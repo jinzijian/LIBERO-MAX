@@ -72,6 +72,15 @@ PYTHONPATH=src:$LIBERO_REPO python scripts/smoke_libero_runtime.py \
   --scenario-id obs_camera_shift_001
 ```
 
+For Cosmos Policy, use the paired launcher on a free GPU. It runs matched
+frozen control and intervention arms with the same task, initial state, and
+policy seed:
+
+```bash
+GPU_ID=0 OUTPUT_ROOT=artifacts/cosmos_paired_smoke \
+  bash scripts/run_cosmos_paired_smoke.sh
+```
+
 ## Repository layout
 
 ```text
@@ -83,6 +92,7 @@ LIBERO-MAX/
 │   └── scenario.schema.json
 ├── src/libero_max/
 │   ├── cli.py
+│   ├── cosmos_integration.py
 │   ├── libero_backend.py
 │   ├── results.py
 │   ├── runtime.py

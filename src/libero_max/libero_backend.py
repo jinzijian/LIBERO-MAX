@@ -43,7 +43,13 @@ class LiberoMujocoBackend:
         if not hasattr(base_env, "sim"):
             raise LiberoBackendError("environment does not expose a MuJoCo sim")
         self.env = base_env
-        self.sim = base_env.sim
+
+    @property
+    def sim(self) -> Any:
+        # LIBERO uses hard resets by default and replaces the MjSim instance.
+        # Resolve it lazily so an intervention never targets the stale,
+        # invalidated simulator that existed when this backend was created.
+        return self.env.sim
 
     def apply_change(self, change: Dict[str, Any]) -> Dict[str, Any]:
         operation = change.get("operation")
