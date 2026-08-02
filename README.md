@@ -62,6 +62,16 @@ PYTHONPATH=src python3 -m libero_max summarize \
 make test
 ```
 
+The simulator backend is optional and imports NumPy only when used. A real
+LIBERO camera-intervention smoke can be run inside an existing LIBERO runtime:
+
+```bash
+PYTHONPATH=src:$LIBERO_REPO python scripts/smoke_libero_runtime.py \
+  --suite libero_goal \
+  --task-id 0 \
+  --scenario-id obs_camera_shift_001
+```
+
 ## Repository layout
 
 ```text
@@ -73,7 +83,9 @@ LIBERO-MAX/
 │   └── scenario.schema.json
 ├── src/libero_max/
 │   ├── cli.py
+│   ├── libero_backend.py
 │   ├── results.py
+│   ├── runtime.py
 │   └── scenario.py
 ├── examples/
 │   ├── results/pilot_results.jsonl
@@ -82,8 +94,8 @@ LIBERO-MAX/
 ```
 
 The project is currently in the benchmark-design phase. The first milestone is
-to connect this tested benchmark core to deterministic LIBERO simulator
-interventions and run a small paired pilot before scaling the suite.
+to connect the intervention runtime to a policy evaluator and run a small
+paired pilot before scaling the suite.
 
 ## Working title
 

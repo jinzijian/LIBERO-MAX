@@ -142,3 +142,6 @@ scenario from each response mode. The pilot should validate:
 - trace logging around the change event;
 - resume-safe evaluation and duplicate detection;
 - category-level reporting of both gains and regressions.
+
+The reference runtime and the evaluator integration contract are documented in
+[`RUNTIME_INTEGRATION.md`](RUNTIME_INTEGRATION.md).

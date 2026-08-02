@@ -17,7 +17,7 @@
     "change_family": "GEO",
     "severity": "medium",
     "trigger": {"type": "before_grasp", "value": "mug"},
-    "change": {"operation": "move_object", "object": "mug", "destination": "alternate_valid_pose"},
+    "change": {"operation": "move_object", "object": "mug", "delta_position_m": [0.0, 0.12, 0.0]},
     "expected_response_mode": "replan",
     "safety_constraints": ["no_forbidden_contact"]
   },
