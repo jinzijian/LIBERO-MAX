@@ -1,0 +1,65 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://libero-max.org/schemas/scenario.schema.json",
+  "title": "LIBERO-MAX Scenario",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "scenario_id",
+    "base_task_id",
+    "seed",
+    "change_family",
+    "severity",
+    "trigger",
+    "change",
+    "expected_response_mode",
+    "safety_constraints"
+  ],
+  "properties": {
+    "scenario_id": {"type": "string", "minLength": 1},
+    "base_task_id": {"type": "string", "minLength": 1},
+    "seed": {"type": "integer", "minimum": 0},
+    "change_family": {
+      "enum": ["OBS", "GEO", "OBS-NEW", "INTENT", "FEAS"]
+    },
+    "severity": {"enum": ["low", "medium", "high"]},
+    "trigger": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "value"],
+      "properties": {
+        "type": {
+          "enum": [
+            "after_grasp",
+            "before_grasp",
+            "after_subgoal",
+            "on_region_entry",
+            "progress_fraction",
+            "fixed_step"
+          ]
+        },
+        "value": {}
+      }
+    },
+    "change": {
+      "type": "object",
+      "required": ["operation"],
+      "properties": {"operation": {"type": "string", "minLength": 1}}
+    },
+    "expected_response_mode": {
+      "enum": [
+        "continue",
+        "replan",
+        "follow_update",
+        "clarify",
+        "stop",
+        "report_infeasible"
+      ]
+    },
+    "safety_constraints": {
+      "type": "array",
+      "items": {"type": "string", "minLength": 1},
+      "uniqueItems": true
+    }
+  }
+}

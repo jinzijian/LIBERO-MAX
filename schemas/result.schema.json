@@ -1,0 +1,43 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://libero-max.org/schemas/result.schema.json",
+  "title": "LIBERO-MAX Paired Result",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "pair_id",
+    "scenario_id",
+    "seed",
+    "change_family",
+    "expected_response_mode",
+    "control_correct",
+    "intervention_correct",
+    "adaptation_latency_steps",
+    "safety_violations"
+  ],
+  "properties": {
+    "pair_id": {"type": "string", "minLength": 1},
+    "scenario_id": {"type": "string", "minLength": 1},
+    "seed": {"type": "integer", "minimum": 0},
+    "change_family": {
+      "enum": ["OBS", "GEO", "OBS-NEW", "INTENT", "FEAS"]
+    },
+    "expected_response_mode": {
+      "enum": [
+        "continue",
+        "replan",
+        "follow_update",
+        "clarify",
+        "stop",
+        "report_infeasible"
+      ]
+    },
+    "control_correct": {"type": "boolean"},
+    "intervention_correct": {"type": "boolean"},
+    "adaptation_latency_steps": {
+      "type": ["integer", "null"],
+      "minimum": 0
+    },
+    "safety_violations": {"type": "integer", "minimum": 0}
+  }
+}
