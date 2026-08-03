@@ -45,7 +45,7 @@ for arm in control intervention; do
       "$PROJECT_DIR/scripts/run_cosmos_libero_max.py" \
       --config cosmos_predict2_2b_480p_libero__inference_only \
       --ckpt_path "$ASSET_DIR/Cosmos-Policy-LIBERO-Predict2-2B.pt" \
-      --config_file "$COSMOS_POLICY_DIR/cosmos_policy/config/config.py" \
+      --config_file cosmos_policy/config/config.py \
       --use_wrist_image True \
       --use_proprio True \
       --normalize_proprio True \
