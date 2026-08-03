@@ -48,6 +48,9 @@ class FakeBackend:
     def refresh_observation(self):
         return {"state": "changed"}
 
+    def distance_to_entity(self, observation, entity_name):
+        return 0.12
+
 
 class CosmosIntegrationTest(unittest.TestCase):
     def make_env(self, root, arm):
@@ -151,6 +154,34 @@ class CosmosIntegrationTest(unittest.TestCase):
         self.assertEqual(observation, {"state": "changed"})
         self.assertEqual(backend.changes, scenario["setup"])
         self.assertEqual(row["setup_event_count"], 1)
+
+    def test_proximity_change_fires_immediately_between_query_boundaries(self):
+        scenario = copy.deepcopy(SCENARIO)
+        scenario["trigger"] = {
+            "type": "on_proximity",
+            "value": "target_1",
+            "distance_m": 0.18,
+        }
+        with tempfile.TemporaryDirectory() as tmp:
+            backend = FakeBackend()
+            env = CosmosInterventionEnv(
+                env=FakeEnv(),
+                task_description="fake task",
+                scenario=scenario,
+                arm="intervention",
+                trace_path=Path(tmp) / "trace.jsonl",
+                original_task_index=0,
+                backend=backend,
+                primary_image_key=None,
+            )
+            env.configure_episode("libero_object", 195, 16, 280)
+            env.reset()
+            env.set_init_state([1, 2, 3])
+            for _ in range(11):
+                _, _, _, info = env.step([0])
+        self.assertEqual(info["libero_max_event"]["step"], 1)
+        self.assertEqual(info["libero_max_event"]["trigger_distance_m"], 0.12)
+        self.assertEqual(env.trigger_observation["policy_step"], 1)
 
 
 if __name__ == "__main__":

@@ -60,6 +60,26 @@ class RuntimeTest(unittest.TestCase):
             )
         )
 
+    def test_proximity_trigger_uses_canonical_entity_event(self):
+        trigger = {
+            "type": "on_proximity",
+            "value": "alphabet_soup_1",
+            "distance_m": 0.18,
+        }
+        self.assertFalse(
+            trigger_satisfied(trigger, TriggerContext(step=5, max_steps=10))
+        )
+        self.assertTrue(
+            trigger_satisfied(
+                trigger,
+                TriggerContext(
+                    step=5,
+                    max_steps=10,
+                    events=frozenset({"proximity:alphabet_soup_1"}),
+                ),
+            )
+        )
+
     def test_instruction_change_updates_next_policy_instruction(self):
         backend = RecordingBackend()
         runtime = InterventionRuntime(self.intent, backend)

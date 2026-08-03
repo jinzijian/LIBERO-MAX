@@ -34,7 +34,10 @@ class ManifestTest(unittest.TestCase):
 
     def test_trigger_must_align_to_query_interval(self):
         broken = copy.deepcopy(self.manifest)
-        broken["cases"][0]["scenario"]["trigger"]["value"] = 17
+        broken["cases"][0]["scenario"]["trigger"] = {
+            "type": "fixed_step",
+            "value": 17,
+        }
         self.assertTrue(any("aligned" in error for error in validate_manifest(broken)))
 
 

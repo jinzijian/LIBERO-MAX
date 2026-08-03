@@ -12,6 +12,7 @@ TRIGGER_TYPES = {
     "before_grasp",
     "after_subgoal",
     "on_region_entry",
+    "on_proximity",
     "progress_fraction",
     "fixed_step",
 }
@@ -131,7 +132,7 @@ def _validate_trigger(trigger: Any) -> List[str]:
 
     errors: List[str] = []
     missing = {"type", "value"} - set(trigger)
-    unknown = set(trigger) - {"type", "value"}
+    unknown = set(trigger) - {"type", "value", "distance_m"}
     if missing:
         errors.append("trigger missing fields: " + ", ".join(sorted(missing)))
     if unknown:
@@ -143,7 +144,19 @@ def _validate_trigger(trigger: Any) -> List[str]:
         errors.append("trigger.type must be one of: " + ", ".join(sorted(TRIGGER_TYPES)))
         return errors
 
-    if trigger_type == "fixed_step":
+    if trigger_type == "on_proximity":
+        if not _nonempty_string(value):
+            errors.append("on_proximity trigger.value must name an entity")
+        distance = trigger.get("distance_m")
+        if (
+            isinstance(distance, bool)
+            or not isinstance(distance, (int, float))
+            or distance <= 0
+        ):
+            errors.append("on_proximity trigger.distance_m must be positive")
+    elif "distance_m" in trigger:
+        errors.append("trigger.distance_m is only valid for on_proximity")
+    elif trigger_type == "fixed_step":
         if not _is_integer(value) or value < 1:
             errors.append("fixed_step trigger.value must be an integer >= 1")
     elif trigger_type == "progress_fraction":

@@ -47,6 +47,8 @@
     "policy_seed": {"type": "integer", "minimum": 0},
     "scoring_mode": {"type": "string", "minLength": 1},
     "intervention_event_step": {"type": "integer", "minimum": 0},
+    "policy_response_query_step": {"type": "integer", "minimum": 0},
+    "open_loop_exposure_steps": {"type": "integer", "minimum": 0},
     "mean_absolute_raw_pixel_delta": {"type": ["number", "null"], "minimum": 0},
     "post_event_action_chunk_mad": {"type": ["number", "null"], "minimum": 0}
   }

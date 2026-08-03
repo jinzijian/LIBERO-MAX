@@ -55,6 +55,17 @@ class ScenarioValidationTest(unittest.TestCase):
         }
         self.assertEqual(validate_scenario(scenario), [])
 
+    def test_proximity_trigger_requires_positive_distance(self):
+        scenario = copy.deepcopy(self.scenarios[0])
+        scenario["trigger"] = {
+            "type": "on_proximity",
+            "value": "target_1",
+            "distance_m": 0.18,
+        }
+        self.assertEqual(validate_scenario(scenario), [])
+        scenario["trigger"]["distance_m"] = 0
+        self.assertIn("must be positive", " ".join(validate_scenario(scenario)))
+
     def test_duplicate_scenario_seed_is_rejected(self):
         scenarios = self.scenarios + [copy.deepcopy(self.scenarios[0])]
         self.assertIn(

@@ -91,6 +91,10 @@ def main() -> int:
                 "policy_seed": case["policy_seed"],
                 "scoring_mode": "libero_goal_completion",
                 "intervention_event_step": event["cosmos_query_boundary_step"],
+                "policy_response_query_step": paired[
+                    "policy_response_query_step"
+                ],
+                "open_loop_exposure_steps": paired["open_loop_exposure_steps"],
                 "mean_absolute_raw_pixel_delta": event.get(
                     "mean_absolute_raw_pixel_delta"
                 ),

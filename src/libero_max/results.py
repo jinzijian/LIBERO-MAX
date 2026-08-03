@@ -30,6 +30,8 @@ OPTIONAL_RESULT_FIELDS = {
     "policy_seed",
     "scoring_mode",
     "intervention_event_step",
+    "policy_response_query_step",
+    "open_loop_exposure_steps",
     "mean_absolute_raw_pixel_delta",
     "post_event_action_chunk_mad",
 }
@@ -97,7 +99,14 @@ def validate_result(record: Any) -> List[str]:
         "late",
     }:
         errors.append("invalid timing_bucket")
-    for field in ("task_index", "init_state_index", "policy_seed", "intervention_event_step"):
+    for field in (
+        "task_index",
+        "init_state_index",
+        "policy_seed",
+        "intervention_event_step",
+        "policy_response_query_step",
+        "open_loop_exposure_steps",
+    ):
         if field in record and (
             not _is_integer(record[field]) or record[field] < 0
         ):

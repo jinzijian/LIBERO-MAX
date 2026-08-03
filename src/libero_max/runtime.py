@@ -11,6 +11,7 @@ EVENT_PREFIXES = {
     "after_grasp": "grasp",
     "after_subgoal": "subgoal",
     "on_region_entry": "region",
+    "on_proximity": "proximity",
 }
 INTENT_OPERATIONS = {"replace_instruction", "cancel_instruction"}
 

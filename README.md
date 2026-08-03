@@ -93,6 +93,11 @@ Run the manifest-driven, resume-safe physical pilot on one or more free GPUs:
 PYTHONPATH=src python3 scripts/preflight_manifest_interventions.py \
   examples/manifests/cosmos_physical_pilot_v0.1.json
 
+# Calibrate a target-distance trigger from a previously successful control
+# action log before freezing the threshold.
+PYTHONPATH=src python3 scripts/calibrate_proximity_from_console.py \
+  artifacts/cosmos_paired_smoke/control/console.log
+
 PYTHONPATH=src python3 scripts/run_cosmos_benchmark.py \
   examples/manifests/cosmos_physical_pilot_v0.1.json \
   --output-root artifacts/cosmos_physical_pilot_v0.1 \
@@ -133,7 +138,8 @@ The project now has an executable Cosmos physical-change pilot. The next
 milestone is severity calibration and multi-task / multi-seed expansion; intent
 and infeasibility tracks still require response-aware scorers. See
 [`docs/PAPER_PLAN.md`](docs/PAPER_PLAN.md) for the paper-scale roadmap and claim
-boundaries.
+boundaries. Pilot intervention and proximity-threshold evidence is recorded in
+[`docs/PILOT_CALIBRATION.md`](docs/PILOT_CALIBRATION.md).
 
 ## Working title
 

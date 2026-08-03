@@ -39,7 +39,11 @@ ordinary LIBERO task success as their correctness label.
 - Use exact `(suite, task, initial-state, policy-seed)` matching across arms.
 - Calibrate low/medium/high severities so each change is visible and physically
   valid without causing simulator instability.
-- Place interventions at chunk-aligned early, middle, and late triggers.
+- Place interventions at semantic triggers and explicitly measure any delay to
+  the next policy query; later ablations cover early, middle, and late timing.
+- Use target-proximity triggers for the core pilot and report both the physical
+  change step and the next policy-query step; later timing ablations vary the
+  distance threshold.
 - Report full manifest coverage, invalid cases, paired flips, Wilson intervals,
   paired-bootstrap intervals, and exact McNemar tests.
 - Separate change detection, response latency, final correctness, and safety.
@@ -72,3 +76,6 @@ ordinary LIBERO task success as their correctness label.
 3. Expand to representative tasks from Spatial, Object, Goal, and LIBERO-10.
 4. Add at least two model families and the oracle-notified diagnostic.
 5. Freeze the v1 manifest before the main evaluation.
+
+The current task-0 mechanics and 18 cm trigger calibration are recorded in
+[`PILOT_CALIBRATION.md`](PILOT_CALIBRATION.md).

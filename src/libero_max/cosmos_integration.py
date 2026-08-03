@@ -85,6 +85,7 @@ class CosmosInterventionEnv:
         self.events = []
         self.policy_queries = []
         self.setup_events = []
+        self.trigger_observation = None
 
     def __getattr__(self, name: str) -> Any:
         return getattr(self._env, name)
@@ -111,6 +112,7 @@ class CosmosInterventionEnv:
         self.events = []
         self.policy_queries = []
         self.setup_events = []
+        self.trigger_observation = None
         self.runtime.reset(self.task_description)
         return result
 
@@ -133,23 +135,52 @@ class CosmosInterventionEnv:
         self.total_env_steps += 1
         policy_step = max(0, self.total_env_steps - self.warmup_steps)
 
+        trigger = self.scenario["trigger"]
+        trigger_events = frozenset()
+        proximity_distance = None
+        if trigger["type"] == "on_proximity" and policy_step > 0:
+            proximity_distance = self.backend.distance_to_entity(
+                observation, trigger["value"]
+            )
+            if proximity_distance <= trigger["distance_m"]:
+                trigger_events = frozenset({"proximity:%s" % trigger["value"]})
+                if self.trigger_observation is None:
+                    self.trigger_observation = {
+                        "type": "on_proximity",
+                        "entity": trigger["value"],
+                        "threshold_m": trigger["distance_m"],
+                        "distance_m": proximity_distance,
+                        "policy_step": policy_step,
+                    }
+
         can_apply = (
             self.arm == "intervention"
             and not done
-            and self.query_interval is not None
             and self.max_policy_steps is not None
             and policy_step > 0
-            and policy_step % self.query_interval == 0
+            and (
+                bool(trigger_events)
+                or (
+                    trigger["type"] != "on_proximity"
+                    and self.query_interval is not None
+                    and policy_step % self.query_interval == 0
+                )
+            )
         )
         if can_apply:
             before_image = self._capture_primary_image(observation)
             event = self.runtime.maybe_apply(
-                TriggerContext(step=policy_step, max_steps=self.max_policy_steps)
+                TriggerContext(
+                    step=policy_step,
+                    max_steps=self.max_policy_steps,
+                    events=trigger_events,
+                )
             )
             if event is not None:
                 observation = self.backend.refresh_observation()
                 after_image = self._capture_primary_image(observation)
                 event["cosmos_query_boundary_step"] = policy_step
+                event["trigger_distance_m"] = proximity_distance
                 event["mean_absolute_raw_pixel_delta"] = _mean_absolute_pixel_delta(
                     before_image, after_image
                 )
@@ -204,6 +235,7 @@ class CosmosInterventionEnv:
             "intervention_events": self.events,
             "setup_event_count": len(self.setup_events),
             "setup_events": self.setup_events,
+            "trigger_observation": self.trigger_observation,
             "policy_query_count": len(self.policy_queries),
             "policy_queries": self.policy_queries,
         }

@@ -133,11 +133,16 @@ def validate_manifest(data: Any) -> List[str]:
                     "%s physical_completion only supports continue or replan" % label
                 )
             trigger = scenario["trigger"]
-            if trigger["type"] != "fixed_step":
+            if trigger["type"] not in {"fixed_step", "on_proximity"}:
                 errors.append(
-                    "%s Cosmos physical pilot requires a fixed_step trigger" % label
+                    "%s Cosmos physical pilot requires fixed_step or on_proximity"
+                    % label
                 )
-            elif _is_integer(query_interval) and trigger["value"] % query_interval:
+            elif (
+                trigger["type"] == "fixed_step"
+                and _is_integer(query_interval)
+                and trigger["value"] % query_interval
+            ):
                 errors.append(
                     "%s trigger step must be aligned to protocol.query_interval" % label
                 )

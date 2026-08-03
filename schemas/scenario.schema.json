@@ -34,11 +34,13 @@
             "before_grasp",
             "after_subgoal",
             "on_region_entry",
+            "on_proximity",
             "progress_fraction",
             "fixed_step"
           ]
         },
-        "value": {}
+        "value": {},
+        "distance_m": {"type": "number", "exclusiveMinimum": 0}
       }
     },
     "change": {

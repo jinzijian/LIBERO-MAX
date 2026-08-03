@@ -75,6 +75,16 @@ class LiberoMujocoBackend:
             self.env._update_observables(force=True)
         return self.env._get_observations()
 
+    def distance_to_entity(
+        self, observation: Dict[str, Any], entity_name: str
+    ) -> float:
+        if not isinstance(observation, dict) or "robot0_eef_pos" not in observation:
+            raise LiberoBackendError("observation does not contain robot0_eef_pos")
+        end_effector = _vector3(observation["robot0_eef_pos"], "robot0_eef_pos")
+        entity, fixture = self._entity(entity_name)
+        entity_position = self._entity_position(entity, fixture)
+        return float(np.linalg.norm(end_effector - entity_position))
+
     def _shift_camera(self, change: Dict[str, Any]) -> Dict[str, Any]:
         camera = change.get("camera")
         if not isinstance(camera, str) or not camera:

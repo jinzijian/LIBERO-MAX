@@ -48,10 +48,15 @@ wall-clock time. Recommended trigger types are:
 - `before_grasp`;
 - `after_subgoal`;
 - `on_region_entry`;
+- `on_proximity` with an entity name and metric distance threshold;
 - `progress_fraction`;
 - `fixed_step` for controlled diagnostics only.
 
 Results should be stratified by early, middle, and late intervention timing.
+For the first physical pilot, all three core changes fire immediately when the
+robot end effector first comes within 18 cm of the target. The trace separately
+records the next policy-query step, exposing any delay caused by open-loop
+action chunks.
 
 ## 4. Expected response modes
 

@@ -45,10 +45,15 @@ def _run_case(case: Dict[str, Any]) -> Dict[str, Any]:
         if setup_events:
             observation = backend.refresh_observation()
         before = observation["agentview_image"].copy()
+        trigger = case["scenario"]["trigger"]
+        if trigger["type"] == "on_proximity":
+            step = 1
+            events = frozenset({"proximity:%s" % trigger["value"]})
+        else:
+            step = trigger["value"]
+            events = frozenset()
         event = runtime.maybe_apply(
-            TriggerContext(
-                step=case["scenario"]["trigger"]["value"], max_steps=1000
-            )
+            TriggerContext(step=step, max_steps=1000, events=events)
         )
         if event is None:
             raise ValueError("intervention did not fire")
