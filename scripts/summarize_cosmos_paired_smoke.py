@@ -41,12 +41,7 @@ def _action_chunk_mad(left, right):
     )
 
 
-def main() -> None:
-    parser = argparse.ArgumentParser()
-    parser.add_argument("root", type=Path)
-    args = parser.parse_args()
-    control = load_one(args.root / "control" / "trace.jsonl")
-    intervention = load_one(args.root / "intervention" / "trace.jsonl")
+def summarize_pair(control, intervention):
     mismatches = {
         field: {"control": control.get(field), "intervention": intervention.get(field)}
         for field in MATCH_FIELDS
@@ -112,10 +107,20 @@ def main() -> None:
         "control": control,
         "intervention": intervention,
     }
+    return summary
+
+
+def main() -> None:
+    parser = argparse.ArgumentParser()
+    parser.add_argument("root", type=Path)
+    args = parser.parse_args()
+    control = load_one(args.root / "control" / "trace.jsonl")
+    intervention = load_one(args.root / "intervention" / "trace.jsonl")
+    summary = summarize_pair(control, intervention)
     output = args.root / "paired_summary.json"
     output.write_text(json.dumps(summary, indent=2, sort_keys=True) + "\n")
     print(json.dumps(summary, indent=2, sort_keys=True))
-    if mismatches:
+    if summary["mismatches"]:
         raise SystemExit(1)
 
 
