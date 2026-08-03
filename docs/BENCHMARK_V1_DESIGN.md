@@ -43,7 +43,7 @@ case therefore cannot silently choose a new direction, distractor, or pose.
 | Camera | random planar direction at 2/4/6 cm and random yaw sign at 5/10/15 degrees |
 | Target relocation | random planar direction; displacement remains exactly 6 or 12 cm |
 | Receptacle relocation | random planar direction; displacement remains exactly 6 or 12 cm |
-| Distractor burst | task-native identity subset/order and five randomized non-overlapping angular placements around the target |
+| Distractor burst | task-native identity subset/order and five angularly separated candidate placements around the target |
 | Obstacle insertion | task-native obstacle identity, path fraction in [0.35, 0.65], and signed lateral offset |
 
 The semantic trigger remains fixed at 18 cm in the main table. Timing

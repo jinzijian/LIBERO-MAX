@@ -3,8 +3,14 @@
 
 import argparse
 import json
+import os
 from pathlib import Path
 from typing import Any, Dict, List
+
+# LIBERO's trusted ``.pruned_init`` files contain NumPy objects. PyTorch 2.6
+# changed ``torch.load`` to ``weights_only=True`` by default, so opt back into
+# the legacy loader before importing LIBERO / Cosmos Policy.
+os.environ.setdefault("TORCH_FORCE_NO_WEIGHTS_ONLY_LOAD", "1")
 
 import numpy as np
 from libero.libero import benchmark

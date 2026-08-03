@@ -19,6 +19,20 @@ class CosmosLauncherTest(unittest.TestCase):
             launcher,
         )
 
+    def test_preflight_enables_trusted_libero_state_loading_before_imports(self) -> None:
+        preflight = (
+            ROOT / "scripts/preflight_manifest_interventions.py"
+        ).read_text(encoding="utf-8")
+        opt_out = (
+            'os.environ.setdefault("TORCH_FORCE_NO_WEIGHTS_ONLY_LOAD", "1")'
+        )
+        self.assertIn(opt_out, preflight)
+        self.assertLess(preflight.index(opt_out), preflight.index("from libero.libero"))
+        self.assertLess(
+            preflight.index(opt_out),
+            preflight.index("from cosmos_policy.experiments.robot.libero"),
+        )
+
 
 if __name__ == "__main__":
     unittest.main()
