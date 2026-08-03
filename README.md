@@ -88,6 +88,11 @@ GPU_ID=0 OUTPUT_ROOT=artifacts/cosmos_paired_smoke \
 Run the manifest-driven, resume-safe physical pilot on one or more free GPUs:
 
 ```bash
+# Verify every setup/change against a real MuJoCo environment without loading
+# the policy checkpoint.
+PYTHONPATH=src python3 scripts/preflight_manifest_interventions.py \
+  examples/manifests/cosmos_physical_pilot_v0.1.json
+
 PYTHONPATH=src python3 scripts/run_cosmos_benchmark.py \
   examples/manifests/cosmos_physical_pilot_v0.1.json \
   --output-root artifacts/cosmos_physical_pilot_v0.1 \
