@@ -73,7 +73,7 @@ ordinary LIBERO task success as their correctness label.
 ## Immediate empirical ladder
 
 1. Five-case Cosmos physical pilot on one task and one initial state.
-2. Physical preflight of the 1,719 unique randomized configurations.
+2. Physical preflight of the 1,539 unique frozen configurations.
 3. Freeze Core only after invalid poses are deterministically repaired or
    excluded under pre-registered rules.
 4. Run Core across three seeds, then Full to decouple policy/intervention
@@ -82,5 +82,5 @@ ordinary LIBERO task success as their correctness label.
 
 The current task-0 mechanics and 18 cm trigger calibration are recorded in
 [`PILOT_CALIBRATION.md`](PILOT_CALIBRATION.md).
-The proposed 1,719-pair-per-model Core scale-up is specified in
+The proposed 1,539-pair-per-model Core scale-up is specified in
 [`BENCHMARK_V1_DESIGN.md`](BENCHMARK_V1_DESIGN.md).

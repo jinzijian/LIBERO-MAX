@@ -8,7 +8,7 @@ from typing import Any, Dict, Iterable, List, Sequence, Tuple
 from .manifest import validate_manifest
 
 
-SAMPLER_VERSION = "libero-max-v1.0"
+SAMPLER_VERSION = "libero-max-v1.1"
 CHANGE_TYPE_ORDER = (
     "illumination_switch",
     "camera_shift",
@@ -20,6 +20,15 @@ CHANGE_TYPE_ORDER = (
 DEFAULT_INITIAL_STATES = (0, 1, 2)
 DEFAULT_POLICY_SEEDS = (195, 201, 207)
 DEFAULT_DRAW_IDS = (0, 1, 2)
+RELOCATION_DRAW_IDS = (0, 1)
+CHANGE_DRAW_IDS = {
+    "illumination_switch": DEFAULT_DRAW_IDS,
+    "camera_shift": DEFAULT_DRAW_IDS,
+    "target_relocation": RELOCATION_DRAW_IDS,
+    "receptacle_relocation": RELOCATION_DRAW_IDS,
+    "distractor_burst": DEFAULT_DRAW_IDS,
+    "obstacle_insertion": DEFAULT_DRAW_IDS,
+}
 
 
 class V1BuildError(ValueError):
@@ -35,11 +44,39 @@ def _rounded_vector(x: float, y: float, z: float = 0.0) -> List[float]:
     return [round(x, 8), round(y, 8), round(z, 8)]
 
 
-def _planar_delta(rng: random.Random, distance_m: float) -> List[float]:
-    angle = rng.uniform(0.0, 2.0 * math.pi)
-    return _rounded_vector(
-        distance_m * math.cos(angle), distance_m * math.sin(angle)
-    )
+def _calibrated_relocation_direction(
+    task: Dict[str, Any], change_type: str
+) -> Tuple[float, float]:
+    directions = task.get("relocation_directions")
+    value = directions.get(change_type) if isinstance(directions, dict) else None
+    if (
+        not isinstance(value, list)
+        or len(value) != 2
+        or any(
+            isinstance(item, bool) or not isinstance(item, (int, float))
+            for item in value
+        )
+    ):
+        raise V1BuildError(
+            "%s requires a calibrated two-number relocation direction"
+            % change_type
+        )
+    x, y = float(value[0]), float(value[1])
+    norm = math.hypot(x, y)
+    if not math.isfinite(norm) or norm <= 1e-9:
+        raise V1BuildError(
+            "calibrated relocation direction must be finite and nonzero"
+        )
+    return x / norm, y / norm
+
+
+def _initial_support(task: Dict[str, Any], entity: str) -> str:
+    placements = task.get("initial_placements")
+    placement = placements.get(entity) if isinstance(placements, dict) else None
+    support = placement.get("support_entity") if isinstance(placement, dict) else None
+    if not isinstance(support, str) or not support:
+        raise V1BuildError("missing initial support for %s" % entity)
+    return support
 
 
 def eligible_change_types(task: Dict[str, Any]) -> List[str]:
@@ -69,19 +106,19 @@ def eligible_change_types(task: Dict[str, Any]) -> List[str]:
 
 
 def _sample_illumination(
-    rng: random.Random, draw_id: int
+    draw_id: int,
 ) -> Tuple[str, List[Dict[str, Any]], Dict[str, Any]]:
     if draw_id == 0:
         return "low", [], {
             "operation": "set_lighting",
-            "scale": round(rng.uniform(0.35, 0.55), 8),
+            "scale": 0.55,
         }
     if draw_id == 1:
         return "high", [], {
             "operation": "set_lighting",
-            "scale": round(rng.uniform(0.02, 0.08), 8),
+            "scale": 0.30,
         }
-    setup_scale = round(rng.uniform(0.03, 0.10), 8)
+    setup_scale = 0.30
     return "medium", [{"operation": "set_lighting", "scale": setup_scale}], {
         "operation": "set_lighting",
         "scale": round(1.0 / setup_scale, 8),
@@ -89,29 +126,39 @@ def _sample_illumination(
 
 
 def _sample_camera(
-    rng: random.Random, draw_id: int
+    draw_id: int,
 ) -> Tuple[str, List[Dict[str, Any]], Dict[str, Any]]:
     severity = ("low", "medium", "high")[draw_id]
-    distance = (0.02, 0.04, 0.06)[draw_id]
-    yaw = (5.0, 10.0, 15.0)[draw_id]
+    delta = ([0.02, 0.0, 0.0], [-0.04, 0.0, 0.0], [0.0, 0.06, 0.0])[
+        draw_id
+    ]
+    yaw = (5.0, -10.0, 15.0)[draw_id]
     change = {
         "operation": "shift_camera",
         "camera": "agentview",
-        "delta_position_m": _planar_delta(rng, distance),
-        "yaw_degrees": yaw if rng.random() < 0.5 else -yaw,
+        "delta_position_m": delta,
+        "yaw_degrees": yaw,
+        "calibration": "fixed_global_viewpoint",
     }
     return severity, [], change
 
 
 def _sample_relocation(
-    rng: random.Random, draw_id: int, entity: str
+    draw_id: int,
+    entity: str,
+    direction_xy: Tuple[float, float],
+    support_entity: str,
 ) -> Tuple[str, List[Dict[str, Any]], Dict[str, Any]]:
-    distance = (0.06, 0.12, rng.choice((0.06, 0.12)))[draw_id]
-    severity = "low" if distance == 0.06 else "medium"
+    distance = (0.06, 0.12)[draw_id]
+    severity = "low" if distance == 0.06 else "high"
     return severity, [], {
         "operation": "move_object",
         "object": entity,
-        "delta_position_m": _planar_delta(rng, distance),
+        "delta_position_m": _rounded_vector(
+            direction_xy[0] * distance, direction_xy[1] * distance
+        ),
+        "support_entity": support_entity,
+        "calibration": "fixed_task_direction",
     }
 
 
@@ -142,6 +189,7 @@ def _sample_distractors(
                     radius * math.cos(angle), radius * math.sin(angle)
                 ),
                 "preserve_initial_z": True,
+                "support_entity": _initial_support(task, entity),
             }
         )
     return "high", setup, {
@@ -169,6 +217,7 @@ def _sample_obstacle(
         "path_target": task["trigger_entity"],
         "path_fraction": round(rng.uniform(0.35, 0.65), 8),
         "lateral_offset_m": round(lateral, 8),
+        "support_entity": _initial_support(task, obstacle),
     }
 
 
@@ -179,12 +228,16 @@ def sample_physical_scenario(
     draw_id: int,
     proximity_distance_m: float = 0.18,
 ) -> Dict[str, Any]:
-    if draw_id not in DEFAULT_DRAW_IDS:
-        raise V1BuildError("v1 draw_id must be one of 0, 1, 2")
     if change_type not in eligible_change_types(task):
         raise V1BuildError(
             "%s is not eligible for %s task %s"
             % (change_type, task["task_suite_name"], task["task_index"])
+        )
+    allowed_draw_ids = CHANGE_DRAW_IDS[change_type]
+    if draw_id not in allowed_draw_ids:
+        raise V1BuildError(
+            "%s draw_id must be one of %s"
+            % (change_type, ", ".join(str(item) for item in allowed_draw_ids))
         )
     seed = _stable_seed(
         (
@@ -198,19 +251,25 @@ def sample_physical_scenario(
     )
     rng = random.Random(seed)
     if change_type == "illumination_switch":
-        severity, setup, change = _sample_illumination(rng, draw_id)
+        severity, setup, change = _sample_illumination(draw_id)
         family, response = "OBS", "continue"
     elif change_type == "camera_shift":
-        severity, setup, change = _sample_camera(rng, draw_id)
+        severity, setup, change = _sample_camera(draw_id)
         family, response = "OBS", "continue"
     elif change_type == "target_relocation":
         severity, setup, change = _sample_relocation(
-            rng, draw_id, task["primary_target"]
+            draw_id,
+            task["primary_target"],
+            _calibrated_relocation_direction(task, change_type),
+            _initial_support(task, task["primary_target"]),
         )
         family, response = "GEO", "replan"
     elif change_type == "receptacle_relocation":
         severity, setup, change = _sample_relocation(
-            rng, draw_id, task["primary_receptacle"]
+            draw_id,
+            task["primary_receptacle"],
+            _calibrated_relocation_direction(task, change_type),
+            _initial_support(task, task["primary_receptacle"]),
         )
         family, response = "GEO", "replan"
     elif change_type == "distractor_burst":
@@ -272,11 +331,11 @@ def _profile_assignments(
         return [
             (
                 init_state,
-                policy_seed,
-                draw_ids[(init_offset + policy_offset) % len(draw_ids)],
+                policy_seeds[(init_offset + draw_offset) % len(policy_seeds)],
+                draw_id,
             )
             for init_offset, init_state in enumerate(initial_states)
-            for policy_offset, policy_seed in enumerate(policy_seeds)
+            for draw_offset, draw_id in enumerate(draw_ids)
         ]
     raise V1BuildError("profile must be core or full")
 
@@ -286,21 +345,23 @@ def build_v1_manifest(
     profile: str = "core",
     initial_states: Sequence[int] = DEFAULT_INITIAL_STATES,
     policy_seeds: Sequence[int] = DEFAULT_POLICY_SEEDS,
-    draw_ids: Sequence[int] = DEFAULT_DRAW_IDS,
 ) -> Dict[str, Any]:
     tasks = catalog.get("tasks")
     if not isinstance(tasks, list) or not tasks:
         raise V1BuildError("catalog.tasks must be a non-empty array")
-    if len(draw_ids) != 3 or tuple(sorted(draw_ids)) != DEFAULT_DRAW_IDS:
-        raise V1BuildError("v1 requires draw_ids 0,1,2")
-    assignments = _profile_assignments(
-        profile, initial_states, policy_seeds, draw_ids
-    )
+    if len(policy_seeds) != 3 or len(set(policy_seeds)) != 3:
+        raise V1BuildError("v1 requires three distinct policy seeds")
     cases: List[Dict[str, Any]] = []
     for task in sorted(
         tasks, key=lambda row: (row["task_suite_name"], row["task_index"])
     ):
         for change_type in eligible_change_types(task):
+            assignments = _profile_assignments(
+                profile,
+                initial_states,
+                policy_seeds,
+                CHANGE_DRAW_IDS[change_type],
+            )
             for init_state, policy_seed, draw_id in assignments:
                 scenario = sample_physical_scenario(
                     task, init_state, change_type, draw_id

@@ -167,9 +167,9 @@ including inside an open-loop action chunk. If the next policy query is at
 | Type | Randomized control | Expected behavior |
 | --- | --- | --- |
 | Illumination switch | light-off scale or dim-to-on setup | preserve target perception and continue |
-| Camera shift | random planar direction, translation magnitude, and yaw sign | recover viewpoint correspondence and continue |
-| Target relocation | random task-valid direction at 6 or 12 cm | relocalize the target and revise the reach |
-| Receptacle relocation | random task-valid direction at 6 or 12 cm | revise the placement plan |
+| Camera shift | fixed global direction, translation magnitude, and yaw | recover viewpoint correspondence and continue |
+| Target relocation | one calibrated task direction at deterministic 6 or 12 cm tiers | relocalize the target and revise the reach |
+| Receptacle relocation | one calibrated task direction at deterministic 6 or 12 cm tiers | revise the placement plan |
 | Distractor burst | five task-native identities/placements | preserve target identity and continue safely |
 | Obstacle insertion | identity, approach-path fraction, and lateral offset | detour without collision and complete the task |
 
@@ -228,15 +228,15 @@ The v1 candidate provides two profiles:
 | --- | ---: | ---: | ---: |
 | Illumination switch | 40 | 360 | 1,080 |
 | Camera shift | 40 | 360 | 1,080 |
-| Target relocation | 33 | 297 | 891 |
-| Receptacle relocation | 27 | 243 | 729 |
+| Target relocation | 33 | 198 | 594 |
+| Receptacle relocation | 27 | 162 | 486 |
 | Distractor burst | 12 | 108 | 324 |
 | Obstacle insertion | 39 | 351 | 1,053 |
-| **Total** |  | **1,719** | **5,157** |
+| **Total** |  | **1,539** | **4,617** |
 
-Core uses a balanced assignment of three intervention draws across three
-initial states and three policy seeds. Full crosses each policy seed with every
-draw to separate policy and intervention randomness. The v1 manifest is frozen
+Core evaluates every unique frozen configuration once and rotates three policy
+seeds evenly within each task--change-type cell. Full crosses each policy seed
+with every configuration to separate policy and intervention variation. The v1 manifest is frozen
 only after task-specific relocation and insertion poses pass physical preflight
 and trigger-coverage calibration.
 

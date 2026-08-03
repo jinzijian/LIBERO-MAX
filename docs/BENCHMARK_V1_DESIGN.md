@@ -40,10 +40,10 @@ case therefore cannot silently choose a new direction, distractor, or pose.
 
 | Change type | Randomized quantities across draw IDs 0/1/2 |
 | --- | --- |
-| Illumination | mild dim scale in [0.35, 0.55], near-dark scale in [0.02, 0.08], or dim-to-on setup in [0.03, 0.10] |
-| Camera | random planar direction at 2/4/6 cm and random yaw sign at 5/10/15 degrees |
-| Target relocation | random planar direction; displacement remains exactly 6 or 12 cm |
-| Receptacle relocation | random planar direction; displacement remains exactly 6 or 12 cm |
+| Illumination | deterministic normal-to-dim scales 0.55/0.30, or a 0.30-to-normal switch; permanent blackout is excluded |
+| Camera | three fixed global viewpoint shifts at 2/4/6 cm with yaw +5/-10/+15 degrees |
+| Target relocation | one offline-calibrated direction per task; deterministic 6 and 12 cm tiers along the same ray |
+| Receptacle relocation | one offline-calibrated direction per task; deterministic 6 and 12 cm tiers along the same ray |
 | Distractor burst | task-native identity subset/order and five angularly separated candidate placements around the target |
 | Obstacle insertion | task-native obstacle identity, path fraction in [0.35, 0.65], and signed lateral offset |
 
@@ -53,26 +53,26 @@ reported as a separate 24/18/12 cm ablation.
 
 ## Core and full profiles
 
-Both profiles use three initial states, three policy seeds, and intervention
-draw IDs 0/1/2.
+Both profiles use three initial states and three policy seeds. Observation,
+clutter, and obstacle changes use three frozen configurations. Target and
+receptacle relocation use only the deterministic 6 and 12 cm tiers.
 
-- **Core:** a balanced Latin-square assignment couples one draw to each
-  `(initial state, policy seed)` cell. Every policy seed sees every draw once
-  across the three initial states. This gives 1,719 matched pairs / 3,438
-  episodes per model.
-- **Full:** crosses every policy seed with all three intervention draws. This
-  separates policy and environment variation at 5,157 matched pairs / 10,314
+- **Core:** every unique `(initial state, frozen configuration)` appears once,
+  with policy seeds rotated evenly inside each task--change-type cell. This
+  gives 1,539 matched pairs / 3,078 episodes per model.
+- **Full:** crosses every policy seed with every frozen configuration. This
+  separates policy and environment variation at 4,617 matched pairs / 9,234
   episodes per model.
 
 | Change type | Core pairs | Full pairs |
 | --- | ---: | ---: |
 | Illumination switch | 360 | 1,080 |
 | Camera shift | 360 | 1,080 |
-| Target relocation | 297 | 891 |
-| Receptacle relocation | 243 | 729 |
+| Target relocation | 198 | 594 |
+| Receptacle relocation | 162 | 486 |
 | Distractor burst | 108 | 324 |
 | Obstacle insertion | 351 | 1,053 |
-| **Total** | **1,719** | **5,157** |
+| **Total** | **1,539** | **4,617** |
 
 The generated artifacts on the evaluation host are:
 
