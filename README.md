@@ -98,23 +98,10 @@ PYTHONPATH=src python3 scripts/preflight_manifest_interventions.py \
 PYTHONPATH=src python3 scripts/calibrate_proximity_from_console.py \
   artifacts/cosmos_paired_smoke/control/console.log
 
-# Build the cross-suite target/distractor catalog used to design the v1
-# manifest.
-PYTHONPATH=src python3 scripts/build_libero_task_catalog.py \
-  --bddl-root "$LIBERO_REPO/libero/libero/bddl_files" \
-  --output artifacts/libero_task_catalog.json
-
-# Build the six-type randomized v1 candidates. Core uses a balanced draw
-# assignment; Full crosses policy and intervention randomness.
-PYTHONPATH=src python3 scripts/build_randomized_v1_manifest.py \
-  artifacts/libero_task_catalog.json \
-  --profile core \
-  --output artifacts/libero_max_v1_core_candidate.json
-
-PYTHONPATH=src python3 scripts/build_randomized_v1_manifest.py \
-  artifacts/libero_task_catalog.json \
-  --profile full \
-  --output artifacts/libero_max_v1_full_candidate.json
+# Rebuild, calibrate, preflight, coverage-audit, and freeze the complete v1
+# Core/Full test sets. Relocation directions are calibrated before manifests
+# are generated; the pipeline never samples them during evaluation.
+bash scripts/run_v1_dataset_build.sh
 
 PYTHONPATH=src python3 scripts/run_cosmos_benchmark.py \
   examples/manifests/cosmos_physical_pilot_v0.1.json \

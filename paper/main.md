@@ -236,9 +236,9 @@ The v1 candidate provides two profiles:
 
 Core evaluates every unique frozen configuration once and rotates three policy
 seeds evenly within each task--change-type cell. Full crosses each policy seed
-with every configuration to separate policy and intervention variation. The v1 manifest is frozen
-only after task-specific relocation and insertion poses pass physical preflight
-and trigger-coverage calibration.
+with every configuration to separate policy and intervention variation. The v1
+manifest is frozen only after task-specific relocation and insertion poses pass
+physical preflight and trigger-coverage calibration.
 
 ## 6. Experimental Setup
 
