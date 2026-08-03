@@ -73,20 +73,59 @@ Our contributions are:
 
 ### Vision-language-action evaluation
 
-[LIBERO, OpenVLA, Octo, RT-X, Cosmos Policy citations and exact evaluation
-assumptions.]
+[LIBERO](https://arxiv.org/abs/2306.03310) established four suites for
+knowledge transfer in language-conditioned manipulation. Recent extensions
+broaden the evaluation distribution. LIBERO-PRO varies object attributes,
+initial spatial configurations, instructions, tasks, and environments
+([Jiang et al., 2025](https://arxiv.org/abs/2510.03827)); LIBERO-Plus generates
+progressive variants over object layout, camera pose, robot initial state,
+language, illumination, texture, and sensor noise
+([Fei et al., 2026](https://openaccess.thecvf.com/content/CVPR2026/html/Fei_LIBERO-Plus_A_Progressive_Robustness_Benchmark_for_Visual-Language-Action_Models_CVPR_2026_paper.html));
+and LIBERO-X jointly increases spatial, object, scene-topology, and semantic
+difficulty ([Zhang et al., 2026](https://arxiv.org/abs/2602.06556)). These
+benchmarks diagnose generalization to a perturbed episode configuration. Our
+question is complementary: after a matched pair has followed the same policy
+trajectory, can the policy respond to a change injected into one arm during
+execution?
 
 ### Robust and dynamic manipulation benchmarks
 
-[Initial-state perturbations, visual robustness, dynamic scenes, disturbance
-recovery, and interactive instruction benchmarks. Distinguish changes before
-execution from changes during execution.]
+Static obstacle benchmarks add an important safety dimension. SafeLIBERO uses
+pre-placed obstacle-interference scenarios with randomized episode layouts
+([Hu et al., 2025](https://arxiv.org/abs/2512.11891)), whereas a later
+SafeLIBERO extension studies moving obstacles for real-time safety filtering
+([Park et al., 2026](https://arxiv.org/abs/2606.09749)). DynamicVLA's Dynamic
+Object Manipulation benchmark instead centers on continuously moving objects,
+including speed variation, abrupt motion changes, and disturbances
+([Xie et al., 2026](https://arxiv.org/abs/2601.22153)). LIBERO-MAX does not
+claim to be the first dynamic manipulation evaluation. Its unit of analysis is
+different: deterministic control/intervention pairs for discrete exogenous
+events, with pre-event action equality and event-to-query exposure measured
+explicitly across lighting, geometry, and clutter.
+
+Mid-execution intent change has also been studied directly. ReSteer switches
+LIBERO-Goal instructions at sampled intermediate states and measures
+state-dependent steerability
+([Liu et al., 2026](https://arxiv.org/abs/2603.17300)); Gaze2Act evaluates a
+real-robot target switch conveyed by human gaze
+([Zuo et al., 2026](https://arxiv.org/abs/2605.30282)). These results establish
+that instruction or referent revision is a real and nontrivial problem. For
+that reason, LIBERO-MAX treats intent revision as a future response-aware track
+rather than folding it into the physical-completion score used in the first
+release.
 
 ### Online adaptation and replanning
 
-[Test-time adaptation, observation history, closed-loop replanning, world
-models, and explicit change detection. Do not equate parameter updates with
-successful episode-level adaptation.]
+Action chunking creates a perception--execution gap because the world may
+change while previously predicted actions are still being applied. Adaptive
+execution-commitment methods vary the accepted action prefix based on
+state-dependent reliability ([Chen et al., 2026](https://arxiv.org/abs/2605.11567)).
+LIBERO-MAX exposes this issue through an evaluator-side quantity: the number of
+environment steps between the physical event and the first policy query that
+can observe it. We compare shorter query intervals, observation history,
+explicit change notification, and online adaptation, but do not equate a
+parameter update or a changed action chunk with correct episode-level
+adaptation; the changed arm must still satisfy its response-aware outcome.
 
 ## 3. LIBERO-MAX
 
