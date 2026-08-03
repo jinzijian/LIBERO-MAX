@@ -62,6 +62,26 @@ def _resolve_entity(reference: str, entities: List[str]) -> Optional[str]:
     return max(matches, key=len) if matches else None
 
 
+def is_planar_workspace_placement(
+    metadata: Dict[str, Any], entity_name: Optional[str]
+) -> bool:
+    """Return whether an object starts on a large floor/table workspace.
+
+    A generic ``On`` predicate is not enough for relocation: LIBERO also uses
+    it for small supports such as a ramekin, stove, cookie box, or cabinet top.
+    Translating those objects in XY would create an unsupported pose.
+    """
+
+    if not entity_name or entity_name not in metadata.get("objects", {}):
+        return False
+    placement = metadata.get("initial_placements", {}).get(entity_name)
+    if not placement or placement.get("predicate", "").lower() != "on":
+        return False
+    support = placement.get("support_entity")
+    support_type = metadata.get("fixtures", {}).get(support, "").lower()
+    return support_type == "floor" or "table" in support_type
+
+
 def parse_bddl_metadata(text: str) -> Dict[str, Any]:
     objects = _typed_entities(extract_section(text, "objects"), "objects")
     fixtures = _typed_entities(extract_section(text, "fixtures"), "fixtures")

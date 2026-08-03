@@ -218,9 +218,9 @@ not sufficient evidence that adaptation was correct.
 
 The installed task catalog contains 40 tasks across LIBERO Spatial, Object,
 Goal, and LIBERO-10. Illumination and camera changes apply to all 40. Valid
-planar target relocation applies to 37 tasks, movable-receptacle relocation to
+planar target relocation applies to 33 tasks, movable-receptacle relocation to
 27, five-object bursts to 12, and task-native obstacle insertion to 39. This
-produces 195 task--change-type cells.
+produces 191 task--change-type cells.
 
 The v1 candidate provides two profiles:
 
@@ -228,11 +228,11 @@ The v1 candidate provides two profiles:
 | --- | ---: | ---: | ---: |
 | Illumination switch | 40 | 360 | 1,080 |
 | Camera shift | 40 | 360 | 1,080 |
-| Target relocation | 37 | 333 | 999 |
+| Target relocation | 33 | 297 | 891 |
 | Receptacle relocation | 27 | 243 | 729 |
 | Distractor burst | 12 | 108 | 324 |
 | Obstacle insertion | 39 | 351 | 1,053 |
-| **Total** |  | **1,755** | **5,265** |
+| **Total** |  | **1,719** | **5,157** |
 
 Core uses a balanced assignment of three intervention draws across three
 initial states and three policy seeds. Full crosses each policy seed with every

@@ -18,6 +18,7 @@ from libero.libero import benchmark
 from cosmos_policy.experiments.robot.libero.libero_utils import get_libero_env
 from libero_max.libero_backend import LiberoMujocoBackend
 from libero_max.manifest import load_manifest
+from libero_max.preflight import select_preflight_cases
 from libero_max.runtime import InterventionRuntime, TriggerContext
 
 
@@ -66,6 +67,11 @@ def _run_case(case: Dict[str, Any]) -> Dict[str, Any]:
         after = backend.refresh_observation()["agentview_image"]
         return {
             "case_id": case["case_id"],
+            "scenario_id": case["scenario"]["scenario_id"],
+            "change_type": case["scenario"].get("change_type"),
+            "intervention_draw_id": case["scenario"].get(
+                "randomization", {}
+            ).get("draw_id"),
             "task_description": task_description,
             "setup_event_count": len(setup_events),
             "operation": case["scenario"]["change"]["operation"],
@@ -80,11 +86,31 @@ def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("manifest", type=Path)
     parser.add_argument("--output", type=Path)
+    parser.add_argument(
+        "--keep-policy-replicates",
+        action="store_true",
+        help="preflight repeated policy-seed cases instead of unique scenarios",
+    )
+    parser.add_argument("--num-shards", type=int, default=1)
+    parser.add_argument("--shard-index", type=int, default=0)
+    parser.add_argument(
+        "--change-type",
+        action="append",
+        default=[],
+        help="restrict to one change type; may be repeated",
+    )
     args = parser.parse_args()
     manifest = load_manifest(args.manifest)
+    selected_cases, selection = select_preflight_cases(
+        manifest["cases"],
+        unique_scenarios=not args.keep_policy_replicates,
+        num_shards=args.num_shards,
+        shard_index=args.shard_index,
+        change_types=args.change_type,
+    )
     rows: List[Dict[str, Any]] = []
     failures: Dict[str, str] = {}
-    for case in manifest["cases"]:
+    for case in selected_cases:
         try:
             row = _run_case(case)
             if row["mean_absolute_raw_pixel_delta"] <= 0:
@@ -95,9 +121,10 @@ def main() -> int:
             failures[case["case_id"]] = str(exc)
     report = {
         "benchmark_id": manifest["benchmark_id"],
-        "planned": len(manifest["cases"]),
+        "selection": selection,
+        "planned": len(selected_cases),
         "passed": len(rows),
-        "complete": len(rows) == len(manifest["cases"]),
+        "complete": len(rows) == len(selected_cases),
         "failures": failures,
         "cases": rows,
     }

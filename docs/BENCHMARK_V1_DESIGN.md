@@ -13,17 +13,18 @@ invalid change into every scene.
 | --- | ---: | --- |
 | Illumination switch | 40 | lights dim sharply or a dim scene lights up |
 | Camera shift | 40 | agent-view camera translates and yaws |
-| Target relocation | 37 | the approached movable target shifts 6 or 12 cm |
+| Target relocation | 33 | a target on a floor/table workspace shifts 6 or 12 cm |
 | Receptacle relocation | 27 | a movable destination shifts 6 or 12 cm |
 | Distractor burst | 12 | five task-native non-target objects appear together |
 | Obstacle insertion | 39 | a task-native object appears in the current approach corridor |
-| **Task-type cells** | **195** |  |
+| **Task-type cells** | **191** |  |
 
-The target count is 37 rather than the earlier catalog estimate of 38 because
-one target begins inside a drawer. It is intentionally excluded from planar
-relocation. Receptacle relocation is restricted to movable object receptacles;
-the benchmark does not translate a fixed cabinet, stove, or rack merely to
-inflate coverage.
+The target count is 33 rather than the earlier syntactic estimate of 37. One
+target begins inside a drawer, and four more begin on a cookie box, ramekin,
+stove, or cabinet top. All five are intentionally excluded from free planar
+relocation. Receptacle relocation is restricted to movable object receptacles
+that start on a floor/table workspace; the benchmark does not translate a
+fixed cabinet, stove, or rack merely to inflate coverage.
 
 ## Explicit intervention randomness
 
@@ -57,21 +58,21 @@ draw IDs 0/1/2.
 
 - **Core:** a balanced Latin-square assignment couples one draw to each
   `(initial state, policy seed)` cell. Every policy seed sees every draw once
-  across the three initial states. This gives 1,755 matched pairs / 3,510
+  across the three initial states. This gives 1,719 matched pairs / 3,438
   episodes per model.
 - **Full:** crosses every policy seed with all three intervention draws. This
-  separates policy and environment variation at 5,265 matched pairs / 10,530
+  separates policy and environment variation at 5,157 matched pairs / 10,314
   episodes per model.
 
 | Change type | Core pairs | Full pairs |
 | --- | ---: | ---: |
 | Illumination switch | 360 | 1,080 |
 | Camera shift | 360 | 1,080 |
-| Target relocation | 333 | 999 |
+| Target relocation | 297 | 891 |
 | Receptacle relocation | 243 | 729 |
 | Distractor burst | 108 | 324 |
 | Obstacle insertion | 351 | 1,053 |
-| **Total** | **1,755** | **5,265** |
+| **Total** | **1,719** | **5,157** |
 
 The generated artifacts on the evaluation host are:
 

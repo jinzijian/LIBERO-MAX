@@ -7,7 +7,7 @@ from pathlib import Path
 
 from libero.libero import benchmark
 
-from libero_max.bddl import parse_bddl_metadata
+from libero_max.bddl import is_planar_workspace_placement, parse_bddl_metadata
 
 
 DEFAULT_SUITES = "libero_spatial,libero_object,libero_goal,libero_10"
@@ -55,12 +55,6 @@ def main() -> int:
                 else None
             )
             primary_receptacle = _primary_receptacle(metadata)
-            target_initial_placement = metadata["initial_placements"].get(
-                primary_target
-            )
-            receptacle_initial_placement = metadata["initial_placements"].get(
-                primary_receptacle
-            )
             rows.append(
                 {
                     "task_suite_name": suite_name,
@@ -73,15 +67,13 @@ def main() -> int:
                     "primary_target": primary_target,
                     "primary_receptacle": primary_receptacle,
                     "supports_target_relocation": bool(
-                        primary_target
-                        and target_initial_placement
-                        and target_initial_placement["predicate"].lower() == "on"
+                        is_planar_workspace_placement(metadata, primary_target)
                     ),
                     "supports_receptacle_relocation": bool(
                         primary_receptacle in metadata["objects"]
-                        and receptacle_initial_placement
-                        and receptacle_initial_placement["predicate"].lower()
-                        == "on"
+                        and is_planar_workspace_placement(
+                            metadata, primary_receptacle
+                        )
                     ),
                     "available_distractor_count": len(
                         metadata["distractor_objects"]

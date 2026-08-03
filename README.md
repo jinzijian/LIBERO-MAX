@@ -153,8 +153,8 @@ LIBERO-MAX/
 ```
 
 The project now has an executable Cosmos physical-change pilot plus deterministic
-six-type Core and Full candidate-manifest generators. Core contains 1,755
-matched pairs; Full contains 5,265 and crosses three policy seeds with three
+six-type Core and Full candidate-manifest generators. Core contains 1,719
+matched pairs; Full contains 5,157 and crosses three policy seeds with three
 intervention draws. These are candidates, not frozen benchmark releases, until
 all physical configurations and trigger coverage pass calibration. Intent and
 infeasibility tracks still require response-aware scorers. See

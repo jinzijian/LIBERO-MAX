@@ -1,6 +1,6 @@
 import unittest
 
-from libero_max.bddl import parse_bddl_metadata
+from libero_max.bddl import is_planar_workspace_placement, parse_bddl_metadata
 
 
 SAMPLE = """
@@ -64,6 +64,30 @@ class BddlParserTest(unittest.TestCase):
         metadata = parse_bddl_metadata(text)
         self.assertEqual(
             metadata["manipulated_objects"], ["milk_1", "alphabet_soup_1"]
+        )
+
+    def test_relocation_requires_a_large_planar_fixture(self):
+        metadata = parse_bddl_metadata(SAMPLE)
+        self.assertTrue(
+            is_planar_workspace_placement(metadata, "alphabet_soup_1")
+        )
+        metadata["objects"]["tray_1"] = "tray"
+        metadata["objects"]["bowl_1"] = "bowl"
+        metadata["initial_placements"]["bowl_1"] = {
+            "predicate": "On",
+            "region": "tray_1_center",
+            "support_entity": "tray_1",
+        }
+        self.assertFalse(is_planar_workspace_placement(metadata, "bowl_1"))
+
+    def test_custom_table_fixture_types_are_planar_workspaces(self):
+        metadata = parse_bddl_metadata(SAMPLE)
+        metadata["fixtures"] = {"living_room_table": "living_room_table"}
+        metadata["initial_placements"]["alphabet_soup_1"][
+            "support_entity"
+        ] = "living_room_table"
+        self.assertTrue(
+            is_planar_workspace_placement(metadata, "alphabet_soup_1")
         )
 
 
