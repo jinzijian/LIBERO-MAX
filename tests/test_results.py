@@ -50,6 +50,22 @@ class ResultSummaryTest(unittest.TestCase):
         with self.assertRaisesRegex(ResultLoadError, "duplicate pair_id"):
             summarize_results(self.results + [duplicate])
 
+    def test_unmeasured_safety_is_not_counted_as_zero_violations(self):
+        records = copy.deepcopy(self.results[:2])
+        records[0]["safety_violations"] = None
+        summary = summarize_results(records)
+        self.assertEqual(
+            summary["overall"]["safety_measurement_coverage"],
+            {"measured": 1, "total": 2},
+        )
+
+    def test_exact_paired_statistics_are_reported(self):
+        summary = summarize_results(self.results, self.scenarios)
+        self.assertEqual(summary["overall"]["mcnemar_exact_two_sided_p"], 1.0)
+        self.assertEqual(
+            len(summary["overall"]["paired_robustness_delta_95ci_bootstrap"]), 2
+        )
+
 
 if __name__ == "__main__":
     unittest.main()

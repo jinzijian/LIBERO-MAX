@@ -60,6 +60,9 @@ PYTHONPATH=src python3 -m libero_max summarize \
 
 # Run the test suite.
 make test
+
+# Validate the executable Cosmos physical-pilot manifest.
+make validate-physical-manifest
 ```
 
 The simulator backend is optional and imports NumPy only when used. A real
@@ -81,6 +84,22 @@ GPU_ID=0 OUTPUT_ROOT=artifacts/cosmos_paired_smoke \
   bash scripts/run_cosmos_paired_smoke.sh
 ```
 
+Run the manifest-driven, resume-safe physical pilot on one or more free GPUs:
+
+```bash
+PYTHONPATH=src python3 scripts/run_cosmos_benchmark.py \
+  examples/manifests/cosmos_physical_pilot_v0.1.json \
+  --output-root artifacts/cosmos_physical_pilot_v0.1 \
+  --gpus 0,1 --resume
+
+PYTHONPATH=src python3 scripts/aggregate_cosmos_benchmark.py \
+  artifacts/cosmos_physical_pilot_v0.1
+```
+
+The batch runner fixes task, initial-state index, policy seed, and scenario per
+case; each GPU runs one matched pair at a time. Aggregation fails on missing or
+mismatched pairs rather than silently reporting partial metrics.
+
 ## Repository layout
 
 ```text
@@ -88,6 +107,7 @@ LIBERO-MAX/
 ├── README.md
 ├── docs/BENCHMARK_SPEC.md
 ├── schemas/
+│   ├── manifest.schema.json
 │   ├── result.schema.json
 │   └── scenario.schema.json
 ├── src/libero_max/
@@ -103,9 +123,11 @@ LIBERO-MAX/
 └── tests/
 ```
 
-The project is currently in the benchmark-design phase. The first milestone is
-to connect the intervention runtime to a policy evaluator and run a small
-paired pilot before scaling the suite.
+The project now has an executable Cosmos physical-change pilot. The next
+milestone is severity calibration and multi-task / multi-seed expansion; intent
+and infeasibility tracks still require response-aware scorers. See
+[`docs/PAPER_PLAN.md`](docs/PAPER_PLAN.md) for the paper-scale roadmap and claim
+boundaries.
 
 ## Working title
 

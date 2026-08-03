@@ -36,6 +36,7 @@ def main() -> None:
     suite_name = os.environ.get("LIBERO_MAX_SUITE", "libero_object")
     task_index = int(os.environ.get("LIBERO_MAX_TASK_INDEX", "0"))
     arm = os.environ.get("LIBERO_MAX_ARM", "intervention")
+    init_state_index = int(os.environ.get("LIBERO_MAX_INIT_STATE_INDEX", "0"))
     scenario_path = Path(
         os.environ.get(
             "LIBERO_MAX_SCENARIO_FILE",
@@ -61,6 +62,7 @@ def main() -> None:
         arm=arm,
         trace_path=trace_path,
         original_task_index=task_index,
+        init_state_index=init_state_index,
     )
     run_libero_eval.eval_libero()
 

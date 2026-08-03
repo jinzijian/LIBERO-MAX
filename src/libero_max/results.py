@@ -1,6 +1,8 @@
 """Paired outcome loading and reporting for LIBERO-MAX."""
 
 import json
+import math
+import random
 import statistics
 from pathlib import Path
 from typing import Any, Dict, Iterable, List, Optional, Sequence, Tuple
@@ -8,7 +10,7 @@ from typing import Any, Dict, Iterable, List, Optional, Sequence, Tuple
 from .scenario import CHANGE_FAMILIES, RESPONSE_MODES, scenario_key
 
 
-RESULT_FIELDS = {
+REQUIRED_RESULT_FIELDS = {
     "pair_id",
     "scenario_id",
     "seed",
@@ -19,6 +21,18 @@ RESULT_FIELDS = {
     "adaptation_latency_steps",
     "safety_violations",
 }
+OPTIONAL_RESULT_FIELDS = {
+    "severity",
+    "timing_bucket",
+    "task_suite_name",
+    "task_index",
+    "init_state_index",
+    "policy_seed",
+    "scoring_mode",
+    "intervention_event_step",
+    "mean_absolute_raw_pixel_delta",
+}
+RESULT_FIELDS = REQUIRED_RESULT_FIELDS | OPTIONAL_RESULT_FIELDS
 
 
 class ResultLoadError(ValueError):
@@ -34,7 +48,7 @@ def validate_result(record: Any) -> List[str]:
         return ["result must be a JSON object"]
 
     errors: List[str] = []
-    missing = sorted(RESULT_FIELDS - set(record))
+    missing = sorted(REQUIRED_RESULT_FIELDS - set(record))
     unknown = sorted(set(record) - RESULT_FIELDS)
     if missing:
         errors.append("missing required fields: " + ", ".join(missing))
@@ -74,6 +88,33 @@ def validate_result(record: Any) -> List[str]:
     ):
         errors.append("safety_violations must be a non-negative integer")
 
+    if "severity" in record and record["severity"] not in {"low", "medium", "high"}:
+        errors.append("invalid severity")
+    if "timing_bucket" in record and record["timing_bucket"] not in {
+        "early",
+        "middle",
+        "late",
+    }:
+        errors.append("invalid timing_bucket")
+    for field in ("task_index", "init_state_index", "policy_seed", "intervention_event_step"):
+        if field in record and (
+            not _is_integer(record[field]) or record[field] < 0
+        ):
+            errors.append("%s must be a non-negative integer" % field)
+    for field in ("task_suite_name", "scoring_mode"):
+        if field in record and (
+            not isinstance(record[field], str) or not record[field].strip()
+        ):
+            errors.append("%s must be a non-empty string" % field)
+    pixel_delta = record.get("mean_absolute_raw_pixel_delta")
+    if pixel_delta is not None and (
+        isinstance(pixel_delta, bool)
+        or not isinstance(pixel_delta, (int, float))
+        or not math.isfinite(pixel_delta)
+        or pixel_delta < 0
+    ):
+        errors.append("mean_absolute_raw_pixel_delta must be null or non-negative")
+
     return errors
 
 
@@ -109,6 +150,53 @@ def _ratio(numerator: int, denominator: int) -> Optional[float]:
     return round(numerator / denominator, 6)
 
 
+def _wilson_interval(successes: int, total: int) -> Optional[List[float]]:
+    if total == 0:
+        return None
+    z = 1.959963984540054
+    proportion = successes / total
+    denominator = 1 + z * z / total
+    center = (proportion + z * z / (2 * total)) / denominator
+    radius = (
+        z
+        * math.sqrt(
+            proportion * (1 - proportion) / total + z * z / (4 * total * total)
+        )
+        / denominator
+    )
+    return [round(max(0.0, center - radius), 6), round(min(1.0, center + radius), 6)]
+
+
+def _mcnemar_exact(gains: int, regressions: int) -> Optional[float]:
+    discordant = gains + regressions
+    if discordant == 0:
+        return None
+    tail = sum(
+        math.comb(discordant, k) for k in range(min(gains, regressions) + 1)
+    ) / (2**discordant)
+    return round(min(1.0, 2 * tail), 10)
+
+
+def _paired_bootstrap_delta(
+    records: Sequence[Dict[str, Any]], samples: int = 2000
+) -> Optional[List[float]]:
+    if not records:
+        return None
+    differences = [
+        int(record["intervention_correct"]) - int(record["control_correct"])
+        for record in records
+    ]
+    rng = random.Random(0)
+    estimates = sorted(
+        sum(differences[rng.randrange(len(differences))] for _ in differences)
+        / len(differences)
+        for _ in range(samples)
+    )
+    low = estimates[int(0.025 * (samples - 1))]
+    high = estimates[int(0.975 * (samples - 1))]
+    return [round(low, 6), round(high, 6)]
+
+
 def _metric_block(records: Sequence[Dict[str, Any]]) -> Dict[str, Any]:
     total = len(records)
     preserved = sum(
@@ -132,7 +220,12 @@ def _metric_block(records: Sequence[Dict[str, Any]]) -> Dict[str, Any]:
         if record["intervention_correct"]
         and record["adaptation_latency_steps"] is not None
     ]
-    safety_failures = sum(record["safety_violations"] > 0 for record in records)
+    measured_safety = [
+        record["safety_violations"]
+        for record in records
+        if record["safety_violations"] is not None
+    ]
+    safety_failures = sum(value > 0 for value in measured_safety)
 
     return {
         "episodes": total,
@@ -143,14 +236,24 @@ def _metric_block(records: Sequence[Dict[str, Any]]) -> Dict[str, Any]:
             "persistent_failure": persistent,
         },
         "scenario_aware_outcome_accuracy": _ratio(intervention_correct, total),
+        "scenario_aware_outcome_accuracy_95ci_wilson": _wilson_interval(
+            intervention_correct, total
+        ),
         "control_accuracy": _ratio(control_correct, total),
+        "control_accuracy_95ci_wilson": _wilson_interval(control_correct, total),
         "paired_robustness_delta": (
             None
             if total == 0
             else round((intervention_correct - control_correct) / total, 6)
         ),
         "regression_rate": _ratio(regressions, control_correct),
-        "safety_violation_rate": _ratio(safety_failures, total),
+        "paired_robustness_delta_95ci_bootstrap": _paired_bootstrap_delta(records),
+        "mcnemar_exact_two_sided_p": _mcnemar_exact(gains, regressions),
+        "safety_violation_rate": _ratio(safety_failures, len(measured_safety)),
+        "safety_measurement_coverage": {
+            "measured": len(measured_safety),
+            "total": total,
+        },
         "adaptation_latency_steps": {
             "count": len(latencies),
             "mean": None if not latencies else round(statistics.mean(latencies), 6),
@@ -204,14 +307,26 @@ def summarize_results(
             [record for record in selected if record["change_family"] == family]
         )
 
+    def grouped(field: str) -> Dict[str, Any]:
+        values = sorted({record[field] for record in selected if field in record})
+        return {
+            str(value): _metric_block(
+                [record for record in selected if record.get(field) == value]
+            )
+            for value in values
+        }
+
     return {
         "coverage": {
             "planned": planned,
             "completed": len(selected),
             "missing": ["%s:%d" % item for item in missing],
             "unexpected": ["%s:%d" % item for item in unexpected],
-            "complete": not missing,
+            "complete": not missing and not unexpected,
         },
         "overall": overall,
         "by_change_family": families,
+        "by_severity": grouped("severity"),
+        "by_timing_bucket": grouped("timing_bucket"),
+        "by_response_mode": grouped("expected_response_mode"),
     }

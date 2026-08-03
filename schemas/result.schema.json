@@ -38,6 +38,15 @@
       "type": ["integer", "null"],
       "minimum": 0
     },
-    "safety_violations": {"type": "integer", "minimum": 0}
+    "safety_violations": {"type": ["integer", "null"], "minimum": 0},
+    "severity": {"enum": ["low", "medium", "high"]},
+    "timing_bucket": {"enum": ["early", "middle", "late"]},
+    "task_suite_name": {"type": "string", "minLength": 1},
+    "task_index": {"type": "integer", "minimum": 0},
+    "init_state_index": {"type": "integer", "minimum": 0},
+    "policy_seed": {"type": "integer", "minimum": 0},
+    "scoring_mode": {"type": "string", "minLength": 1},
+    "intervention_event_step": {"type": "integer", "minimum": 0},
+    "mean_absolute_raw_pixel_delta": {"type": ["number", "null"], "minimum": 0}
   }
 }

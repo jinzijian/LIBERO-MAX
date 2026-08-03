@@ -2,8 +2,9 @@ import json
 import tempfile
 import unittest
 from pathlib import Path
+from types import SimpleNamespace
 
-from libero_max.cosmos_integration import CosmosInterventionEnv
+from libero_max.cosmos_integration import CosmosInterventionEnv, install_cosmos_hooks
 
 
 SCENARIO = {
@@ -57,6 +58,7 @@ class CosmosIntegrationTest(unittest.TestCase):
             arm=arm,
             trace_path=root / arm / "trace.jsonl",
             original_task_index=0,
+            init_state_index=3,
             backend=backend,
             primary_image_key=None,
         )
@@ -97,6 +99,27 @@ class CosmosIntegrationTest(unittest.TestCase):
             )
             self.assertEqual(control_row["intervention_event_count"], 0)
             self.assertEqual(intervention_row["intervention_event_count"], 1)
+            self.assertEqual(control_row["init_state_index"], 3)
+
+    def test_hook_selects_exact_default_initial_state(self):
+        module = SimpleNamespace(
+            get_libero_env=lambda *args, **kwargs: (FakeEnv(), "fake task"),
+            run_episode=lambda *args, **kwargs: (True,),
+            load_initial_states=lambda *args, **kwargs: (["s0", "s1", "s2"], None),
+            TASK_MAX_STEPS={"libero_object": 280},
+        )
+        with tempfile.TemporaryDirectory() as tmp:
+            install_cosmos_hooks(
+                module,
+                scenario=SCENARIO,
+                arm="control",
+                trace_path=Path(tmp) / "trace.jsonl",
+                original_task_index=0,
+                init_state_index=2,
+            )
+            states, custom = module.load_initial_states(None, None, 0)
+        self.assertEqual(states, ["s2"])
+        self.assertIsNone(custom)
 
 
 if __name__ == "__main__":

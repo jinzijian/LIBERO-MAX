@@ -10,6 +10,7 @@ MATCH_FIELDS = (
     "scenario_id",
     "task_suite_name",
     "original_task_index",
+    "init_state_index",
     "task_description",
     "episode_index",
     "policy_seed",

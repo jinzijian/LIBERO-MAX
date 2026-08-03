@@ -1,0 +1,106 @@
+{
+  "benchmark_id": "cosmos-physical-pilot-v0.1",
+  "benchmark_version": "0.1.0",
+  "protocol": {
+    "arms": ["control", "intervention"],
+    "query_interval": 16,
+    "scoring_track": "physical_completion"
+  },
+  "cases": [
+    {
+      "case_id": "object0-init0-camera-yaw12-step16-seed195",
+      "task_suite_name": "libero_object",
+      "task_index": 0,
+      "init_state_index": 0,
+      "policy_seed": 195,
+      "timing_bucket": "early",
+      "scenario": {
+        "scenario_id": "obs_camera_yaw12_object0_step16",
+        "base_task_id": "libero_object/task_0",
+        "seed": 0,
+        "change_family": "OBS",
+        "severity": "medium",
+        "trigger": {"type": "fixed_step", "value": 16},
+        "change": {"operation": "shift_camera", "camera": "agentview", "yaw_degrees": 12},
+        "expected_response_mode": "continue",
+        "safety_constraints": []
+      }
+    },
+    {
+      "case_id": "object0-init0-light035-step16-seed195",
+      "task_suite_name": "libero_object",
+      "task_index": 0,
+      "init_state_index": 0,
+      "policy_seed": 195,
+      "timing_bucket": "early",
+      "scenario": {
+        "scenario_id": "obs_light035_object0_step16",
+        "base_task_id": "libero_object/task_0",
+        "seed": 0,
+        "change_family": "OBS",
+        "severity": "medium",
+        "trigger": {"type": "fixed_step", "value": 16},
+        "change": {"operation": "set_lighting", "scale": 0.35},
+        "expected_response_mode": "continue",
+        "safety_constraints": []
+      }
+    },
+    {
+      "case_id": "object0-init0-move-target-y012-step64-seed195",
+      "task_suite_name": "libero_object",
+      "task_index": 0,
+      "init_state_index": 0,
+      "policy_seed": 195,
+      "timing_bucket": "middle",
+      "scenario": {
+        "scenario_id": "geo_move_target_y012_object0_step64",
+        "base_task_id": "libero_object/task_0",
+        "seed": 0,
+        "change_family": "GEO",
+        "severity": "medium",
+        "trigger": {"type": "fixed_step", "value": 64},
+        "change": {"operation": "move_object", "object": "alphabet_soup_1", "delta_position_m": [0.0, 0.12, 0.0]},
+        "expected_response_mode": "replan",
+        "safety_constraints": []
+      }
+    },
+    {
+      "case_id": "object0-init0-move-basket-xn012-step64-seed195",
+      "task_suite_name": "libero_object",
+      "task_index": 0,
+      "init_state_index": 0,
+      "policy_seed": 195,
+      "timing_bucket": "middle",
+      "scenario": {
+        "scenario_id": "geo_move_receptacle_xn012_object0_step64",
+        "base_task_id": "libero_object/task_0",
+        "seed": 0,
+        "change_family": "GEO",
+        "severity": "medium",
+        "trigger": {"type": "fixed_step", "value": 64},
+        "change": {"operation": "move_object", "object": "basket_1", "delta_position_m": [-0.12, 0.0, 0.0]},
+        "expected_response_mode": "replan",
+        "safety_constraints": []
+      }
+    },
+    {
+      "case_id": "object0-init0-obstacle-milk-step64-seed195",
+      "task_suite_name": "libero_object",
+      "task_index": 0,
+      "init_state_index": 0,
+      "policy_seed": 195,
+      "timing_bucket": "middle",
+      "scenario": {
+        "scenario_id": "obsnew_milk_corridor_object0_step64",
+        "base_task_id": "libero_object/task_0",
+        "seed": 0,
+        "change_family": "OBS-NEW",
+        "severity": "medium",
+        "trigger": {"type": "fixed_step", "value": 64},
+        "change": {"operation": "insert_obstacle", "object": "milk_1", "position_m": [-0.05, 0.05, 0.035]},
+        "expected_response_mode": "replan",
+        "safety_constraints": []
+      }
+    }
+  ]
+}

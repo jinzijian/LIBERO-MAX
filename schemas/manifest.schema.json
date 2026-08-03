@@ -1,0 +1,50 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://libero-max.org/schemas/manifest.schema.json",
+  "title": "LIBERO-MAX Benchmark Manifest",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["benchmark_id", "benchmark_version", "protocol", "cases"],
+  "properties": {
+    "benchmark_id": {"type": "string", "minLength": 1},
+    "benchmark_version": {"type": "string", "minLength": 1},
+    "protocol": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["arms", "query_interval", "scoring_track"],
+      "properties": {
+        "arms": {"const": ["control", "intervention"]},
+        "query_interval": {"type": "integer", "minimum": 1},
+        "scoring_track": {"enum": ["physical_completion"]}
+      }
+    },
+    "cases": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "case_id",
+          "task_suite_name",
+          "task_index",
+          "init_state_index",
+          "policy_seed",
+          "timing_bucket",
+          "scenario"
+        ],
+        "properties": {
+          "case_id": {"type": "string", "minLength": 1},
+          "task_suite_name": {
+            "enum": ["libero_spatial", "libero_object", "libero_goal", "libero_10", "libero_90"]
+          },
+          "task_index": {"type": "integer", "minimum": 0},
+          "init_state_index": {"type": "integer", "minimum": 0},
+          "policy_seed": {"type": "integer", "minimum": 0},
+          "timing_bucket": {"enum": ["early", "middle", "late"]},
+          "scenario": {"$ref": "scenario.schema.json"}
+        }
+      }
+    }
+  }
+}

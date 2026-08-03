@@ -7,6 +7,7 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional, Sequence
 
 from .results import ResultLoadError, load_results_jsonl, summarize_results
+from .manifest import ManifestLoadError, load_manifest
 from .scenario import (
     ScenarioLoadError,
     load_scenarios,
@@ -56,6 +57,21 @@ def _summarize_command(args: argparse.Namespace) -> int:
     return 0
 
 
+def _validate_manifest_command(args: argparse.Namespace) -> int:
+    try:
+        manifest = load_manifest(args.path)
+        payload = {
+            "valid": True,
+            "benchmark_id": manifest["benchmark_id"],
+            "case_count": len(manifest["cases"]),
+            "errors": [],
+        }
+    except ManifestLoadError as exc:
+        payload = {"valid": False, "errors": [str(exc)]}
+    _write_json(payload, args.output)
+    return 0 if payload["valid"] else 1
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="libero-max")
     subparsers = parser.add_subparsers(dest="command", required=True)
@@ -74,6 +90,13 @@ def build_parser() -> argparse.ArgumentParser:
     )
     summarize.add_argument("--output", type=Path, help="write the JSON report")
     summarize.set_defaults(handler=_summarize_command)
+
+    validate_manifest_parser = subparsers.add_parser(
+        "validate-manifest", help="validate a benchmark execution manifest"
+    )
+    validate_manifest_parser.add_argument("path", type=Path)
+    validate_manifest_parser.add_argument("--output", type=Path)
+    validate_manifest_parser.set_defaults(handler=_validate_manifest_command)
     return parser
 
 

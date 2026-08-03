@@ -48,6 +48,7 @@ class CosmosInterventionEnv:
         arm: str,
         trace_path: Path,
         original_task_index: int,
+        init_state_index: int = 0,
         backend: Any = None,
         warmup_steps: int = 10,
         primary_image_key: Optional[str] = "agentview_image",
@@ -69,6 +70,7 @@ class CosmosInterventionEnv:
         self.arm = arm
         self.trace_path = Path(trace_path)
         self.original_task_index = original_task_index
+        self.init_state_index = init_state_index
         self.backend = backend
         self.runtime = InterventionRuntime(scenario, backend)
         self.warmup_steps = warmup_steps
@@ -159,6 +161,7 @@ class CosmosInterventionEnv:
             "scenario_seed": self.scenario["seed"],
             "task_suite_name": self.task_suite_name,
             "original_task_index": self.original_task_index,
+            "init_state_index": self.init_state_index,
             "task_description": self.task_description,
             "episode_index": self.episode_index,
             "policy_seed": self.policy_seed,
@@ -183,11 +186,28 @@ def install_cosmos_hooks(
     arm: str,
     trace_path: Path,
     original_task_index: int,
+    init_state_index: int = 0,
 ) -> None:
     """Patch the already-imported Cosmos evaluator without editing upstream."""
 
     original_get_libero_env = run_libero_eval.get_libero_env
     original_run_episode = run_libero_eval.run_episode
+    original_load_initial_states = run_libero_eval.load_initial_states
+
+    def load_selected_initial_state(cfg: Any, task_suite: Any, task_id: int, log_file=None):
+        initial_states, custom_states = original_load_initial_states(
+            cfg, task_suite, task_id, log_file
+        )
+        if custom_states is not None:
+            raise CosmosIntegrationError(
+                "LIBERO-MAX init_state_index currently requires DEFAULT initial states"
+            )
+        if not 0 <= init_state_index < len(initial_states):
+            raise CosmosIntegrationError(
+                "init_state_index %d outside [0, %d)"
+                % (init_state_index, len(initial_states))
+            )
+        return [initial_states[init_state_index]], None
 
     def get_libero_env_with_intervention(*args: Any, **kwargs: Any):
         env, task_description = original_get_libero_env(*args, **kwargs)
@@ -199,6 +219,7 @@ def install_cosmos_hooks(
                 arm=arm,
                 trace_path=trace_path,
                 original_task_index=original_task_index,
+                init_state_index=init_state_index,
             ),
             task_description,
         )
@@ -219,3 +240,4 @@ def install_cosmos_hooks(
 
     run_libero_eval.get_libero_env = get_libero_env_with_intervention
     run_libero_eval.run_episode = run_episode_with_trace
+    run_libero_eval.load_initial_states = load_selected_initial_state

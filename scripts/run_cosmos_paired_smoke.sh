@@ -15,16 +15,19 @@ SCENARIO_FILE="${SCENARIO_FILE:-$PROJECT_DIR/examples/scenarios/cosmos_camera_sh
 SUITE="${SUITE:-libero_object}"
 TASK_INDEX="${TASK_INDEX:-0}"
 SEED="${SEED:-195}"
+INIT_STATE_INDEX="${INIT_STATE_INDEX:-0}"
 
 cosmos_site_packages="$COSMOS_POLICY_DIR/.venv/lib/python3.10/site-packages"
 mkdir -p "$OUTPUT_ROOT"
+OUTPUT_ROOT="$(cd "$OUTPUT_ROOT" && pwd)"
+SCENARIO_FILE="$(cd "$(dirname "$SCENARIO_FILE")" && pwd)/$(basename "$SCENARIO_FILE")"
 
 for arm in control intervention; do
   arm_dir="$OUTPUT_ROOT/$arm"
   mkdir -p "$arm_dir/eval"
   : > "$arm_dir/trace.jsonl"
   (
-    cd "$PROJECT_DIR"
+    cd "$arm_dir"
     MUJOCO_GL=egl \
     PYOPENGL_PLATFORM=egl \
     TORCH_FORCE_NO_WEIGHTS_ONLY_LOAD=1 \
@@ -34,6 +37,7 @@ for arm in control intervention; do
     LIBERO_MAX_ARM="$arm" \
     LIBERO_MAX_SUITE="$SUITE" \
     LIBERO_MAX_TASK_INDEX="$TASK_INDEX" \
+    LIBERO_MAX_INIT_STATE_INDEX="$INIT_STATE_INDEX" \
     LIBERO_MAX_SCENARIO_FILE="$SCENARIO_FILE" \
     LIBERO_MAX_TRACE_PATH="$arm_dir/trace.jsonl" \
     PYTHONPATH="$PROJECT_DIR/src:$ROBOSUITE_DIR:$cosmos_site_packages:$LEGACY_SITE_PACKAGES:$LIBERO_DIR:$COSMOS_POLICY_DIR${PYTHONPATH:+:$PYTHONPATH}" \
@@ -41,7 +45,7 @@ for arm in control intervention; do
       "$PROJECT_DIR/scripts/run_cosmos_libero_max.py" \
       --config cosmos_predict2_2b_480p_libero__inference_only \
       --ckpt_path "$ASSET_DIR/Cosmos-Policy-LIBERO-Predict2-2B.pt" \
-      --config_file cosmos_policy/config/config.py \
+      --config_file "$COSMOS_POLICY_DIR/cosmos_policy/config/config.py" \
       --use_wrist_image True \
       --use_proprio True \
       --normalize_proprio True \

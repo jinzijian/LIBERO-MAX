@@ -2,6 +2,12 @@
 
 Status: initial design draft
 
+The executable release is organized into three tracks. Track A scores physical
+changes with paired LIBERO goal completion. Track B scores intent revisions
+with alternate goal / cancellation / clarification evaluators. Track C scores
+safe infeasibility awareness. Only Track A is currently executable end to end;
+the ordinary LIBERO success predicate is not valid for Track B or C.
+
 ## 1. Evaluation unit
 
 The basic evaluation unit is a matched episode pair:
@@ -145,3 +151,13 @@ scenario from each response mode. The pilot should validate:
 
 The reference runtime and the evaluator integration contract are documented in
 [`RUNTIME_INTEGRATION.md`](RUNTIME_INTEGRATION.md).
+
+## 9. Execution manifests
+
+Paper runs must use an immutable manifest. Every case fixes the task suite,
+original task index, initial-state index, policy seed, timing bucket, and full
+scenario. The required arms are ordered as `control` then `intervention`.
+
+The first executable manifest is
+`examples/manifests/cosmos_physical_pilot_v0.1.json`. Its five cases are a
+calibration pilot, not the frozen v1 benchmark.
