@@ -98,6 +98,12 @@ PYTHONPATH=src python3 scripts/preflight_manifest_interventions.py \
 PYTHONPATH=src python3 scripts/calibrate_proximity_from_console.py \
   artifacts/cosmos_paired_smoke/control/console.log
 
+# Build the cross-suite target/distractor catalog used to design the v1
+# manifest.
+PYTHONPATH=src python3 scripts/build_libero_task_catalog.py \
+  --bddl-root "$LIBERO_REPO/libero/libero/bddl_files" \
+  --output artifacts/libero_task_catalog.json
+
 PYTHONPATH=src python3 scripts/run_cosmos_benchmark.py \
   examples/manifests/cosmos_physical_pilot_v0.1.json \
   --output-root artifacts/cosmos_physical_pilot_v0.1 \
@@ -140,6 +146,8 @@ and infeasibility tracks still require response-aware scorers. See
 [`docs/PAPER_PLAN.md`](docs/PAPER_PLAN.md) for the paper-scale roadmap and claim
 boundaries. Pilot intervention and proximity-threshold evidence is recorded in
 [`docs/PILOT_CALIBRATION.md`](docs/PILOT_CALIBRATION.md).
+The current v1 sampling proposal is in
+[`docs/BENCHMARK_V1_DESIGN.md`](docs/BENCHMARK_V1_DESIGN.md).
 
 ## Working title
 

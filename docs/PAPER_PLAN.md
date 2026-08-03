@@ -79,3 +79,5 @@ ordinary LIBERO task success as their correctness label.
 
 The current task-0 mechanics and 18 cm trigger calibration are recorded in
 [`PILOT_CALIBRATION.md`](PILOT_CALIBRATION.md).
+The proposed 1,620-pair-per-model scale-up is specified in
+[`BENCHMARK_V1_DESIGN.md`](BENCHMARK_V1_DESIGN.md).
