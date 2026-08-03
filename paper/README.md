@@ -9,4 +9,6 @@ Current empirical status:
 - intervention mechanics: five-case real-MuJoCo preflight complete;
 - trigger calibration: one successful Cosmos control trajectory replayed;
 - model study: five-case Cosmos pilot queued, not yet complete;
-- v1 main evaluation: proposed, not frozen or run.
+- v1 main evaluation: six-type Core (1,755 pairs) and Full (5,265 pairs)
+  candidate manifests generated; physical calibration, freezing, and model runs
+  remain pending.

@@ -5,7 +5,28 @@ from pathlib import Path
 from typing import Any, Dict, Iterable, List, Sequence, Tuple
 
 
-CHANGE_FAMILIES = {"OBS", "GEO", "CLUTTER", "OBS-NEW", "INTENT", "FEAS"}
+CHANGE_FAMILIES = {
+    "OBS",
+    "GEO",
+    "CLUTTER",
+    "OBSTACLE",
+    "OBS-NEW",
+    "INTENT",
+    "FEAS",
+}
+CHANGE_TYPES = {
+    "illumination_switch",
+    "camera_shift",
+    "target_relocation",
+    "receptacle_relocation",
+    "distractor_burst",
+    "obstacle_insertion",
+    "target_removal",
+    "receptacle_removal",
+    "instruction_target_update",
+    "instruction_receptacle_update",
+    "task_cancel",
+}
 SEVERITIES = {"low", "medium", "high"}
 TRIGGER_TYPES = {
     "after_grasp",
@@ -36,7 +57,7 @@ REQUIRED_FIELDS = {
     "expected_response_mode",
     "safety_constraints",
 }
-OPTIONAL_FIELDS = {"setup"}
+OPTIONAL_FIELDS = {"setup", "change_type", "randomization"}
 
 
 class ScenarioLoadError(ValueError):
@@ -81,6 +102,9 @@ def validate_scenario(data: Any) -> List[str]:
             "change_family must be one of: " + ", ".join(sorted(CHANGE_FAMILIES))
         )
 
+    if "change_type" in data and data["change_type"] not in CHANGE_TYPES:
+        errors.append("change_type must be one of: " + ", ".join(sorted(CHANGE_TYPES)))
+
     if "severity" in data and data["severity"] not in SEVERITIES:
         errors.append("severity must be one of: " + ", ".join(sorted(SEVERITIES)))
 
@@ -103,6 +127,31 @@ def validate_scenario(data: Any) -> List[str]:
         else:
             for index, item in enumerate(setup):
                 errors.extend(_validate_change(item, "setup[%d]" % index))
+
+    randomization = data.get("randomization")
+    if randomization is not None:
+        if not isinstance(randomization, dict):
+            errors.append("randomization must be a JSON object")
+        else:
+            expected = {"sampler", "draw_id", "seed"}
+            missing = expected - set(randomization)
+            unknown = set(randomization) - expected
+            if missing:
+                errors.append(
+                    "randomization missing fields: " + ", ".join(sorted(missing))
+                )
+            if unknown:
+                errors.append(
+                    "randomization has unknown fields: " + ", ".join(sorted(unknown))
+                )
+            if not _nonempty_string(randomization.get("sampler")):
+                errors.append("randomization.sampler must be a non-empty string")
+            for field in ("draw_id", "seed"):
+                value = randomization.get(field)
+                if not _is_integer(value) or value < 0:
+                    errors.append(
+                        "randomization.%s must be a non-negative integer" % field
+                    )
 
     constraints = data.get("safety_constraints")
     if constraints is not None:

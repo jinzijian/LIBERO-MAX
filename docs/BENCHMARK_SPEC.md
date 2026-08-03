@@ -29,15 +29,29 @@ Each intervention episode has three phases:
 | `OBS` | Observation conditions | Lights off, camera moved | Recover perception and continue |
 | `GEO` | Scene geometry | Target or receptacle moved | Re-localize and replan |
 | `CLUTTER` | Distractor burst | Multiple confusing objects suddenly appear | Maintain target identity and continue safely |
-| `OBS-NEW` | New obstruction | Obstacle inserted into path | Avoid and replan safely |
+| `OBSTACLE` | New obstruction | Obstacle inserted into path | Avoid and replan safely |
+| `OBS-NEW` | Legacy new-observation label | Backward-compatible pilot scenarios | Migrate to a specific v1 type |
 | `INTENT` | User intent | Instruction modified or cancelled | Follow the update or stop |
 | `FEAS` | Task feasibility | Target or receptacle removed | Stop or report infeasibility |
 
 The taxonomy describes what changed, not which adaptation method a model uses.
 
-The first paper release prioritizes three controlled axes: illumination switch,
-target relocation, and distractor burst. Camera motion and broader obstruction
-cases remain secondary diagnostics until these three axes are calibrated.
+The v1 physical-completion track contains six explicit change types:
+
+1. `illumination_switch`;
+2. `camera_shift`;
+3. `target_relocation`;
+4. `receptacle_relocation`;
+5. `distractor_burst`;
+6. `obstacle_insertion`.
+
+The earlier five-case pilot covers only illumination, target relocation, and
+distractor insertion. It validates mechanics but does not define the final
+benchmark breadth.
+
+Intent and feasibility use separate response-aware types:
+`instruction_target_update`, `instruction_receptacle_update`, `task_cancel`,
+`target_removal`, and `receptacle_removal`.
 
 ## 3. Intervention timing
 
@@ -81,6 +95,7 @@ because the robot correctly declines to complete the original task.
   "base_task_id": "libero_task_id",
   "seed": 0,
   "change_family": "GEO",
+  "change_type": "target_relocation",
   "severity": "medium",
   "trigger": {
     "type": "after_subgoal",
@@ -96,12 +111,27 @@ because the robot correctly declines to complete the original task.
 }
 ```
 
+For randomized v1 cases, `seed` is the intervention seed and the record also
+contains:
+
+```json
+"randomization": {
+  "sampler": "libero-max-v1.0",
+  "draw_id": 1,
+  "seed": 2841930307
+}
+```
+
+Randomness is resolved when the manifest is built. A rollout never samples a
+hidden direction, object, or pose at runtime.
+
 ## 6. Required reporting
 
 ### 6.1 Coverage
 
 - planned, completed, missing, invalid, and duplicated episode pairs;
-- counts per task, change family, timing bucket, and severity;
+- counts per task, change family, change type, intervention draw, timing bucket,
+  and severity;
 - model checkpoint, decoding settings, observation history, and adaptation
   configuration.
 

@@ -20,8 +20,25 @@
     "scenario_id": {"type": "string", "minLength": 1},
     "seed": {"type": "integer", "minimum": 0},
     "change_family": {
-      "enum": ["OBS", "GEO", "CLUTTER", "OBS-NEW", "INTENT", "FEAS"]
+      "enum": ["OBS", "GEO", "CLUTTER", "OBSTACLE", "OBS-NEW", "INTENT", "FEAS"]
     },
+    "change_type": {
+      "enum": [
+        "illumination_switch",
+        "camera_shift",
+        "target_relocation",
+        "receptacle_relocation",
+        "distractor_burst",
+        "obstacle_insertion",
+        "target_removal",
+        "receptacle_removal",
+        "instruction_target_update",
+        "instruction_receptacle_update",
+        "task_cancel"
+      ]
+    },
+    "intervention_draw_id": {"type": "integer", "minimum": 0},
+    "intervention_seed": {"type": "integer", "minimum": 0},
     "expected_response_mode": {
       "enum": [
         "continue",

@@ -1,82 +1,116 @@
 # LIBERO-MAX v1 Benchmark Design
 
-Status: proposed scale-up after the task-0 Cosmos pilot; the v1 manifest is not
-yet frozen.
+Status: deterministic candidate manifests generated; physical calibration and
+Cosmos rollout validation are still required before either manifest is frozen.
 
-## Empirical task universe
+## Six-type physical main track
 
-The catalog builder inspected the installed BDDL definitions for all 40 tasks
-in LIBERO Spatial, Object, Goal, and LIBERO-10:
+The installed catalog contains 40 tasks across LIBERO Spatial, Object, Goal,
+and LIBERO-10. Eligibility is defined per intervention rather than forcing an
+invalid change into every scene.
 
-| Suite | Tasks | Manipulated target identified | At least 5 native distractors |
-| --- | ---: | ---: | ---: |
-| Spatial | 10 | 10 | 0 |
-| Object | 10 | 10 | 10 |
-| Goal | 10 | 8 | 0 |
-| LIBERO-10 | 10 | 10 | 2 |
-| **Total** | **40** | **38** | **12** |
+| Change type | Eligible tasks | What changes mid-execution |
+| --- | ---: | --- |
+| Illumination switch | 40 | lights dim sharply or a dim scene lights up |
+| Camera shift | 40 | agent-view camera translates and yaws |
+| Target relocation | 37 | the approached movable target shifts 6 or 12 cm |
+| Receptacle relocation | 27 | a movable destination shifts 6 or 12 cm |
+| Distractor burst | 12 | five task-native non-target objects appear together |
+| Obstacle insertion | 39 | a task-native object appears in the current approach corridor |
+| **Task-type cells** | **195** |  |
 
-Lighting can cover all 40 tasks. Target relocation is restricted to the 38
-tasks with an identified manipulated object. Five-object distractor bursts are
-restricted to the 12 tasks with enough task-native non-target objects; v1 does
-not silently inject unseen asset classes into the other scenes.
+The target count is 37 rather than the earlier catalog estimate of 38 because
+one target begins inside a drawer. It is intentionally excluded from planar
+relocation. Receptacle relocation is restricted to movable object receptacles;
+the benchmark does not translate a fixed cabinet, stove, or rack merely to
+inflate coverage.
 
-## Proposed main matrix
+## Explicit intervention randomness
 
-Every case uses three initial states and three deterministic policy seeds.
+Policy randomness and intervention randomness are separate fields. A stable
+SHA-256-derived intervention seed is computed from:
 
-| Axis | Task coverage | Conditions | Matched pairs |
-| --- | ---: | ---: | ---: |
-| Illumination switch | 40 | light off, light on | 720 |
-| Target relocation | 38 | 6 cm, 12 cm | 684 |
-| Distractor burst | 12 | 3 objects, 5 objects | 216 |
-| **Total per model** |  |  | **1,620** |
+```text
+(sampler version, suite, task, initial-state index, change type, draw id)
+```
 
-Each matched pair contains a no-change control and an intervention episode, so
-the matrix requires 3,240 episodes per model before any invalid-case reruns.
+The generator resolves every sampled value into the manifest. Re-running a
+case therefore cannot silently choose a new direction, distractor, or pose.
 
-## Trigger protocol
+| Change type | Randomized quantities across draw IDs 0/1/2 |
+| --- | --- |
+| Illumination | mild dim scale in [0.35, 0.55], near-dark scale in [0.02, 0.08], or dim-to-on setup in [0.03, 0.10] |
+| Camera | random planar direction at 2/4/6 cm and random yaw sign at 5/10/15 degrees |
+| Target relocation | random planar direction; displacement remains exactly 6 or 12 cm |
+| Receptacle relocation | random planar direction; displacement remains exactly 6 or 12 cm |
+| Distractor burst | task-native identity subset/order and five randomized non-overlapping angular placements around the target |
+| Obstacle insertion | task-native obstacle identity, path fraction in [0.35, 0.65], and signed lateral offset |
 
-The main matrix uses an 18 cm end-effector-to-target trigger. The intervention
-fires immediately on the first threshold crossing, even inside an open-loop
-action chunk. Reports include the physical change step, next policy-query step,
-and intervening open-loop exposure.
+The semantic trigger remains fixed at 18 cm in the main table. Timing
+randomization is deliberately kept out of the main causal comparison and is
+reported as a separate 24/18/12 cm ablation.
 
-A timing ablation on a pre-registered representative task subset compares 24,
-18, and 12 cm. Trigger coverage must be reported: episodes that never reach the
-threshold are invalid intervention cases, not ordinary policy failures.
+## Core and full profiles
 
-## Severity and validity
+Both profiles use three initial states, three policy seeds, and intervention
+draw IDs 0/1/2.
 
-- Lighting-off uses 5% of the current diffuse/specular intensity.
-- Lighting-on starts both arms at 5%, then restores the intervention arm with a
-  calibrated x20 change.
-- Target displacement is applied in a task-valid surface direction; the 6 cm
-  and 12 cm destinations must remain collision-free and reachable.
-- Distractors are hidden off-world in both arms and restored only in the
-  intervention arm at prevalidated poses.
-- A case is valid only if the setup is identical across arms, the trigger fires,
-  the simulator remains stable, and the intervention produces a non-zero visual
-  or state change.
+- **Core:** a balanced Latin-square assignment couples one draw to each
+  `(initial state, policy seed)` cell. Every policy seed sees every draw once
+  across the three initial states. This gives 1,755 matched pairs / 3,510
+  episodes per model.
+- **Full:** crosses every policy seed with all three intervention draws. This
+  separates policy and environment variation at 5,265 matched pairs / 10,530
+  episodes per model.
 
-## Baseline roster
+| Change type | Core pairs | Full pairs |
+| --- | ---: | ---: |
+| Illumination switch | 360 | 1,080 |
+| Camera shift | 360 | 1,080 |
+| Target relocation | 333 | 999 |
+| Receptacle relocation | 243 | 729 |
+| Distractor burst | 108 | 324 |
+| Obstacle insertion | 351 | 1,053 |
+| **Total** | **1,755** | **5,265** |
 
-1. Frozen VLA, standard 16-action chunks.
-2. Frozen VLA with shorter closed-loop query intervals.
-3. Frozen VLA with explicit change notification (oracle diagnostic).
-4. Observation-history / replanning baseline.
-5. Online-adaptation method, if its update contract is fully specified.
+The generated artifacts on the evaluation host are:
 
-The oracle-notified arm measures headroom from knowing that a change occurred;
-it is not a deployable benchmark winner.
+```text
+artifacts/libero_task_catalog_v1.json
+artifacts/libero_max_v1_core_candidate.json
+artifacts/libero_max_v1_full_candidate.json
+```
+
+They remain `1.0.0-candidate` until every unique physical configuration passes
+preflight and successful-control trigger calibration.
+
+## Validity and calibration gates
+
+- Shared setup is identical in control and intervention arms.
+- Pre-change action chunks match exactly.
+- The proximity trigger fires exactly once and its measured distance is at or
+  below the declared threshold.
+- Relocated objects remain reachable, supported, collision-free, and within the
+  task workspace.
+- Inserted distractors and obstacles retain their original object height and do
+  not begin in penetration.
+- The intervention causes non-zero visual or simulator-state change.
+- Missing triggers, collisions introduced at insertion, simulator errors, and
+  physically infeasible poses are invalid cases, never policy failures.
+
+## Response-aware extension tracks
+
+Track B adds randomized target updates, receptacle updates, and cancellations.
+Track C removes targets or receptacles. They are excluded from the physical
+goal-completion leaderboard until model-agnostic scorers can verify task update,
+safe stopping, clarification, or infeasibility reporting.
 
 ## Required paper reporting
 
-- full planned/completed/missing/invalid/duplicate coverage;
-- preserved successes, gains, regressions, and persistent failures;
+- planned/completed/missing/invalid/duplicate coverage;
+- paired outcome table and control-correct regression rate;
 - Wilson intervals, paired-bootstrap delta intervals, and exact McNemar tests;
-- breakdown by axis, severity, trigger threshold, task suite, and base-control
-  correctness;
-- pre-change action equality, first post-change action difference, open-loop
-  exposure, and final goal outcome;
-- measured safety coverage rather than assumed zero violations.
+- breakdown by type, family, severity, suite, draw ID, and policy seed;
+- pre-change equality, post-event action response, and open-loop exposure;
+- Core and Full results reported separately rather than merged;
+- safety measurement coverage, not assumed zero violations.

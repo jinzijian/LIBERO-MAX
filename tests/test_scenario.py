@@ -36,6 +36,25 @@ class ScenarioValidationTest(unittest.TestCase):
         scenario["change_family"] = "ROBOT_ERROR"
         self.assertIn("change_family must be one of", " ".join(validate_scenario(scenario)))
 
+    def test_invalid_change_type_is_rejected(self):
+        scenario = copy.deepcopy(self.scenarios[0])
+        scenario["change_type"] = "magic_world_change"
+        self.assertIn("change_type must be one of", " ".join(validate_scenario(scenario)))
+
+    def test_randomization_provenance_is_strict(self):
+        scenario = copy.deepcopy(self.scenarios[0])
+        scenario["randomization"] = {
+            "sampler": "libero-max-v1.0",
+            "draw_id": 2,
+            "seed": 123,
+        }
+        self.assertEqual(validate_scenario(scenario), [])
+        scenario["randomization"]["hidden_runtime_rng"] = True
+        self.assertIn(
+            "randomization has unknown fields",
+            " ".join(validate_scenario(scenario)),
+        )
+
     def test_invalid_progress_fraction_is_rejected(self):
         scenario = copy.deepcopy(self.scenarios[0])
         scenario["trigger"] = {"type": "progress_fraction", "value": 1.0}

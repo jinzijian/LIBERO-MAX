@@ -43,6 +43,7 @@ class LiberoMujocoBackend:
         if not hasattr(base_env, "sim"):
             raise LiberoBackendError("environment does not expose a MuJoCo sim")
         self.env = base_env
+        self._removed_positions: Dict[str, np.ndarray] = {}
 
     @property
     def sim(self) -> Any:
@@ -183,7 +184,22 @@ class LiberoMujocoBackend:
             return _vector3(change["position_m"], "position_m")
         if "delta_position_m" in change:
             return before + _vector3(change["delta_position_m"], "delta_position_m")
-        raise LiberoBackendError("operation requires position_m or delta_position_m")
+        if "relative_to" in change:
+            anchor_name = change["relative_to"]
+            anchor, anchor_fixture = self._entity(anchor_name)
+            position = self._entity_position(anchor, anchor_fixture) + _vector3(
+                change.get("offset_m", [0.0, 0.0, 0.0]), "offset_m"
+            )
+            if change.get("preserve_initial_z", False):
+                if entity_name not in self._removed_positions:
+                    raise LiberoBackendError(
+                        "preserve_initial_z requires the object to be removed in setup"
+                    )
+                position[2] = self._removed_positions[entity_name][2]
+            return position
+        raise LiberoBackendError(
+            "operation requires position_m, delta_position_m, or relative_to"
+        )
 
     def _move_object(self, change: Dict[str, Any]) -> Dict[str, Any]:
         entity_name = change.get("object")
@@ -194,10 +210,48 @@ class LiberoMujocoBackend:
 
     def _insert_obstacle(self, change: Dict[str, Any]) -> Dict[str, Any]:
         entity_name = change.get("object")
-        position = self._requested_position(change, entity_name)
+        if "path_target" in change:
+            position = self._path_obstacle_position(change, entity_name)
+        else:
+            position = self._requested_position(change, entity_name)
         result = self._set_entity_position(entity_name, position)
         result["operation"] = "insert_obstacle"
+        if "path_target" in change:
+            result["placement_rule"] = "eef_target_path"
+            result["path_target"] = change["path_target"]
+            result["path_fraction"] = change.get("path_fraction", 0.5)
+            result["lateral_offset_m"] = change.get("lateral_offset_m", 0.0)
         return result
+
+    def _path_obstacle_position(
+        self, change: Dict[str, Any], entity_name: str
+    ) -> np.ndarray:
+        target_name = change.get("path_target")
+        target, target_fixture = self._entity(target_name)
+        target_position = self._entity_position(target, target_fixture)
+        observation = self.env._get_observations()
+        if "robot0_eef_pos" not in observation:
+            raise LiberoBackendError("environment does not expose robot0_eef_pos")
+        end_effector = _vector3(observation["robot0_eef_pos"], "robot0_eef_pos")
+        fraction = float(change.get("path_fraction", 0.5))
+        lateral = float(change.get("lateral_offset_m", 0.0))
+        if not math.isfinite(fraction) or not 0.0 < fraction < 1.0:
+            raise LiberoBackendError("path_fraction must be finite and between 0 and 1")
+        if not math.isfinite(lateral):
+            raise LiberoBackendError("lateral_offset_m must be finite")
+        direction_xy = target_position[:2] - end_effector[:2]
+        norm = float(np.linalg.norm(direction_xy))
+        if norm <= 1e-9:
+            raise LiberoBackendError("end effector and target have identical XY position")
+        perpendicular = np.array([-direction_xy[1], direction_xy[0]]) / norm
+        position = end_effector + fraction * (target_position - end_effector)
+        position[:2] += lateral * perpendicular
+        if entity_name not in self._removed_positions:
+            raise LiberoBackendError(
+                "path obstacle must be removed in shared setup before insertion"
+            )
+        position[2] = self._removed_positions[entity_name][2]
+        return position
 
     def _insert_distractors(self, change: Dict[str, Any]) -> Dict[str, Any]:
         placements = change.get("placements")
@@ -224,6 +278,10 @@ class LiberoMujocoBackend:
 
     def _remove_object(self, change: Dict[str, Any]) -> Dict[str, Any]:
         entity_name = change.get("object")
+        entity, fixture = self._entity(entity_name)
+        self._removed_positions[entity_name] = self._entity_position(
+            entity, fixture
+        )
         position = _vector3(
             change.get("offworld_position_m", [0.0, 0.0, -5.0]),
             "offworld_position_m",

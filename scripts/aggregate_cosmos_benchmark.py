@@ -78,6 +78,23 @@ def main() -> int:
                 "scenario_id": case["scenario"]["scenario_id"],
                 "seed": case["scenario"]["seed"],
                 "change_family": case["scenario"]["change_family"],
+                **(
+                    {"change_type": case["scenario"]["change_type"]}
+                    if "change_type" in case["scenario"]
+                    else {}
+                ),
+                **(
+                    {
+                        "intervention_draw_id": case["scenario"]["randomization"][
+                            "draw_id"
+                        ],
+                        "intervention_seed": case["scenario"]["randomization"][
+                            "seed"
+                        ],
+                    }
+                    if "randomization" in case["scenario"]
+                    else {}
+                ),
                 "expected_response_mode": case["scenario"]["expected_response_mode"],
                 "control_correct": bool(paired["control_success"]),
                 "intervention_correct": bool(paired["intervention_success"]),
@@ -125,6 +142,8 @@ def main() -> int:
         "metrics": None if metrics is None else {
             "overall": metrics["overall"],
             "by_change_family": metrics["by_change_family"],
+            "by_change_type": metrics.get("by_change_type", {}),
+            "by_intervention_draw": metrics.get("by_intervention_draw", {}),
             "by_severity": metrics.get("by_severity", {}),
             "by_timing_bucket": metrics.get("by_timing_bucket", {}),
             "by_response_mode": metrics.get("by_response_mode", {}),

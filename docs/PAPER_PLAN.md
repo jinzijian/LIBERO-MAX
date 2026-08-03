@@ -2,9 +2,10 @@
 
 Status: executable Track A pilot; Track B/C scorers remain implementation work.
 
-The first paper release centers on three intuitive, visually demonstrable
-stressors: sudden light off/on, sudden target relocation, and the sudden
-appearance of multiple distractor objects.
+The five-case pilot centers on three intuitive stressors. The v1 paper main
+track expands to six: illumination, camera shift, target relocation,
+receptacle relocation, five-object distractor burst, and path-obstacle
+insertion. Each type contains three deterministic intervention draws.
 
 ## Central question
 
@@ -16,7 +17,7 @@ largest gap between static task competence and mid-execution responsiveness?
 
 | Track | Families | Correctness signal | Current status |
 | --- | --- | --- | --- |
-| A. Physical adaptation | `OBS`, `GEO`, `CLUTTER` | original LIBERO goal completion, paired against no-change control | executable for Cosmos |
+| A. Physical adaptation | `OBS`, `GEO`, `CLUTTER`, `OBSTACLE` | original LIBERO goal completion, paired against no-change control | six-type candidate generator executable; full physical calibration pending |
 | B. Intent revision | `INTENT` | alternate goal predicate, safe cancellation, or clarification response | runtime core only; Cosmos language-query hook and scorers missing |
 | C. Feasibility awareness | `FEAS` | safe abstention plus explicit infeasibility report | taxonomy only; action/text protocol and scorer missing |
 
@@ -72,10 +73,12 @@ ordinary LIBERO task success as their correctness label.
 ## Immediate empirical ladder
 
 1. Five-case Cosmos physical pilot on one task and one initial state.
-2. Severity calibration across three initial states and three policy seeds.
-3. Expand to representative tasks from Spatial, Object, Goal, and LIBERO-10.
-4. Add at least two model families and the oracle-notified diagnostic.
-5. Freeze the v1 manifest before the main evaluation.
+2. Physical preflight of the 1,755 unique randomized configurations.
+3. Freeze Core only after invalid poses are deterministically repaired or
+   excluded under pre-registered rules.
+4. Run Core across three seeds, then Full to decouple policy/intervention
+   randomness.
+5. Add at least two model families and the oracle-notified diagnostic.
 
 The current task-0 mechanics and 18 cm trigger calibration are recorded in
 [`PILOT_CALIBRATION.md`](PILOT_CALIBRATION.md).

@@ -123,7 +123,13 @@ def validate_manifest(data: Any) -> List[str]:
         scenario_errors = validate_scenario(scenario)
         errors.extend("%s.scenario: %s" % (label, error) for error in scenario_errors)
         if not scenario_errors and scoring_track == "physical_completion":
-            if scenario["change_family"] not in {"OBS", "GEO", "CLUTTER", "OBS-NEW"}:
+            if scenario["change_family"] not in {
+                "OBS",
+                "GEO",
+                "CLUTTER",
+                "OBSTACLE",
+                "OBS-NEW",
+            }:
                 errors.append(
                     "%s physical_completion only supports OBS, GEO, CLUTTER, and OBS-NEW"
                     % label

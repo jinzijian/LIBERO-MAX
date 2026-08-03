@@ -63,6 +63,36 @@ class LiberoBackendTest(unittest.TestCase):
                 }
             )
 
+    def test_relative_placement_preserves_removed_object_height(self):
+        backend = object.__new__(LiberoMujocoBackend)
+        backend._removed_positions = {"distractor": np.array([0.0, 0.0, 0.12])}
+        positions = {
+            "distractor": np.array([0.0, 0.0, -5.0]),
+            "target": np.array([0.4, -0.2, 0.08]),
+        }
+        backend._entity = lambda name: (name, False)
+        backend._entity_position = lambda entity, fixture: positions[entity].copy()
+        result = backend._requested_position(
+            {
+                "relative_to": "target",
+                "offset_m": [0.1, 0.05, 0.0],
+                "preserve_initial_z": True,
+            },
+            "distractor",
+        )
+        np.testing.assert_allclose(result, [0.5, -0.15, 0.12])
+
+    def test_relative_placement_requires_shared_removal_for_preserved_height(self):
+        backend = object.__new__(LiberoMujocoBackend)
+        backend._removed_positions = {}
+        backend._entity = lambda name: (name, False)
+        backend._entity_position = lambda entity, fixture: np.zeros(3)
+        with self.assertRaisesRegex(LiberoBackendError, "removed in setup"):
+            backend._requested_position(
+                {"relative_to": "target", "preserve_initial_z": True},
+                "distractor",
+            )
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -6,11 +6,13 @@ Vision-language-action models are commonly evaluated in episodes whose visual
 conditions, object locations, and distractor sets remain fixed after execution
 begins. Real robot environments do not satisfy this assumption. We introduce
 LIBERO-MAX, a matched-pair benchmark for **mid-execution adaptation to
-exogenous changes**. The first release centers on three controlled changes that
-are easy to interpret and reproduce: sudden illumination switches, target
-relocation, and the sudden appearance of multiple distractor objects. Each
-intervention fires when the robot approaches the task target, and is paired
-with a no-change rollout sharing the task, initial state, and policy seed. The
+exogenous changes**. The v1 physical track covers six controlled changes:
+illumination switches, camera shifts, target and receptacle relocation,
+five-object distractor bursts, and path-obstacle insertion. Each intervention
+fires when the robot approaches the task target and is paired with a no-change
+rollout sharing the task, initial state, policy seed, and deterministic setup.
+Independent intervention seeds randomize direction, magnitude, identity, and
+placement while resolving every sampled value into an immutable manifest. The
 protocol separates preserved capability, intervention-side recovery,
 change-induced regression, and persistent failure, while recording the delay
 between physical change and the next policy query. We evaluate [MODEL ROSTER]
@@ -43,26 +45,32 @@ clock time. This design isolates change-induced regressions from base-task
 failures and exposes the open-loop delay before the policy can observe and
 react to the new state.
 
-The first benchmark release deliberately focuses on three physical changes:
+The v1 physical-completion track contains six changes:
 
 1. **Illumination switch:** the lights suddenly turn off or on.
-2. **Target relocation:** the object being approached moves to a new reachable
+2. **Camera shift:** the external camera suddenly translates and rotates.
+3. **Target relocation:** the object being approached moves to a new reachable
    pose.
-3. **Distractor burst:** multiple task-native non-target objects suddenly
+4. **Receptacle relocation:** the destination moves while the original goal
+   remains feasible.
+5. **Distractor burst:** five task-native non-target objects suddenly
    appear.
+6. **Obstacle insertion:** a task-native object appears along the current
+   approach corridor.
 
-These axes cover perceptual degradation, geometric replanning, and target
-identity under clutter without requiring a model-specific textual refusal or
-termination interface. Intent revision and infeasibility awareness are
-important extensions, but they require response-aware scorers and are not
-silently reduced to the original LIBERO success predicate.
+These axes cover perceptual degradation, viewpoint shift, geometric
+replanning, target identity under clutter, and collision-aware detours without
+requiring a model-specific textual refusal or termination interface. Intent
+revision and infeasibility awareness are important extensions, but they
+require response-aware scorers and are not silently reduced to the original
+LIBERO success predicate.
 
 Our contributions are:
 
 - a deterministic matched-pair protocol for evaluating changes introduced
   after execution begins;
-- three simulator-grounded intervention axes with semantic proximity triggers,
-  severity controls, and explicit validity checks;
+- six simulator-grounded intervention types with semantic proximity triggers,
+  deterministic random draws, severity controls, and explicit validity checks;
 - reporting that decomposes paired outcomes and includes coverage, uncertainty,
   pre-change action equality, post-change action response, and open-loop
   exposure;
@@ -156,14 +164,19 @@ including inside an open-loop action chunk. If the next policy query is at
 
 ### 3.3 Intervention axes
 
-| Axis | Low / medium / high control | Expected behavior |
+| Type | Randomized control | Expected behavior |
 | --- | --- | --- |
-| Illumination | calibrated light intensity or direction | preserve target perception and continue |
-| Target relocation | task-valid in-plane displacement | relocalize the target and revise the reach |
-| Distractor burst | number and similarity of inserted objects | preserve target identity and continue safely |
+| Illumination switch | light-off scale or dim-to-on setup | preserve target perception and continue |
+| Camera shift | random planar direction, translation magnitude, and yaw sign | recover viewpoint correspondence and continue |
+| Target relocation | random task-valid direction at 6 or 12 cm | relocalize the target and revise the reach |
+| Receptacle relocation | random task-valid direction at 6 or 12 cm | revise the placement plan |
+| Distractor burst | five task-native identities/placements | preserve target identity and continue safely |
+| Obstacle insertion | identity, approach-path fraction, and lateral offset | detour without collision and complete the task |
 
-All inserted distractors are task-native objects. They are hidden off-world in
-both paired arms before execution and restored only in the intervention arm.
+All inserted distractors and obstacles are task-native objects. They are hidden
+off-world in both paired arms before execution and restored only in the
+intervention arm. Each case records a sampler version, draw ID, intervention
+seed, and fully resolved parameters; there is no hidden runtime sampling.
 
 ### 3.4 Validity contract
 
@@ -204,20 +217,28 @@ not sufficient evidence that adaptation was correct.
 ## 5. Benchmark Construction
 
 The installed task catalog contains 40 tasks across LIBERO Spatial, Object,
-Goal, and LIBERO-10. Lighting applies to all 40. A manipulated target is
-identified in 38 tasks. Twelve tasks have at least five task-native distractors.
+Goal, and LIBERO-10. Illumination and camera changes apply to all 40. Valid
+planar target relocation applies to 37 tasks, movable-receptacle relocation to
+27, five-object bursts to 12, and task-native obstacle insertion to 39. This
+produces 195 task--change-type cells.
 
-The proposed v1 matrix contains 1,620 matched pairs per model:
+The v1 candidate provides two profiles:
 
-| Axis | Tasks | Conditions | Initial states | Policy seeds | Pairs |
-| --- | ---: | ---: | ---: | ---: | ---: |
-| Illumination | 40 | 2 | 3 | 3 | 720 |
-| Target relocation | 38 | 2 | 3 | 3 | 684 |
-| Distractor burst | 12 | 2 | 3 | 3 | 216 |
-| **Total** |  |  |  |  | **1,620** |
+| Type | Eligible tasks | Core pairs | Full pairs |
+| --- | ---: | ---: | ---: |
+| Illumination switch | 40 | 360 | 1,080 |
+| Camera shift | 40 | 360 | 1,080 |
+| Target relocation | 37 | 333 | 999 |
+| Receptacle relocation | 27 | 243 | 729 |
+| Distractor burst | 12 | 108 | 324 |
+| Obstacle insertion | 39 | 351 | 1,053 |
+| **Total** |  | **1,755** | **5,265** |
 
-The v1 manifest is frozen only after task-specific relocation and distractor
-poses pass physical preflight and trigger-coverage calibration.
+Core uses a balanced assignment of three intervention draws across three
+initial states and three policy seeds. Full crosses each policy seed with every
+draw to separate policy and intervention randomness. The v1 manifest is frozen
+only after task-specific relocation and insertion poses pass physical preflight
+and trigger-coverage calibration.
 
 ## 6. Experimental Setup
 
@@ -248,7 +269,7 @@ all missing/invalid/duplicate cases.
 
 ### 7.2 By intervention axis
 
-| Model | Light off | Light on | Move 6 cm | Move 12 cm | Burst 3 | Burst 5 |
+| Model | Light | Camera | Target move | Receptacle move | Burst-5 | Obstacle |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: |
 | [pending] |  |  |  |  |  |  |
 
@@ -264,7 +285,7 @@ failed replanning, simulator-invalid cases, and base-task failures.]
 
 ## 8. Limitations
 
-The first release uses simulation, task-native distractors, and a geometric
+The first release uses simulation, task-native inserted objects, and a geometric
 proximity trigger available to the evaluator but not exposed to the policy.
 Goal completion alone cannot establish change detection. Safety claims require
 instrumented collision or termination coverage. Intent revision and explicit

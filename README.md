@@ -104,6 +104,18 @@ PYTHONPATH=src python3 scripts/build_libero_task_catalog.py \
   --bddl-root "$LIBERO_REPO/libero/libero/bddl_files" \
   --output artifacts/libero_task_catalog.json
 
+# Build the six-type randomized v1 candidates. Core uses a balanced draw
+# assignment; Full crosses policy and intervention randomness.
+PYTHONPATH=src python3 scripts/build_randomized_v1_manifest.py \
+  artifacts/libero_task_catalog.json \
+  --profile core \
+  --output artifacts/libero_max_v1_core_candidate.json
+
+PYTHONPATH=src python3 scripts/build_randomized_v1_manifest.py \
+  artifacts/libero_task_catalog.json \
+  --profile full \
+  --output artifacts/libero_max_v1_full_candidate.json
+
 PYTHONPATH=src python3 scripts/run_cosmos_benchmark.py \
   examples/manifests/cosmos_physical_pilot_v0.1.json \
   --output-root artifacts/cosmos_physical_pilot_v0.1 \
@@ -140,9 +152,12 @@ LIBERO-MAX/
 └── tests/
 ```
 
-The project now has an executable Cosmos physical-change pilot. The next
-milestone is severity calibration and multi-task / multi-seed expansion; intent
-and infeasibility tracks still require response-aware scorers. See
+The project now has an executable Cosmos physical-change pilot plus deterministic
+six-type Core and Full candidate-manifest generators. Core contains 1,755
+matched pairs; Full contains 5,265 and crosses three policy seeds with three
+intervention draws. These are candidates, not frozen benchmark releases, until
+all physical configurations and trigger coverage pass calibration. Intent and
+infeasibility tracks still require response-aware scorers. See
 [`docs/PAPER_PLAN.md`](docs/PAPER_PLAN.md) for the paper-scale roadmap and claim
 boundaries. Pilot intervention and proximity-threshold evidence is recorded in
 [`docs/PILOT_CALIBRATION.md`](docs/PILOT_CALIBRATION.md).

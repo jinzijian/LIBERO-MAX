@@ -34,6 +34,7 @@ class ResultSummaryTest(unittest.TestCase):
         )
         self.assertEqual(summary["overall"]["paired_robustness_delta"], 0.0)
         self.assertEqual(summary["overall"]["regression_rate"], 0.166667)
+        self.assertEqual(summary["by_change_type"]["camera_shift"]["episodes"], 1)
 
     def test_missing_pair_is_reported_without_inflating_metrics(self):
         summary = summarize_results(self.results[:-1], self.scenarios)
@@ -65,6 +66,24 @@ class ResultSummaryTest(unittest.TestCase):
         self.assertEqual(
             len(summary["overall"]["paired_robustness_delta_95ci_bootstrap"]), 2
         )
+
+    def test_same_randomized_scenario_can_repeat_across_policy_seeds(self):
+        records = [copy.deepcopy(self.results[0]), copy.deepcopy(self.results[0])]
+        for index, record in enumerate(records):
+            record.update(
+                {
+                    "pair_id": "pair-%d" % index,
+                    "task_suite_name": "libero_object",
+                    "task_index": 0,
+                    "init_state_index": 0,
+                    "policy_seed": 195 + index,
+                    "intervention_draw_id": 0,
+                    "intervention_seed": 123,
+                }
+            )
+        summary = summarize_results(records)
+        self.assertEqual(summary["overall"]["episodes"], 2)
+        self.assertEqual(summary["by_intervention_draw"]["0"]["episodes"], 2)
 
 
 if __name__ == "__main__":

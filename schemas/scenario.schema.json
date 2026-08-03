@@ -20,7 +20,22 @@
     "base_task_id": {"type": "string", "minLength": 1},
     "seed": {"type": "integer", "minimum": 0},
     "change_family": {
-      "enum": ["OBS", "GEO", "CLUTTER", "OBS-NEW", "INTENT", "FEAS"]
+      "enum": ["OBS", "GEO", "CLUTTER", "OBSTACLE", "OBS-NEW", "INTENT", "FEAS"]
+    },
+    "change_type": {
+      "enum": [
+        "illumination_switch",
+        "camera_shift",
+        "target_relocation",
+        "receptacle_relocation",
+        "distractor_burst",
+        "obstacle_insertion",
+        "target_removal",
+        "receptacle_removal",
+        "instruction_target_update",
+        "instruction_receptacle_update",
+        "task_cancel"
+      ]
     },
     "severity": {"enum": ["low", "medium", "high"]},
     "trigger": {
@@ -54,6 +69,16 @@
         "type": "object",
         "required": ["operation"],
         "properties": {"operation": {"type": "string", "minLength": 1}}
+      }
+    },
+    "randomization": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["sampler", "draw_id", "seed"],
+      "properties": {
+        "sampler": {"type": "string", "minLength": 1},
+        "draw_id": {"type": "integer", "minimum": 0},
+        "seed": {"type": "integer", "minimum": 0}
       }
     },
     "expected_response_mode": {

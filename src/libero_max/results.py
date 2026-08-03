@@ -7,7 +7,7 @@ import statistics
 from pathlib import Path
 from typing import Any, Dict, Iterable, List, Optional, Sequence, Tuple
 
-from .scenario import CHANGE_FAMILIES, RESPONSE_MODES, scenario_key
+from .scenario import CHANGE_FAMILIES, CHANGE_TYPES, RESPONSE_MODES, scenario_key
 
 
 REQUIRED_RESULT_FIELDS = {
@@ -22,6 +22,9 @@ REQUIRED_RESULT_FIELDS = {
     "safety_violations",
 }
 OPTIONAL_RESULT_FIELDS = {
+    "change_type",
+    "intervention_draw_id",
+    "intervention_seed",
     "severity",
     "timing_bucket",
     "task_suite_name",
@@ -71,6 +74,8 @@ def validate_result(record: Any) -> List[str]:
 
     if "change_family" in record and record["change_family"] not in CHANGE_FAMILIES:
         errors.append("invalid change_family")
+    if "change_type" in record and record["change_type"] not in CHANGE_TYPES:
+        errors.append("invalid change_type")
     if (
         "expected_response_mode" in record
         and record["expected_response_mode"] not in RESPONSE_MODES
@@ -103,6 +108,8 @@ def validate_result(record: Any) -> List[str]:
         "task_index",
         "init_state_index",
         "policy_seed",
+        "intervention_draw_id",
+        "intervention_seed",
         "intervention_event_step",
         "policy_response_query_step",
         "open_loop_exposure_steps",
@@ -153,6 +160,22 @@ def load_results_jsonl(path: Path) -> List[Dict[str, Any]]:
     if not records:
         raise ResultLoadError("no result records found in %s" % path)
     return records
+
+
+def result_execution_key(record: Dict[str, Any]) -> Tuple[Any, ...]:
+    dimensions = (
+        "task_suite_name",
+        "task_index",
+        "init_state_index",
+        "policy_seed",
+    )
+    if all(field in record for field in dimensions):
+        return (
+            record["scenario_id"],
+            record["seed"],
+            *(record[field] for field in dimensions),
+        )
+    return scenario_key(record)
 
 
 def _ratio(numerator: int, denominator: int) -> Optional[float]:
@@ -287,10 +310,10 @@ def summarize_results(
             raise ResultLoadError("result[%d]: %s" % (index, "; ".join(errors)))
         if record["pair_id"] in pair_ids:
             raise ResultLoadError("duplicate pair_id: %s" % record["pair_id"])
-        key = scenario_key(record)
+        key = result_execution_key(record)
         if key in result_keys:
             raise ResultLoadError(
-                "duplicate result for (scenario_id, seed): %s, %d" % key
+                "duplicate result execution key: %r" % (key,)
             )
         pair_ids.add(record["pair_id"])
         result_keys.add(key)
@@ -337,6 +360,8 @@ def summarize_results(
         },
         "overall": overall,
         "by_change_family": families,
+        "by_change_type": grouped("change_type"),
+        "by_intervention_draw": grouped("intervention_draw_id"),
         "by_severity": grouped("severity"),
         "by_timing_bucket": grouped("timing_bucket"),
         "by_response_mode": grouped("expected_response_mode"),
