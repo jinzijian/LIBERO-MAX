@@ -27,6 +27,7 @@ LIBERO-MAX covers changes introduced during an episode, including:
 - lighting changes and camera displacement;
 - target-object or receptacle relocation and removal;
 - newly introduced obstacles;
+- sudden bursts of multiple visually confusing distractors;
 - user instruction modification or cancellation;
 - transitions from feasible to infeasible tasks.
 

@@ -57,6 +57,7 @@ class LiberoMujocoBackend:
             "shift_camera": self._shift_camera,
             "move_object": self._move_object,
             "insert_obstacle": self._insert_obstacle,
+            "insert_distractors": self._insert_distractors,
             "remove_object": self._remove_object,
             "set_lighting": self._set_lighting,
         }
@@ -187,6 +188,29 @@ class LiberoMujocoBackend:
         result = self._set_entity_position(entity_name, position)
         result["operation"] = "insert_obstacle"
         return result
+
+    def _insert_distractors(self, change: Dict[str, Any]) -> Dict[str, Any]:
+        placements = change.get("placements")
+        if not isinstance(placements, list) or not placements:
+            raise LiberoBackendError(
+                "insert_distractors requires a non-empty placements array"
+            )
+        results = []
+        seen = set()
+        for index, placement in enumerate(placements):
+            if not isinstance(placement, dict):
+                raise LiberoBackendError(
+                    "placements[%d] must be a JSON object" % index
+                )
+            entity_name = placement.get("object")
+            if entity_name in seen:
+                raise LiberoBackendError(
+                    "duplicate distractor object: %s" % entity_name
+                )
+            seen.add(entity_name)
+            position = self._requested_position(placement, entity_name)
+            results.append(self._set_entity_position(entity_name, position))
+        return {"operation": "insert_distractors", "placements": results}
 
     def _remove_object(self, change: Dict[str, Any]) -> Dict[str, Any]:
         entity_name = change.get("object")

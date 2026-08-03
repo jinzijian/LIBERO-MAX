@@ -78,6 +78,20 @@ class RuntimeTest(unittest.TestCase):
         self.assertEqual(event["instruction_after"], runtime.current_instruction)
         self.assertEqual(backend.changes, [])
 
+    def test_shared_setup_is_applied_once_before_intervention(self):
+        scenario = copy.deepcopy(self.camera)
+        scenario["setup"] = [
+            {"operation": "remove_object", "object": "distractor_1"}
+        ]
+        backend = RecordingBackend()
+        runtime = InterventionRuntime(scenario, backend)
+        runtime.reset("original instruction")
+        setup_trace = runtime.apply_setup()
+        self.assertEqual(len(setup_trace), 1)
+        self.assertEqual(backend.changes, scenario["setup"])
+        with self.assertRaisesRegex(RuntimeError, "already applied"):
+            runtime.apply_setup()
+
 
 if __name__ == "__main__":
     unittest.main()

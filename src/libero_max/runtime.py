@@ -54,6 +54,7 @@ class InterventionRuntime:
         self.scenario = scenario
         self.backend = backend
         self.trace: List[Dict[str, Any]] = []
+        self.setup_trace: List[Dict[str, Any]] = []
         self.applied = False
         self.current_instruction = ""
 
@@ -61,8 +62,22 @@ class InterventionRuntime:
         if not isinstance(instruction, str) or not instruction.strip():
             raise ValueError("instruction must be a non-empty string")
         self.trace = []
+        self.setup_trace = []
         self.applied = False
         self.current_instruction = instruction
+
+    def apply_setup(self) -> List[Dict[str, Any]]:
+        """Apply deterministic pre-episode setup shared by both paired arms."""
+
+        if not self.current_instruction:
+            raise RuntimeError("reset() must be called before apply_setup()")
+        if self.setup_trace:
+            raise RuntimeError("scenario setup was already applied")
+        for change in self.scenario.get("setup", []):
+            self.setup_trace.append(
+                {"change": change, "backend_result": self.backend.apply_change(change)}
+            )
+        return list(self.setup_trace)
 
     def maybe_apply(self, context: TriggerContext) -> Optional[Dict[str, Any]]:
         if self.applied or not trigger_satisfied(self.scenario["trigger"], context):

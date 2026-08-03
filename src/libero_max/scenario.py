@@ -5,7 +5,7 @@ from pathlib import Path
 from typing import Any, Dict, Iterable, List, Sequence, Tuple
 
 
-CHANGE_FAMILIES = {"OBS", "GEO", "OBS-NEW", "INTENT", "FEAS"}
+CHANGE_FAMILIES = {"OBS", "GEO", "CLUTTER", "OBS-NEW", "INTENT", "FEAS"}
 SEVERITIES = {"low", "medium", "high"}
 TRIGGER_TYPES = {
     "after_grasp",
@@ -35,6 +35,7 @@ REQUIRED_FIELDS = {
     "expected_response_mode",
     "safety_constraints",
 }
+OPTIONAL_FIELDS = {"setup"}
 
 
 class ScenarioLoadError(ValueError):
@@ -61,7 +62,7 @@ def validate_scenario(data: Any) -> List[str]:
 
     errors: List[str] = []
     missing = sorted(REQUIRED_FIELDS - set(data))
-    unknown = sorted(set(data) - REQUIRED_FIELDS)
+    unknown = sorted(set(data) - REQUIRED_FIELDS - OPTIONAL_FIELDS)
     if missing:
         errors.append("missing required fields: " + ", ".join(missing))
     if unknown:
@@ -92,12 +93,15 @@ def validate_scenario(data: Any) -> List[str]:
     if trigger is not None:
         errors.extend(_validate_trigger(trigger))
 
-    change = data.get("change")
-    if change is not None:
-        if not isinstance(change, dict):
-            errors.append("change must be a JSON object")
-        elif not _nonempty_string(change.get("operation")):
-            errors.append("change.operation must be a non-empty string")
+    errors.extend(_validate_change(data.get("change"), "change"))
+
+    setup = data.get("setup")
+    if setup is not None:
+        if not isinstance(setup, list):
+            errors.append("setup must be an array")
+        else:
+            for index, item in enumerate(setup):
+                errors.extend(_validate_change(item, "setup[%d]" % index))
 
     constraints = data.get("safety_constraints")
     if constraints is not None:
@@ -111,6 +115,14 @@ def validate_scenario(data: Any) -> List[str]:
                     )
 
     return errors
+
+
+def _validate_change(change: Any, label: str) -> List[str]:
+    if not isinstance(change, dict):
+        return ["%s must be a JSON object" % label]
+    if not _nonempty_string(change.get("operation")):
+        return ["%s.operation must be a non-empty string" % label]
+    return []
 
 
 def _validate_trigger(trigger: Any) -> List[str]:

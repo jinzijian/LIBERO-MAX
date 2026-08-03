@@ -8,97 +8,114 @@
   },
   "cases": [
     {
-      "case_id": "object0-init0-camera-yaw12-step16-seed195",
+      "case_id": "object0-init0-light-off005-step16-seed195",
       "task_suite_name": "libero_object",
       "task_index": 0,
       "init_state_index": 0,
       "policy_seed": 195,
       "timing_bucket": "early",
       "scenario": {
-        "scenario_id": "obs_camera_yaw12_object0_step16",
+        "scenario_id": "obs_light_off005_object0_step16",
         "base_task_id": "libero_object/task_0",
         "seed": 0,
         "change_family": "OBS",
         "severity": "medium",
         "trigger": {"type": "fixed_step", "value": 16},
-        "change": {"operation": "shift_camera", "camera": "agentview", "yaw_degrees": 12},
+        "change": {"operation": "set_lighting", "scale": 0.05},
         "expected_response_mode": "continue",
         "safety_constraints": []
       }
     },
     {
-      "case_id": "object0-init0-light035-step16-seed195",
+      "case_id": "object0-init0-light-on-step16-seed195",
       "task_suite_name": "libero_object",
       "task_index": 0,
       "init_state_index": 0,
       "policy_seed": 195,
       "timing_bucket": "early",
       "scenario": {
-        "scenario_id": "obs_light035_object0_step16",
+        "scenario_id": "obs_light_on_object0_step16",
         "base_task_id": "libero_object/task_0",
         "seed": 0,
         "change_family": "OBS",
         "severity": "medium",
         "trigger": {"type": "fixed_step", "value": 16},
-        "change": {"operation": "set_lighting", "scale": 0.35},
+        "setup": [{"operation": "set_lighting", "scale": 0.05}],
+        "change": {"operation": "set_lighting", "scale": 20.0},
         "expected_response_mode": "continue",
         "safety_constraints": []
       }
     },
     {
-      "case_id": "object0-init0-move-target-y012-step64-seed195",
+      "case_id": "object0-init0-move-target-y006-step16-seed195",
       "task_suite_name": "libero_object",
       "task_index": 0,
       "init_state_index": 0,
       "policy_seed": 195,
-      "timing_bucket": "middle",
+      "timing_bucket": "early",
       "scenario": {
-        "scenario_id": "geo_move_target_y012_object0_step64",
+        "scenario_id": "geo_move_target_y006_object0_step16",
+        "base_task_id": "libero_object/task_0",
+        "seed": 0,
+        "change_family": "GEO",
+        "severity": "low",
+        "trigger": {"type": "fixed_step", "value": 16},
+        "change": {"operation": "move_object", "object": "alphabet_soup_1", "delta_position_m": [0.0, 0.06, 0.0]},
+        "expected_response_mode": "replan",
+        "safety_constraints": []
+      }
+    },
+    {
+      "case_id": "object0-init0-move-target-y012-step16-seed195",
+      "task_suite_name": "libero_object",
+      "task_index": 0,
+      "init_state_index": 0,
+      "policy_seed": 195,
+      "timing_bucket": "early",
+      "scenario": {
+        "scenario_id": "geo_move_target_y012_object0_step16",
         "base_task_id": "libero_object/task_0",
         "seed": 0,
         "change_family": "GEO",
         "severity": "medium",
-        "trigger": {"type": "fixed_step", "value": 64},
+        "trigger": {"type": "fixed_step", "value": 16},
         "change": {"operation": "move_object", "object": "alphabet_soup_1", "delta_position_m": [0.0, 0.12, 0.0]},
         "expected_response_mode": "replan",
         "safety_constraints": []
       }
     },
     {
-      "case_id": "object0-init0-move-basket-xn012-step64-seed195",
+      "case_id": "object0-init0-distractor-burst5-step16-seed195",
       "task_suite_name": "libero_object",
       "task_index": 0,
       "init_state_index": 0,
       "policy_seed": 195,
-      "timing_bucket": "middle",
+      "timing_bucket": "early",
       "scenario": {
-        "scenario_id": "geo_move_receptacle_xn012_object0_step64",
+        "scenario_id": "clutter_burst5_object0_step16",
         "base_task_id": "libero_object/task_0",
         "seed": 0,
-        "change_family": "GEO",
-        "severity": "medium",
-        "trigger": {"type": "fixed_step", "value": 64},
-        "change": {"operation": "move_object", "object": "basket_1", "delta_position_m": [-0.12, 0.0, 0.0]},
-        "expected_response_mode": "replan",
-        "safety_constraints": []
-      }
-    },
-    {
-      "case_id": "object0-init0-obstacle-milk-step64-seed195",
-      "task_suite_name": "libero_object",
-      "task_index": 0,
-      "init_state_index": 0,
-      "policy_seed": 195,
-      "timing_bucket": "middle",
-      "scenario": {
-        "scenario_id": "obsnew_milk_corridor_object0_step64",
-        "base_task_id": "libero_object/task_0",
-        "seed": 0,
-        "change_family": "OBS-NEW",
-        "severity": "medium",
-        "trigger": {"type": "fixed_step", "value": 64},
-        "change": {"operation": "insert_obstacle", "object": "milk_1", "position_m": [-0.05, 0.05, 0.035]},
-        "expected_response_mode": "replan",
+        "change_family": "CLUTTER",
+        "severity": "high",
+        "trigger": {"type": "fixed_step", "value": 16},
+        "setup": [
+          {"operation": "remove_object", "object": "salad_dressing_1", "offworld_position_m": [-2.0, 0.0, -5.0]},
+          {"operation": "remove_object", "object": "cream_cheese_1", "offworld_position_m": [-2.2, 0.0, -5.0]},
+          {"operation": "remove_object", "object": "milk_1", "offworld_position_m": [-2.4, 0.0, -5.0]},
+          {"operation": "remove_object", "object": "tomato_sauce_1", "offworld_position_m": [-2.6, 0.0, -5.0]},
+          {"operation": "remove_object", "object": "butter_1", "offworld_position_m": [-2.8, 0.0, -5.0]}
+        ],
+        "change": {
+          "operation": "insert_distractors",
+          "placements": [
+            {"object": "salad_dressing_1", "position_m": [-0.02, -0.05, 0.035]},
+            {"object": "cream_cheese_1", "position_m": [-0.10, 0.02, 0.0]},
+            {"object": "milk_1", "position_m": [0.02, 0.08, 0.035]},
+            {"object": "tomato_sauce_1", "position_m": [0.10, 0.0, 0.035]},
+            {"object": "butter_1", "position_m": [-0.16, -0.05, -0.005]}
+          ]
+        },
+        "expected_response_mode": "continue",
         "safety_constraints": []
       }
     }

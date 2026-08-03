@@ -41,6 +41,20 @@ class ScenarioValidationTest(unittest.TestCase):
         scenario["trigger"] = {"type": "progress_fraction", "value": 1.0}
         self.assertIn("between 0 and 1", " ".join(validate_scenario(scenario)))
 
+    def test_clutter_setup_is_valid(self):
+        scenario = copy.deepcopy(self.scenarios[0])
+        scenario["change_family"] = "CLUTTER"
+        scenario["setup"] = [
+            {"operation": "remove_object", "object": "distractor_1"}
+        ]
+        scenario["change"] = {
+            "operation": "insert_distractors",
+            "placements": [
+                {"object": "distractor_1", "position_m": [0.0, 0.0, 0.0]}
+            ],
+        }
+        self.assertEqual(validate_scenario(scenario), [])
+
     def test_duplicate_scenario_seed_is_rejected(self):
         scenarios = self.scenarios + [copy.deepcopy(self.scenarios[0])]
         self.assertIn(

@@ -31,6 +31,7 @@ OPTIONAL_RESULT_FIELDS = {
     "scoring_mode",
     "intervention_event_step",
     "mean_absolute_raw_pixel_delta",
+    "post_event_action_chunk_mad",
 }
 RESULT_FIELDS = REQUIRED_RESULT_FIELDS | OPTIONAL_RESULT_FIELDS
 
@@ -106,14 +107,15 @@ def validate_result(record: Any) -> List[str]:
             not isinstance(record[field], str) or not record[field].strip()
         ):
             errors.append("%s must be a non-empty string" % field)
-    pixel_delta = record.get("mean_absolute_raw_pixel_delta")
-    if pixel_delta is not None and (
-        isinstance(pixel_delta, bool)
-        or not isinstance(pixel_delta, (int, float))
-        or not math.isfinite(pixel_delta)
-        or pixel_delta < 0
-    ):
-        errors.append("mean_absolute_raw_pixel_delta must be null or non-negative")
+    for field in ("mean_absolute_raw_pixel_delta", "post_event_action_chunk_mad"):
+        value = record.get(field)
+        if value is not None and (
+            isinstance(value, bool)
+            or not isinstance(value, (int, float))
+            or not math.isfinite(value)
+            or value < 0
+        ):
+            errors.append("%s must be null or non-negative" % field)
 
     return errors
 

@@ -20,7 +20,7 @@
     "base_task_id": {"type": "string", "minLength": 1},
     "seed": {"type": "integer", "minimum": 0},
     "change_family": {
-      "enum": ["OBS", "GEO", "OBS-NEW", "INTENT", "FEAS"]
+      "enum": ["OBS", "GEO", "CLUTTER", "OBS-NEW", "INTENT", "FEAS"]
     },
     "severity": {"enum": ["low", "medium", "high"]},
     "trigger": {
@@ -45,6 +45,14 @@
       "type": "object",
       "required": ["operation"],
       "properties": {"operation": {"type": "string", "minLength": 1}}
+    },
+    "setup": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["operation"],
+        "properties": {"operation": {"type": "string", "minLength": 1}}
+      }
     },
     "expected_response_mode": {
       "enum": [

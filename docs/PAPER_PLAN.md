@@ -2,6 +2,10 @@
 
 Status: executable Track A pilot; Track B/C scorers remain implementation work.
 
+The first paper release centers on three intuitive, visually demonstrable
+stressors: sudden light off/on, sudden target relocation, and the sudden
+appearance of multiple distractor objects.
+
 ## Central question
 
 Do VLA policies appropriately revise their behavior when an external change is
@@ -12,7 +16,7 @@ largest gap between static task competence and mid-execution responsiveness?
 
 | Track | Families | Correctness signal | Current status |
 | --- | --- | --- | --- |
-| A. Physical adaptation | `OBS`, `GEO`, `OBS-NEW` | original LIBERO goal completion, paired against no-change control | executable for Cosmos |
+| A. Physical adaptation | `OBS`, `GEO`, `CLUTTER` | original LIBERO goal completion, paired against no-change control | executable for Cosmos |
 | B. Intent revision | `INTENT` | alternate goal predicate, safe cancellation, or clarification response | runtime core only; Cosmos language-query hook and scorers missing |
 | C. Feasibility awareness | `FEAS` | safe abstention plus explicit infeasibility report | taxonomy only; action/text protocol and scorer missing |
 
@@ -39,6 +43,9 @@ ordinary LIBERO task success as their correctness label.
 - Report full manifest coverage, invalid cases, paired flips, Wilson intervals,
   paired-bootstrap intervals, and exact McNemar tests.
 - Separate change detection, response latency, final correctness, and safety.
+- Verify exact pre-change action-chunk equality and report the first post-event
+  action-chunk difference. This is behavioral-response evidence, not by itself
+  proof of successful adaptation.
 
 ## Main tables
 

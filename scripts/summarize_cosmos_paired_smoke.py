@@ -27,6 +27,20 @@ def load_one(path: Path):
     return rows[0]
 
 
+def _query_by_step(row):
+    return {query["policy_step"]: query for query in row.get("policy_queries", [])}
+
+
+def _action_chunk_mad(left, right):
+    left_values = [value for action in left for value in action]
+    right_values = [value for action in right for value in action]
+    if len(left_values) != len(right_values):
+        raise ValueError("paired action chunks have different sizes")
+    return sum(abs(a - b) for a, b in zip(left_values, right_values)) / len(
+        left_values
+    )
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("root", type=Path)
@@ -46,6 +60,25 @@ def main() -> None:
         raise ValueError("intervention arm must contain exactly one event")
 
     event = intervention["intervention_events"][0]
+    event_step = event["cosmos_query_boundary_step"]
+    control_queries = _query_by_step(control)
+    intervention_queries = _query_by_step(intervention)
+    pre_change_steps = sorted(
+        set(control_queries) & set(intervention_queries) & set(range(event_step))
+    )
+    pre_change_action_chunks_match = bool(pre_change_steps) and all(
+        control_queries[step]["action_chunk_sha256"]
+        == intervention_queries[step]["action_chunk_sha256"]
+        for step in pre_change_steps
+    )
+    if not pre_change_action_chunks_match:
+        raise ValueError("control/intervention action chunks differ before change")
+    if event_step not in control_queries or event_step not in intervention_queries:
+        raise ValueError("missing first post-intervention policy query")
+    post_event_action_chunk_mad = _action_chunk_mad(
+        control_queries[event_step]["actions"],
+        intervention_queries[event_step]["actions"],
+    )
     control_success = bool(control["success"])
     intervention_success = bool(intervention["success"])
     if control_success and intervention_success:
@@ -63,8 +96,11 @@ def main() -> None:
         "intervention_success": intervention_success,
         "paired_outcome": paired_outcome,
         "intervention_event_count": intervention["intervention_event_count"],
-        "intervention_policy_step": event["cosmos_query_boundary_step"],
+        "intervention_policy_step": event_step,
         "mean_absolute_raw_pixel_delta": event["mean_absolute_raw_pixel_delta"],
+        "pre_change_action_chunks_match": pre_change_action_chunks_match,
+        "pre_change_query_steps": pre_change_steps,
+        "post_event_action_chunk_mad": post_event_action_chunk_mad,
         "control": control,
         "intervention": intervention,
     }

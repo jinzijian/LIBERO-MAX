@@ -28,11 +28,16 @@ Each intervention episode has three phases:
 | --- | --- | --- | --- |
 | `OBS` | Observation conditions | Lights off, camera moved | Recover perception and continue |
 | `GEO` | Scene geometry | Target or receptacle moved | Re-localize and replan |
+| `CLUTTER` | Distractor burst | Multiple confusing objects suddenly appear | Maintain target identity and continue safely |
 | `OBS-NEW` | New obstruction | Obstacle inserted into path | Avoid and replan safely |
 | `INTENT` | User intent | Instruction modified or cancelled | Follow the update or stop |
 | `FEAS` | Task feasibility | Target or receptacle removed | Stop or report infeasibility |
 
 The taxonomy describes what changed, not which adaptation method a model uses.
+
+The first paper release prioritizes three controlled axes: illumination switch,
+target relocation, and distractor burst. Camera motion and broader obstruction
+cases remain secondary diagnostics until these three axes are calibrated.
 
 ## 3. Intervention timing
 

@@ -20,7 +20,7 @@
     "scenario_id": {"type": "string", "minLength": 1},
     "seed": {"type": "integer", "minimum": 0},
     "change_family": {
-      "enum": ["OBS", "GEO", "OBS-NEW", "INTENT", "FEAS"]
+      "enum": ["OBS", "GEO", "CLUTTER", "OBS-NEW", "INTENT", "FEAS"]
     },
     "expected_response_mode": {
       "enum": [
@@ -47,6 +47,7 @@
     "policy_seed": {"type": "integer", "minimum": 0},
     "scoring_mode": {"type": "string", "minLength": 1},
     "intervention_event_step": {"type": "integer", "minimum": 0},
-    "mean_absolute_raw_pixel_delta": {"type": ["number", "null"], "minimum": 0}
+    "mean_absolute_raw_pixel_delta": {"type": ["number", "null"], "minimum": 0},
+    "post_event_action_chunk_mad": {"type": ["number", "null"], "minimum": 0}
   }
 }

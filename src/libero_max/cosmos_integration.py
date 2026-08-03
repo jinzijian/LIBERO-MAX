@@ -83,6 +83,8 @@ class CosmosInterventionEnv:
         self.total_env_steps = 0
         self.init_state_sha256 = None
         self.events = []
+        self.policy_queries = []
+        self.setup_events = []
 
     def __getattr__(self, name: str) -> Any:
         return getattr(self._env, name)
@@ -107,12 +109,18 @@ class CosmosInterventionEnv:
         self.total_env_steps = 0
         self.init_state_sha256 = None
         self.events = []
+        self.policy_queries = []
+        self.setup_events = []
         self.runtime.reset(self.task_description)
         return result
 
     def set_init_state(self, initial_state: Any) -> Any:
         self.init_state_sha256 = _state_digest(initial_state)
-        return self._env.set_init_state(initial_state)
+        observation = self._env.set_init_state(initial_state)
+        self.setup_events = self.runtime.apply_setup()
+        if self.setup_events:
+            observation = self.backend.refresh_observation()
+        return observation
 
     def _capture_primary_image(self, observation: Any) -> Any:
         if self.primary_image_key is None or not isinstance(observation, dict):
@@ -150,6 +158,27 @@ class CosmosInterventionEnv:
                 info["libero_max_event"] = event
         return observation, reward, done, info
 
+    def record_policy_query(self, actions: Any) -> Dict[str, Any]:
+        import numpy as np
+
+        action_array = np.asarray(actions, dtype=np.float32)
+        if action_array.ndim != 2 or not np.all(np.isfinite(action_array)):
+            raise CosmosIntegrationError(
+                "policy action chunk must be a finite rank-2 array"
+            )
+        policy_step = max(0, self.total_env_steps - self.warmup_steps)
+        query = {
+            "query_index": len(self.policy_queries),
+            "policy_step": policy_step,
+            "action_chunk_shape": list(action_array.shape),
+            "action_chunk_sha256": hashlib.sha256(
+                action_array.tobytes()
+            ).hexdigest(),
+            "actions": action_array.tolist(),
+        }
+        self.policy_queries.append(query)
+        return query
+
     def record_outcome(self, success: bool) -> Dict[str, Any]:
         if self.query_interval is None or self.max_policy_steps is None:
             raise CosmosIntegrationError("configure_episode() was not called")
@@ -173,6 +202,10 @@ class CosmosInterventionEnv:
             "success": bool(success),
             "intervention_event_count": len(self.events),
             "intervention_events": self.events,
+            "setup_event_count": len(self.setup_events),
+            "setup_events": self.setup_events,
+            "policy_query_count": len(self.policy_queries),
+            "policy_queries": self.policy_queries,
         }
         self.trace_path.parent.mkdir(parents=True, exist_ok=True)
         with self.trace_path.open("a", encoding="utf-8") as handle:
@@ -193,6 +226,8 @@ def install_cosmos_hooks(
     original_get_libero_env = run_libero_eval.get_libero_env
     original_run_episode = run_libero_eval.run_episode
     original_load_initial_states = run_libero_eval.load_initial_states
+    original_get_action = run_libero_eval.get_action
+    active_env: Dict[str, Optional[CosmosInterventionEnv]] = {"value": None}
 
     def load_selected_initial_state(cfg: Any, task_suite: Any, task_id: int, log_file=None):
         initial_states, custom_states = original_load_initial_states(
@@ -234,10 +269,22 @@ def install_cosmos_hooks(
             query_interval=cfg.num_open_loop_steps,
             max_policy_steps=max_steps,
         )
-        result = original_run_episode(cfg, env, *args, **kwargs)
+        active_env["value"] = env
+        try:
+            result = original_run_episode(cfg, env, *args, **kwargs)
+        finally:
+            active_env["value"] = None
         env.record_outcome(result[0])
+        return result
+
+    def get_action_with_trace(*args: Any, **kwargs: Any):
+        result = original_get_action(*args, **kwargs)
+        env = active_env["value"]
+        if env is not None:
+            env.record_policy_query(result["actions"])
         return result
 
     run_libero_eval.get_libero_env = get_libero_env_with_intervention
     run_libero_eval.run_episode = run_episode_with_trace
     run_libero_eval.load_initial_states = load_selected_initial_state
+    run_libero_eval.get_action = get_action_with_trace

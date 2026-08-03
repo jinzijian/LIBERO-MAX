@@ -39,6 +39,10 @@ def _validate_case(case: Dict[str, Any], summary: Dict[str, Any]) -> List[str]:
         errors.append("control arm contains intervention events")
     if intervention.get("intervention_event_count") != 1:
         errors.append("intervention arm must contain exactly one event")
+    if not summary.get("pre_change_action_chunks_match"):
+        errors.append("pre-change action chunks are not exactly matched")
+    if summary.get("post_event_action_chunk_mad") is None:
+        errors.append("post-event action response is missing")
     return errors
 
 
@@ -90,6 +94,9 @@ def main() -> int:
                 "mean_absolute_raw_pixel_delta": event.get(
                     "mean_absolute_raw_pixel_delta"
                 ),
+                "post_event_action_chunk_mad": paired[
+                    "post_event_action_chunk_mad"
+                ],
             }
         )
 

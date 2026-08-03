@@ -1,3 +1,4 @@
+import copy
 import json
 import tempfile
 import unittest
@@ -65,6 +66,7 @@ class CosmosIntegrationTest(unittest.TestCase):
         env.configure_episode("libero_object", 195, 16, 280)
         env.reset()
         env.set_init_state([1, 2, 3])
+        env.record_policy_query([[0.0, 1.0], [2.0, 3.0]])
         return env, backend
 
     def test_intervention_fires_after_warmup_at_query_boundary(self):
@@ -100,6 +102,8 @@ class CosmosIntegrationTest(unittest.TestCase):
             self.assertEqual(control_row["intervention_event_count"], 0)
             self.assertEqual(intervention_row["intervention_event_count"], 1)
             self.assertEqual(control_row["init_state_index"], 3)
+            self.assertEqual(control_row["policy_query_count"], 1)
+            self.assertEqual(control_row["policy_queries"][0]["policy_step"], 0)
 
     def test_hook_selects_exact_default_initial_state(self):
         module = SimpleNamespace(
@@ -107,6 +111,7 @@ class CosmosIntegrationTest(unittest.TestCase):
             run_episode=lambda *args, **kwargs: (True,),
             load_initial_states=lambda *args, **kwargs: (["s0", "s1", "s2"], None),
             TASK_MAX_STEPS={"libero_object": 280},
+            get_action=lambda *args, **kwargs: {"actions": [[1.0, 2.0]]},
         )
         with tempfile.TemporaryDirectory() as tmp:
             install_cosmos_hooks(
@@ -120,6 +125,32 @@ class CosmosIntegrationTest(unittest.TestCase):
             states, custom = module.load_initial_states(None, None, 0)
         self.assertEqual(states, ["s2"])
         self.assertIsNone(custom)
+
+    def test_setup_is_applied_to_control_and_recorded(self):
+        scenario = copy.deepcopy(SCENARIO)
+        scenario["setup"] = [
+            {"operation": "remove_object", "object": "distractor_1"}
+        ]
+        with tempfile.TemporaryDirectory() as tmp:
+            backend = FakeBackend()
+            env = CosmosInterventionEnv(
+                env=FakeEnv(),
+                task_description="fake task",
+                scenario=scenario,
+                arm="control",
+                trace_path=Path(tmp) / "trace.jsonl",
+                original_task_index=0,
+                backend=backend,
+                primary_image_key=None,
+            )
+            env.configure_episode("libero_object", 195, 16, 280)
+            env.reset()
+            observation = env.set_init_state([1, 2, 3])
+            env.record_outcome(False)
+            row = json.loads((Path(tmp) / "trace.jsonl").read_text())
+        self.assertEqual(observation, {"state": "changed"})
+        self.assertEqual(backend.changes, scenario["setup"])
+        self.assertEqual(row["setup_event_count"], 1)
 
 
 if __name__ == "__main__":
