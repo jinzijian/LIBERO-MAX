@@ -163,6 +163,8 @@ boundaries. Pilot intervention and proximity-threshold evidence is recorded in
 [`docs/PILOT_CALIBRATION.md`](docs/PILOT_CALIBRATION.md).
 The current v1 sampling proposal is in
 [`docs/BENCHMARK_V1_DESIGN.md`](docs/BENCHMARK_V1_DESIGN.md).
+The deterministic build, validation, and checksum contract is documented in
+[`docs/DATASET_RELEASE.md`](docs/DATASET_RELEASE.md).
 
 ## Working title
 
