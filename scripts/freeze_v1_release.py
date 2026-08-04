@@ -23,12 +23,18 @@ def main() -> int:
     parser.add_argument("--core", type=Path, required=True)
     parser.add_argument("--full", type=Path, required=True)
     parser.add_argument("--preflight", type=Path, required=True)
+    parser.add_argument("--feasibility-filter", type=Path)
     parser.add_argument("--output-dir", type=Path, required=True)
     args = parser.parse_args()
     catalog = json.loads(args.catalog.read_text(encoding="utf-8"))
     core = json.loads(args.core.read_text(encoding="utf-8"))
     full = json.loads(args.full.read_text(encoding="utf-8"))
     preflight = json.loads(args.preflight.read_text(encoding="utf-8"))
+    feasibility_filter = (
+        json.loads(args.feasibility_filter.read_text(encoding="utf-8"))
+        if args.feasibility_filter
+        else None
+    )
     errors = audit_v1_release(catalog, core, full, preflight)
     if errors:
         raise ValueError("release audit failed: " + "; ".join(errors))
@@ -58,6 +64,13 @@ def main() -> int:
         "full_matched_pairs": len(frozen_full["cases"]),
         "physical_preflight_passed": preflight["passed"],
     }
+    if feasibility_filter is not None:
+        summary["excluded_configurations"] = len(
+            feasibility_filter.get("excluded_configurations", [])
+        )
+        summary["candidate_physical_scenarios"] = feasibility_filter.get(
+            "core_cases_before"
+        )
     files = {
         "task_catalog.json": _json_bytes(frozen_catalog),
         "core.json": _json_bytes(frozen_core),
@@ -65,6 +78,8 @@ def main() -> int:
         "physical_preflight.json": _json_bytes(preflight),
         "release_summary.json": _json_bytes(summary),
     }
+    if feasibility_filter is not None:
+        files["feasibility_filter.json"] = _json_bytes(feasibility_filter)
     args.output_dir.mkdir(parents=True, exist_ok=True)
     for name, payload in files.items():
         (args.output_dir / name).write_bytes(payload)

@@ -1,11 +1,14 @@
 # LIBERO-MAX Paper Plan
 
-Status: executable Track A pilot; Track B/C scorers remain implementation work.
+Status: Track A v1.0.0 physical test sets frozen; multi-model paired evaluation
+and Track B/C scorers remain implementation work.
 
 The five-case pilot centers on three intuitive stressors. The v1 paper main
 track expands to six: illumination, camera shift, target relocation,
 receptacle relocation, five-object distractor burst, and path-obstacle
-insertion. Each type contains three deterministic intervention draws.
+insertion. Observation, clutter, and obstacle families start from three
+deterministic draws per task; relocation uses fixed 6 cm and 12 cm tiers, and
+the frozen release retains only configurations that pass physical preflight.
 
 ## Central question
 
@@ -17,7 +20,7 @@ largest gap between static task competence and mid-execution responsiveness?
 
 | Track | Families | Correctness signal | Current status |
 | --- | --- | --- | --- |
-| A. Physical adaptation | `OBS`, `GEO`, `CLUTTER`, `OBSTACLE` | original LIBERO goal completion, paired against no-change control | six-type candidate generator executable; full physical calibration pending |
+| A. Physical adaptation | `OBS`, `GEO`, `CLUTTER`, `OBSTACLE` | original LIBERO goal completion, paired against no-change control | v1.0.0 Core/Full frozen; policy evaluation pending |
 | B. Intent revision | `INTENT` | alternate goal predicate, safe cancellation, or clarification response | runtime core only; Cosmos language-query hook and scorers missing |
 | C. Feasibility awareness | `FEAS` | safe abstention plus explicit infeasibility report | taxonomy only; action/text protocol and scorer missing |
 
@@ -72,15 +75,16 @@ ordinary LIBERO task success as their correctness label.
 
 ## Immediate empirical ladder
 
-1. Five-case Cosmos physical pilot on one task and one initial state.
-2. Physical preflight of the 1,539 unique frozen configurations.
-3. Freeze Core only after invalid poses are deterministically repaired or
-   excluded under pre-registered rules.
-4. Run Core across three seeds, then Full to decouple policy/intervention
+1. Five-case Cosmos physical pilot on one task and one initial state. **Done.**
+2. Calibrate 1,521 candidate physical scenarios and preflight them in MuJoCo.
+   **Done.**
+3. Exclude failed task--change--draw configurations, re-preflight 1,335/1,335,
+   and freeze matched Core/Full v1.0.0. **Done.**
+4. Run Core, then Full, to decouple policy/intervention
    randomness.
 5. Add at least two model families and the oracle-notified diagnostic.
 
 The current task-0 mechanics and 18 cm trigger calibration are recorded in
 [`PILOT_CALIBRATION.md`](PILOT_CALIBRATION.md).
-The proposed 1,539-pair-per-model Core scale-up is specified in
+The frozen 1,335-pair-per-model Core release is specified in
 [`BENCHMARK_V1_DESIGN.md`](BENCHMARK_V1_DESIGN.md).

@@ -1,7 +1,8 @@
 # LIBERO-MAX v1 Benchmark Design
 
-Status: deterministic candidate manifests generated; physical calibration and
-Cosmos rollout validation are still required before either manifest is frozen.
+Status: v1.0.0 physical test sets frozen after deterministic relocation
+calibration, two-pass real-MuJoCo preflight, feasibility filtering, and release
+audit. Cosmos rollout and paper-result validation are still pending.
 
 ## Six-type physical main track
 
@@ -13,22 +14,23 @@ invalid change into every scene.
 | --- | ---: | --- |
 | Illumination switch | 40 | lights dim sharply or a dim scene lights up |
 | Camera shift | 40 | agent-view camera translates and yaws |
-| Target relocation | 33 | a target on a floor/table workspace shifts 6 or 12 cm |
-| Receptacle relocation | 27 | a movable destination shifts 6 or 12 cm |
+| Target relocation | 31 | a target on a floor/table workspace shifts 6 or 12 cm |
+| Receptacle relocation | 26 | a movable destination shifts 6 or 12 cm |
 | Distractor burst | 12 | five task-native non-target objects appear together |
-| Obstacle insertion | 39 | a task-native object appears in the current approach corridor |
-| **Task-type cells** | **191** |  |
+| Obstacle insertion | 28 | a task-native object appears in the current approach corridor |
+| **Task-type cells** | **177** |  |
 
-The target count is 33 rather than the earlier syntactic estimate of 37. One
-target begins inside a drawer, and four more begin on a cookie box, ramekin,
-stove, or cabinet top. All five are intentionally excluded from free planar
-relocation. Receptacle relocation is restricted to movable object receptacles
-that start on a floor/table workspace; the benchmark does not translate a
-fixed cabinet, stove, or rack merely to inflate coverage.
+The catalog initially admitted 33 target-relocation and 27
+receptacle-relocation task cells. Calibration retained 31 and 26 respectively:
+one fixed direction had to pass both 6 cm and 12 cm in all three initial states.
+Receptacle relocation remains restricted to movable destinations on a planar
+workspace; the benchmark does not translate a fixed cabinet, stove, or rack to
+inflate coverage. The feasibility filter also removed all obstacle draws from
+11 task cells while retaining the obstacle family on 28 tasks.
 
 ## Explicit intervention randomness
 
-Policy randomness and intervention randomness are separate fields. A stable
+Policy randomness and intervention variation are separate fields. A stable
 SHA-256-derived intervention seed is computed from:
 
 ```text
@@ -38,7 +40,7 @@ SHA-256-derived intervention seed is computed from:
 The generator resolves every sampled value into the manifest. Re-running a
 case therefore cannot silently choose a new direction, distractor, or pose.
 
-| Change type | Randomized quantities across draw IDs 0/1/2 |
+| Change type | Pre-resolved variation across draw IDs 0/1/2 |
 | --- | --- |
 | Illumination | deterministic normal-to-dim scales 0.55/0.30, or a 0.30-to-normal switch; permanent blackout is excluded |
 | Camera | three fixed global viewpoint shifts at 2/4/6 cm with yaw +5/-10/+15 degrees |
@@ -54,36 +56,43 @@ reported as a separate 24/18/12 cm ablation.
 ## Core and full profiles
 
 Both profiles use three initial states and three policy seeds. Observation,
-clutter, and obstacle changes use three frozen configurations. Target and
-receptacle relocation use only the deterministic 6 and 12 cm tiers.
+clutter, and obstacle changes start with three candidate configurations per
+task and retain the physically valid subset. Target and receptacle relocation
+use only the deterministic 6 and 12 cm tiers.
 
-- **Core:** every unique `(initial state, frozen configuration)` appears once,
-  with policy seeds rotated evenly inside each task--change-type cell. This
-  gives 1,539 matched pairs / 3,078 episodes per model.
-- **Full:** crosses every policy seed with every frozen configuration. This
-  separates policy and environment variation at 4,617 matched pairs / 9,234
+- **Core:** every retained `(initial state, frozen configuration)` appears
+  once, with policy seeds rotated inside each task--change-type cell. This gives
+  1,335 matched pairs / 2,670 episodes per model.
+- **Full:** crosses every policy seed with every retained configuration. This
+  separates policy and environment variation at 4,005 matched pairs / 8,010
   episodes per model.
 
 | Change type | Core pairs | Full pairs |
 | --- | ---: | ---: |
 | Illumination switch | 360 | 1,080 |
 | Camera shift | 360 | 1,080 |
-| Target relocation | 198 | 594 |
-| Receptacle relocation | 162 | 486 |
-| Distractor burst | 108 | 324 |
-| Obstacle insertion | 351 | 1,053 |
-| **Total** | **1,539** | **4,617** |
+| Target relocation | 186 | 558 |
+| Receptacle relocation | 156 | 468 |
+| Distractor burst | 99 | 297 |
+| Obstacle insertion | 174 | 522 |
+| **Total** | **1,335** | **4,005** |
 
-The generated artifacts on the evaluation host are:
+The frozen artifacts are:
 
 ```text
-artifacts/libero_task_catalog_v1.json
-artifacts/libero_max_v1_core_candidate.json
-artifacts/libero_max_v1_full_candidate.json
+benchmark/v1/task_catalog.json
+benchmark/v1/core.json
+benchmark/v1/full.json
+benchmark/v1/physical_preflight.json
+benchmark/v1/feasibility_filter.json
+benchmark/v1/release_summary.json
+benchmark/v1/SHA256SUMS
 ```
 
-They remain `1.0.0-candidate` until every unique physical configuration passes
-preflight and successful-control trigger calibration.
+They are versioned `1.0.0`. Every retained physical configuration passed the
+static real-MuJoCo preflight. Successful-control trigger coverage and model
+outcomes must still be measured during evaluation and are not implied by this
+release gate.
 
 ## Validity and calibration gates
 

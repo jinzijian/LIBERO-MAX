@@ -16,7 +16,8 @@ from libero.libero import benchmark
 
 from cosmos_policy.experiments.robot.libero.libero_utils import get_libero_env
 from libero_max.calibration import CANONICAL_DIRECTIONS, rank_lateral_directions
-from libero_max.libero_backend import LiberoMujocoBackend
+from libero_max.libero_backend import LiberoBackendError, LiberoMujocoBackend
+from libero_max.mujoco_geometry import entity_contact_geom_ids
 
 
 DISTANCES_M = (0.06, 0.12)
@@ -27,31 +28,8 @@ MAX_EXCESS_DISPLACEMENT_M = 0.02
 MAX_EXCESS_VERTICAL_DROP_M = 0.01
 
 
-def _geom_ids(sim: Any, names: Iterable[str]) -> Set[int]:
-    result = set()
-    for name in names:
-        result.add(int(sim.model.geom_name2id(name)))
-    return result
-
-
 def _entity_contact_geoms(base_env: Any, name: str) -> Set[int]:
-    entity = base_env.objects_dict.get(name) or base_env.fixtures_dict.get(name)
-    if entity is None:
-        matching = {
-            index
-            for index in range(int(base_env.sim.model.ngeom))
-            if (base_env.sim.model.geom_id2name(index) or "") == name
-            or (base_env.sim.model.geom_id2name(index) or "").startswith(
-                name + "_"
-            )
-        }
-        if not matching:
-            raise ValueError("unknown entity or support geom: %s" % name)
-        return matching
-    names = getattr(entity, "contact_geoms", None)
-    if not names:
-        raise ValueError("entity has no contact geoms: %s" % name)
-    return _geom_ids(base_env.sim, names)
+    return entity_contact_geom_ids(base_env, name)
 
 
 def _contact_partners(sim: Any, entity_geoms: Set[int]) -> Set[int]:
@@ -67,7 +45,14 @@ def _contact_partners(sim: Any, entity_geoms: Set[int]) -> Set[int]:
 
 
 def _position(backend: LiberoMujocoBackend, name: str) -> np.ndarray:
-    entity, fixture = backend._entity(name)
+    try:
+        entity, fixture = backend._entity(name)
+    except LiberoBackendError:
+        geom_ids = sorted(entity_contact_geom_ids(backend.env, name))
+        return np.asarray(
+            [backend.sim.data.geom_xpos[index] for index in geom_ids],
+            dtype=np.float64,
+        ).mean(axis=0)
     return backend._entity_position(entity, fixture)
 
 

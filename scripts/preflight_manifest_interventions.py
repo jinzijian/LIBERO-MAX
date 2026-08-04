@@ -18,6 +18,7 @@ from libero.libero import benchmark
 from cosmos_policy.experiments.robot.libero.libero_utils import get_libero_env
 from libero_max.libero_backend import LiberoMujocoBackend
 from libero_max.manifest import load_manifest
+from libero_max.mujoco_geometry import entity_contact_geom_ids
 from libero_max.preflight import (
     changed_entities,
     select_preflight_cases,
@@ -35,24 +36,7 @@ def _pixel_mad(before: Any, after: Any) -> float:
 
 
 def _entity_geom_ids(backend: LiberoMujocoBackend, name: str) -> set:
-    try:
-        entity, _ = backend._entity(name)
-    except Exception:
-        matching = {
-            index
-            for index in range(int(backend.sim.model.ngeom))
-            if (backend.sim.model.geom_id2name(index) or "") == name
-            or (backend.sim.model.geom_id2name(index) or "").startswith(
-                name + "_"
-            )
-        }
-        if not matching:
-            raise ValueError("unknown entity or support geom: %s" % name)
-        return matching
-    names = getattr(entity, "contact_geoms", None)
-    if not names:
-        raise ValueError("entity has no contact geoms: %s" % name)
-    return {int(backend.sim.model.geom_name2id(item)) for item in names}
+    return entity_contact_geom_ids(backend.env, name)
 
 
 def _contact_partners(backend: LiberoMujocoBackend, name: str) -> set:
@@ -312,6 +296,18 @@ def main() -> int:
             print(json.dumps(row, sort_keys=True), flush=True)
         except Exception as exc:
             failures[case["case_id"]] = str(exc)
+            rows.append(
+                {
+                    "case_id": case["case_id"],
+                    "scenario_id": case["scenario"]["scenario_id"],
+                    "change_type": case["scenario"].get("change_type"),
+                    "intervention_draw_id": case["scenario"].get(
+                        "randomization", {}
+                    ).get("draw_id"),
+                    "passed": False,
+                    "validation_errors": ["preflight exception: %s" % exc],
+                }
+            )
     report = {
         "benchmark_id": manifest["benchmark_id"],
         "selection": selection,

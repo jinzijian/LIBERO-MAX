@@ -139,12 +139,15 @@ LIBERO-MAX/
 └── tests/
 ```
 
-The project now has an executable Cosmos physical-change pilot plus deterministic
-six-type Core and Full candidate-manifest generators. Core contains 1,539
-matched pairs; Full contains 4,617 and crosses three policy seeds with every
-frozen intervention configuration. These are candidates, not frozen benchmark releases, until
-all physical configurations and trigger coverage pass calibration. Intent and
-infeasibility tracks still require response-aware scorers. See
+The project now has an executable Cosmos physical-change pilot plus a frozen
+six-type v1 physical test-set release. Core contains 1,335 matched pairs / 2,670
+episodes; Full contains 4,005 matched pairs / 8,010 episodes and crosses three
+policy seeds with every retained intervention configuration. All 1,335 unique
+physical scenarios passed the real-MuJoCo preflight; the release records the 62
+candidate configurations excluded by the feasibility filter. Policy rollout,
+trigger-coverage, and benchmark-result validation remain empirical work rather
+than properties of the dataset release. Intent and infeasibility tracks still
+require response-aware scorers. See
 [`docs/PAPER_PLAN.md`](docs/PAPER_PLAN.md) for the paper-scale roadmap and claim
 boundaries. Pilot intervention and proximity-threshold evidence is recorded in
 [`docs/PILOT_CALIBRATION.md`](docs/PILOT_CALIBRATION.md).

@@ -1,0 +1,494 @@
+{
+  "core_cases_after": 1335,
+  "core_cases_before": 1521,
+  "excluded_configurations": [
+    {
+      "change_type": "distractor_burst",
+      "draw_id": 0,
+      "task_index": 0,
+      "task_suite_name": "libero_10"
+    },
+    {
+      "change_type": "obstacle_insertion",
+      "draw_id": 1,
+      "task_index": 0,
+      "task_suite_name": "libero_10"
+    },
+    {
+      "change_type": "obstacle_insertion",
+      "draw_id": 2,
+      "task_index": 0,
+      "task_suite_name": "libero_10"
+    },
+    {
+      "change_type": "distractor_burst",
+      "draw_id": 0,
+      "task_index": 1,
+      "task_suite_name": "libero_10"
+    },
+    {
+      "change_type": "distractor_burst",
+      "draw_id": 2,
+      "task_index": 1,
+      "task_suite_name": "libero_10"
+    },
+    {
+      "change_type": "obstacle_insertion",
+      "draw_id": 0,
+      "task_index": 1,
+      "task_suite_name": "libero_10"
+    },
+    {
+      "change_type": "obstacle_insertion",
+      "draw_id": 1,
+      "task_index": 1,
+      "task_suite_name": "libero_10"
+    },
+    {
+      "change_type": "obstacle_insertion",
+      "draw_id": 2,
+      "task_index": 1,
+      "task_suite_name": "libero_10"
+    },
+    {
+      "change_type": "obstacle_insertion",
+      "draw_id": 0,
+      "task_index": 2,
+      "task_suite_name": "libero_10"
+    },
+    {
+      "change_type": "obstacle_insertion",
+      "draw_id": 1,
+      "task_index": 2,
+      "task_suite_name": "libero_10"
+    },
+    {
+      "change_type": "obstacle_insertion",
+      "draw_id": 2,
+      "task_index": 2,
+      "task_suite_name": "libero_10"
+    },
+    {
+      "change_type": "obstacle_insertion",
+      "draw_id": 1,
+      "task_index": 4,
+      "task_suite_name": "libero_10"
+    },
+    {
+      "change_type": "obstacle_insertion",
+      "draw_id": 2,
+      "task_index": 4,
+      "task_suite_name": "libero_10"
+    },
+    {
+      "change_type": "obstacle_insertion",
+      "draw_id": 1,
+      "task_index": 6,
+      "task_suite_name": "libero_10"
+    },
+    {
+      "change_type": "obstacle_insertion",
+      "draw_id": 2,
+      "task_index": 6,
+      "task_suite_name": "libero_10"
+    },
+    {
+      "change_type": "obstacle_insertion",
+      "draw_id": 0,
+      "task_index": 7,
+      "task_suite_name": "libero_10"
+    },
+    {
+      "change_type": "obstacle_insertion",
+      "draw_id": 1,
+      "task_index": 9,
+      "task_suite_name": "libero_10"
+    },
+    {
+      "change_type": "obstacle_insertion",
+      "draw_id": 0,
+      "task_index": 0,
+      "task_suite_name": "libero_goal"
+    },
+    {
+      "change_type": "obstacle_insertion",
+      "draw_id": 1,
+      "task_index": 0,
+      "task_suite_name": "libero_goal"
+    },
+    {
+      "change_type": "obstacle_insertion",
+      "draw_id": 2,
+      "task_index": 0,
+      "task_suite_name": "libero_goal"
+    },
+    {
+      "change_type": "obstacle_insertion",
+      "draw_id": 2,
+      "task_index": 1,
+      "task_suite_name": "libero_goal"
+    },
+    {
+      "change_type": "obstacle_insertion",
+      "draw_id": 0,
+      "task_index": 2,
+      "task_suite_name": "libero_goal"
+    },
+    {
+      "change_type": "obstacle_insertion",
+      "draw_id": 1,
+      "task_index": 2,
+      "task_suite_name": "libero_goal"
+    },
+    {
+      "change_type": "obstacle_insertion",
+      "draw_id": 2,
+      "task_index": 2,
+      "task_suite_name": "libero_goal"
+    },
+    {
+      "change_type": "obstacle_insertion",
+      "draw_id": 1,
+      "task_index": 3,
+      "task_suite_name": "libero_goal"
+    },
+    {
+      "change_type": "obstacle_insertion",
+      "draw_id": 2,
+      "task_index": 3,
+      "task_suite_name": "libero_goal"
+    },
+    {
+      "change_type": "obstacle_insertion",
+      "draw_id": 1,
+      "task_index": 4,
+      "task_suite_name": "libero_goal"
+    },
+    {
+      "change_type": "obstacle_insertion",
+      "draw_id": 2,
+      "task_index": 4,
+      "task_suite_name": "libero_goal"
+    },
+    {
+      "change_type": "obstacle_insertion",
+      "draw_id": 1,
+      "task_index": 5,
+      "task_suite_name": "libero_goal"
+    },
+    {
+      "change_type": "obstacle_insertion",
+      "draw_id": 0,
+      "task_index": 6,
+      "task_suite_name": "libero_goal"
+    },
+    {
+      "change_type": "obstacle_insertion",
+      "draw_id": 1,
+      "task_index": 6,
+      "task_suite_name": "libero_goal"
+    },
+    {
+      "change_type": "obstacle_insertion",
+      "draw_id": 2,
+      "task_index": 6,
+      "task_suite_name": "libero_goal"
+    },
+    {
+      "change_type": "obstacle_insertion",
+      "draw_id": 0,
+      "task_index": 7,
+      "task_suite_name": "libero_goal"
+    },
+    {
+      "change_type": "obstacle_insertion",
+      "draw_id": 1,
+      "task_index": 7,
+      "task_suite_name": "libero_goal"
+    },
+    {
+      "change_type": "obstacle_insertion",
+      "draw_id": 2,
+      "task_index": 7,
+      "task_suite_name": "libero_goal"
+    },
+    {
+      "change_type": "obstacle_insertion",
+      "draw_id": 1,
+      "task_index": 8,
+      "task_suite_name": "libero_goal"
+    },
+    {
+      "change_type": "obstacle_insertion",
+      "draw_id": 2,
+      "task_index": 8,
+      "task_suite_name": "libero_goal"
+    },
+    {
+      "change_type": "obstacle_insertion",
+      "draw_id": 0,
+      "task_index": 9,
+      "task_suite_name": "libero_goal"
+    },
+    {
+      "change_type": "obstacle_insertion",
+      "draw_id": 1,
+      "task_index": 9,
+      "task_suite_name": "libero_goal"
+    },
+    {
+      "change_type": "obstacle_insertion",
+      "draw_id": 2,
+      "task_index": 9,
+      "task_suite_name": "libero_goal"
+    },
+    {
+      "change_type": "obstacle_insertion",
+      "draw_id": 0,
+      "task_index": 0,
+      "task_suite_name": "libero_object"
+    },
+    {
+      "change_type": "obstacle_insertion",
+      "draw_id": 1,
+      "task_index": 0,
+      "task_suite_name": "libero_object"
+    },
+    {
+      "change_type": "obstacle_insertion",
+      "draw_id": 2,
+      "task_index": 0,
+      "task_suite_name": "libero_object"
+    },
+    {
+      "change_type": "obstacle_insertion",
+      "draw_id": 1,
+      "task_index": 4,
+      "task_suite_name": "libero_object"
+    },
+    {
+      "change_type": "obstacle_insertion",
+      "draw_id": 2,
+      "task_index": 4,
+      "task_suite_name": "libero_object"
+    },
+    {
+      "change_type": "obstacle_insertion",
+      "draw_id": 2,
+      "task_index": 7,
+      "task_suite_name": "libero_object"
+    },
+    {
+      "change_type": "obstacle_insertion",
+      "draw_id": 0,
+      "task_index": 8,
+      "task_suite_name": "libero_object"
+    },
+    {
+      "change_type": "obstacle_insertion",
+      "draw_id": 1,
+      "task_index": 8,
+      "task_suite_name": "libero_object"
+    },
+    {
+      "change_type": "obstacle_insertion",
+      "draw_id": 1,
+      "task_index": 1,
+      "task_suite_name": "libero_spatial"
+    },
+    {
+      "change_type": "obstacle_insertion",
+      "draw_id": 2,
+      "task_index": 1,
+      "task_suite_name": "libero_spatial"
+    },
+    {
+      "change_type": "obstacle_insertion",
+      "draw_id": 0,
+      "task_index": 2,
+      "task_suite_name": "libero_spatial"
+    },
+    {
+      "change_type": "obstacle_insertion",
+      "draw_id": 1,
+      "task_index": 2,
+      "task_suite_name": "libero_spatial"
+    },
+    {
+      "change_type": "obstacle_insertion",
+      "draw_id": 2,
+      "task_index": 2,
+      "task_suite_name": "libero_spatial"
+    },
+    {
+      "change_type": "obstacle_insertion",
+      "draw_id": 0,
+      "task_index": 6,
+      "task_suite_name": "libero_spatial"
+    },
+    {
+      "change_type": "obstacle_insertion",
+      "draw_id": 0,
+      "task_index": 7,
+      "task_suite_name": "libero_spatial"
+    },
+    {
+      "change_type": "obstacle_insertion",
+      "draw_id": 1,
+      "task_index": 7,
+      "task_suite_name": "libero_spatial"
+    },
+    {
+      "change_type": "obstacle_insertion",
+      "draw_id": 2,
+      "task_index": 7,
+      "task_suite_name": "libero_spatial"
+    },
+    {
+      "change_type": "obstacle_insertion",
+      "draw_id": 0,
+      "task_index": 8,
+      "task_suite_name": "libero_spatial"
+    },
+    {
+      "change_type": "obstacle_insertion",
+      "draw_id": 1,
+      "task_index": 8,
+      "task_suite_name": "libero_spatial"
+    },
+    {
+      "change_type": "obstacle_insertion",
+      "draw_id": 0,
+      "task_index": 9,
+      "task_suite_name": "libero_spatial"
+    },
+    {
+      "change_type": "obstacle_insertion",
+      "draw_id": 1,
+      "task_index": 9,
+      "task_suite_name": "libero_spatial"
+    },
+    {
+      "change_type": "obstacle_insertion",
+      "draw_id": 2,
+      "task_index": 9,
+      "task_suite_name": "libero_spatial"
+    }
+  ],
+  "excluded_configurations_by_change_type": {
+    "distractor_burst": 3,
+    "obstacle_insertion": 59
+  },
+  "failed_case_ids": [
+    "libero_10-t00-i1-obstacle_insertion-d1-p207",
+    "libero_10-t00-i2-distractor_burst-d0-p207",
+    "libero_10-t00-i2-obstacle_insertion-d2-p201",
+    "libero_10-t01-i0-distractor_burst-d0-p195",
+    "libero_10-t01-i0-distractor_burst-d2-p207",
+    "libero_10-t01-i0-obstacle_insertion-d2-p207",
+    "libero_10-t01-i1-obstacle_insertion-d0-p201",
+    "libero_10-t01-i1-obstacle_insertion-d1-p207",
+    "libero_10-t01-i1-obstacle_insertion-d2-p195",
+    "libero_10-t01-i2-distractor_burst-d0-p207",
+    "libero_10-t01-i2-obstacle_insertion-d2-p201",
+    "libero_10-t02-i0-obstacle_insertion-d0-p195",
+    "libero_10-t02-i0-obstacle_insertion-d1-p201",
+    "libero_10-t02-i0-obstacle_insertion-d2-p207",
+    "libero_10-t02-i1-obstacle_insertion-d2-p195",
+    "libero_10-t02-i2-obstacle_insertion-d0-p207",
+    "libero_10-t02-i2-obstacle_insertion-d1-p195",
+    "libero_10-t02-i2-obstacle_insertion-d2-p201",
+    "libero_10-t04-i0-obstacle_insertion-d1-p201",
+    "libero_10-t04-i0-obstacle_insertion-d2-p207",
+    "libero_10-t04-i1-obstacle_insertion-d1-p207",
+    "libero_10-t04-i2-obstacle_insertion-d2-p201",
+    "libero_10-t06-i0-obstacle_insertion-d1-p201",
+    "libero_10-t06-i0-obstacle_insertion-d2-p207",
+    "libero_10-t06-i1-obstacle_insertion-d2-p195",
+    "libero_10-t07-i0-obstacle_insertion-d0-p195",
+    "libero_10-t09-i2-obstacle_insertion-d1-p195",
+    "libero_goal-t00-i0-obstacle_insertion-d1-p201",
+    "libero_goal-t00-i1-obstacle_insertion-d2-p195",
+    "libero_goal-t00-i2-obstacle_insertion-d0-p207",
+    "libero_goal-t00-i2-obstacle_insertion-d1-p195",
+    "libero_goal-t00-i2-obstacle_insertion-d2-p201",
+    "libero_goal-t01-i0-obstacle_insertion-d2-p207",
+    "libero_goal-t02-i0-obstacle_insertion-d0-p195",
+    "libero_goal-t02-i0-obstacle_insertion-d1-p201",
+    "libero_goal-t02-i1-obstacle_insertion-d2-p195",
+    "libero_goal-t02-i2-obstacle_insertion-d0-p207",
+    "libero_goal-t02-i2-obstacle_insertion-d1-p195",
+    "libero_goal-t02-i2-obstacle_insertion-d2-p201",
+    "libero_goal-t03-i1-obstacle_insertion-d1-p207",
+    "libero_goal-t03-i2-obstacle_insertion-d2-p201",
+    "libero_goal-t04-i0-obstacle_insertion-d2-p207",
+    "libero_goal-t04-i1-obstacle_insertion-d2-p195",
+    "libero_goal-t04-i2-obstacle_insertion-d1-p195",
+    "libero_goal-t05-i2-obstacle_insertion-d1-p195",
+    "libero_goal-t06-i0-obstacle_insertion-d0-p195",
+    "libero_goal-t06-i0-obstacle_insertion-d1-p201",
+    "libero_goal-t06-i0-obstacle_insertion-d2-p207",
+    "libero_goal-t06-i1-obstacle_insertion-d0-p201",
+    "libero_goal-t06-i1-obstacle_insertion-d1-p207",
+    "libero_goal-t06-i2-obstacle_insertion-d0-p207",
+    "libero_goal-t06-i2-obstacle_insertion-d2-p201",
+    "libero_goal-t07-i0-obstacle_insertion-d0-p195",
+    "libero_goal-t07-i0-obstacle_insertion-d1-p201",
+    "libero_goal-t07-i0-obstacle_insertion-d2-p207",
+    "libero_goal-t07-i1-obstacle_insertion-d1-p207",
+    "libero_goal-t07-i2-obstacle_insertion-d1-p195",
+    "libero_goal-t07-i2-obstacle_insertion-d2-p201",
+    "libero_goal-t08-i0-obstacle_insertion-d1-p201",
+    "libero_goal-t08-i0-obstacle_insertion-d2-p207",
+    "libero_goal-t08-i1-obstacle_insertion-d1-p207",
+    "libero_goal-t08-i2-obstacle_insertion-d2-p201",
+    "libero_goal-t09-i0-obstacle_insertion-d0-p195",
+    "libero_goal-t09-i0-obstacle_insertion-d2-p207",
+    "libero_goal-t09-i1-obstacle_insertion-d0-p201",
+    "libero_goal-t09-i1-obstacle_insertion-d1-p207",
+    "libero_goal-t09-i1-obstacle_insertion-d2-p195",
+    "libero_goal-t09-i2-obstacle_insertion-d0-p207",
+    "libero_goal-t09-i2-obstacle_insertion-d1-p195",
+    "libero_goal-t09-i2-obstacle_insertion-d2-p201",
+    "libero_object-t00-i0-obstacle_insertion-d2-p207",
+    "libero_object-t00-i1-obstacle_insertion-d0-p201",
+    "libero_object-t00-i1-obstacle_insertion-d1-p207",
+    "libero_object-t04-i1-obstacle_insertion-d1-p207",
+    "libero_object-t04-i1-obstacle_insertion-d2-p195",
+    "libero_object-t07-i2-obstacle_insertion-d2-p201",
+    "libero_object-t08-i0-obstacle_insertion-d0-p195",
+    "libero_object-t08-i0-obstacle_insertion-d1-p201",
+    "libero_spatial-t01-i1-obstacle_insertion-d1-p207",
+    "libero_spatial-t01-i1-obstacle_insertion-d2-p195",
+    "libero_spatial-t01-i2-obstacle_insertion-d2-p201",
+    "libero_spatial-t02-i0-obstacle_insertion-d0-p195",
+    "libero_spatial-t02-i0-obstacle_insertion-d1-p201",
+    "libero_spatial-t02-i1-obstacle_insertion-d1-p207",
+    "libero_spatial-t02-i1-obstacle_insertion-d2-p195",
+    "libero_spatial-t02-i2-obstacle_insertion-d0-p207",
+    "libero_spatial-t02-i2-obstacle_insertion-d1-p195",
+    "libero_spatial-t06-i1-obstacle_insertion-d0-p201",
+    "libero_spatial-t07-i0-obstacle_insertion-d0-p195",
+    "libero_spatial-t07-i0-obstacle_insertion-d1-p201",
+    "libero_spatial-t07-i0-obstacle_insertion-d2-p207",
+    "libero_spatial-t07-i1-obstacle_insertion-d0-p201",
+    "libero_spatial-t07-i1-obstacle_insertion-d1-p207",
+    "libero_spatial-t07-i1-obstacle_insertion-d2-p195",
+    "libero_spatial-t07-i2-obstacle_insertion-d0-p207",
+    "libero_spatial-t07-i2-obstacle_insertion-d1-p195",
+    "libero_spatial-t07-i2-obstacle_insertion-d2-p201",
+    "libero_spatial-t08-i0-obstacle_insertion-d0-p195",
+    "libero_spatial-t08-i1-obstacle_insertion-d1-p207",
+    "libero_spatial-t09-i0-obstacle_insertion-d1-p201",
+    "libero_spatial-t09-i0-obstacle_insertion-d2-p207",
+    "libero_spatial-t09-i2-obstacle_insertion-d0-p207",
+    "libero_spatial-t09-i2-obstacle_insertion-d2-p201"
+  ],
+  "filter_version": "libero-max-feasibility-filter-v1.0",
+  "full_cases_after": 4005,
+  "full_cases_before": 4563,
+  "policy": "drop_task_change_draw_if_any_init_state_fails_preflight",
+  "source_preflight_complete": false,
+  "source_preflight_passed": 1418,
+  "source_preflight_planned": 1521
+}

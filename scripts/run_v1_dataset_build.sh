@@ -20,8 +20,12 @@ cd "$PROJECT_DIR"
 raw_catalog="$BUILD_ROOT/task_catalog_raw.json"
 calibrated_catalog="$BUILD_ROOT/task_catalog_calibrated.json"
 calibration_report="$BUILD_ROOT/relocation_calibration.json"
-core_manifest="$BUILD_ROOT/core_candidate.json"
-full_manifest="$BUILD_ROOT/full_candidate.json"
+core_candidate="$BUILD_ROOT/core_candidate.json"
+full_candidate="$BUILD_ROOT/full_candidate.json"
+candidate_preflight="$BUILD_ROOT/candidate_physical_preflight.json"
+feasibility_filter="$BUILD_ROOT/feasibility_filter.json"
+core_manifest="$BUILD_ROOT/core_filtered.json"
+full_manifest="$BUILD_ROOT/full_filtered.json"
 merged_preflight="$BUILD_ROOT/physical_preflight.json"
 
 "$PYTHON" scripts/build_libero_task_catalog.py \
@@ -34,36 +38,64 @@ CUDA_VISIBLE_DEVICES=0 "$PYTHON" scripts/calibrate_relocation_directions.py \
   --report "$calibration_report"
 
 "$PYTHON" scripts/build_randomized_v1_manifest.py \
-  "$calibrated_catalog" --profile core --output "$core_manifest"
+  "$calibrated_catalog" --profile core --output "$core_candidate"
 "$PYTHON" scripts/build_randomized_v1_manifest.py \
-  "$calibrated_catalog" --profile full --output "$full_manifest"
+  "$calibrated_catalog" --profile full --output "$full_candidate"
 
-pids=()
-for ((shard=0; shard<NUM_SHARDS; shard++)); do
-  CUDA_VISIBLE_DEVICES="$shard" "$PYTHON" \
-    scripts/preflight_manifest_interventions.py "$core_manifest" \
-    --num-shards "$NUM_SHARDS" \
-    --shard-index "$shard" \
-    --output "$BUILD_ROOT/preflight/shard-$shard.json" \
-    > "$BUILD_ROOT/preflight/shard-$shard.log" 2>&1 &
-  pids+=("$!")
-done
-
-shard_status=0
-for pid in "${pids[@]}"; do
-  if ! wait "$pid"; then
-    shard_status=1
+run_preflight_round() {
+  local manifest="$1"
+  local round_dir="$2"
+  local output="$3"
+  mkdir -p "$round_dir"
+  local pids=()
+  local shard
+  for ((shard=0; shard<NUM_SHARDS; shard++)); do
+    CUDA_VISIBLE_DEVICES="$shard" "$PYTHON" \
+      scripts/preflight_manifest_interventions.py "$manifest" \
+      --num-shards "$NUM_SHARDS" \
+      --shard-index "$shard" \
+      --output "$round_dir/shard-$shard.json" \
+      > "$round_dir/shard-$shard.log" 2>&1 &
+    pids+=("$!")
+  done
+  local shard_status=0
+  local pid
+  for pid in "${pids[@]}"; do
+    if ! wait "$pid"; then
+      shard_status=1
+    fi
+  done
+  set +e
+  "$PYTHON" scripts/merge_preflight_reports.py \
+    "$round_dir"/shard-*.json --output "$output"
+  local merge_status=$?
+  set -e
+  if (( shard_status != 0 || merge_status != 0 )); then
+    return 1
   fi
-done
+}
 
 set +e
-"$PYTHON" scripts/merge_preflight_reports.py \
-  "$BUILD_ROOT"/preflight/shard-*.json \
-  --output "$merged_preflight"
-merge_status=$?
+run_preflight_round \
+  "$core_candidate" "$BUILD_ROOT/preflight-candidate" "$candidate_preflight"
+candidate_status=$?
 set -e
-if (( shard_status != 0 || merge_status != 0 )); then
-  echo "v1 physical preflight incomplete; inspect $BUILD_ROOT" >&2
+if [[ ! -s "$candidate_preflight" ]]; then
+  echo "candidate physical preflight did not produce a complete report" >&2
+  exit 1
+fi
+
+"$PYTHON" scripts/prune_infeasible_configurations.py \
+  --core "$core_candidate" \
+  --full "$full_candidate" \
+  --preflight "$candidate_preflight" \
+  --output-core "$core_manifest" \
+  --output-full "$full_manifest" \
+  --report "$feasibility_filter"
+
+if ! run_preflight_round \
+  "$core_manifest" "$BUILD_ROOT/preflight-final" "$merged_preflight"; then
+  echo "filtered v1 physical preflight incomplete; inspect $BUILD_ROOT" >&2
   exit 1
 fi
 
@@ -72,6 +104,7 @@ fi
   --core "$core_manifest" \
   --full "$full_manifest" \
   --preflight "$merged_preflight" \
+  --feasibility-filter "$feasibility_filter" \
   --output-dir "$RELEASE_DIR"
 
 echo "LIBERO-MAX v1 test sets frozen at $RELEASE_DIR"
