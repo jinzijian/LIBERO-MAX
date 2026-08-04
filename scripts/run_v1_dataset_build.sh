@@ -14,7 +14,7 @@ export TORCH_FORCE_NO_WEIGHTS_ONLY_LOAD=1
 export LIBERO_CONFIG_PATH="$DEPS_DIR/libero-config"
 export PYTHONPATH="$PROJECT_DIR/src:$DEPS_DIR/robosuite-1.4.0:$DEPS_DIR/cosmos-policy/.venv/lib/python3.10/site-packages:$DEPS_DIR/.venv-libero/lib/python3.10/site-packages:$DEPS_DIR/LIBERO:$DEPS_DIR/cosmos-policy"
 
-mkdir -p "$BUILD_ROOT/preflight"
+mkdir -p "$BUILD_ROOT"
 cd "$PROJECT_DIR"
 
 raw_catalog="$BUILD_ROOT/task_catalog_raw.json"
@@ -65,24 +65,24 @@ run_preflight_round() {
       shard_status=1
     fi
   done
-  set +e
+  local merge_status=0
   "$PYTHON" scripts/merge_preflight_reports.py \
-    "$round_dir"/shard-*.json --output "$output"
-  local merge_status=$?
-  set -e
+    "$round_dir"/shard-*.json --output "$output" || merge_status=$?
   if (( shard_status != 0 || merge_status != 0 )); then
     return 1
   fi
 }
 
-set +e
+candidate_status=0
 run_preflight_round \
-  "$core_candidate" "$BUILD_ROOT/preflight-candidate" "$candidate_preflight"
-candidate_status=$?
-set -e
+  "$core_candidate" "$BUILD_ROOT/preflight-candidate" "$candidate_preflight" \
+  || candidate_status=$?
 if [[ ! -s "$candidate_preflight" ]]; then
   echo "candidate physical preflight did not produce a complete report" >&2
   exit 1
+fi
+if (( candidate_status != 0 )); then
+  echo "candidate preflight found infeasible configurations; applying filter"
 fi
 
 "$PYTHON" scripts/prune_infeasible_configurations.py \
