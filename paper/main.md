@@ -11,8 +11,9 @@ illumination switches, camera shifts, target and receptacle relocation,
 five-object distractor bursts, and path-obstacle insertion. Each intervention
 fires when the robot approaches the task target and is paired with a no-change
 rollout sharing the task, initial state, policy seed, and deterministic setup.
-Independent intervention seeds randomize direction, magnitude, identity, and
-placement while resolving every sampled value into an immutable manifest. The
+Independent intervention draws vary severity, identity, and placement while
+using one prevalidated relocation direction per task and resolving every value
+into an immutable manifest. The
 protocol separates preserved capability, intervention-side recovery,
 change-induced regression, and persistent failure, while recording the delay
 between physical change and the next policy query. We evaluate [MODEL ROSTER]
@@ -296,8 +297,9 @@ all missing/invalid/duplicate cases.
 
 ### 7.3 Timing and closed-loop exposure
 
-[24/18/12 cm trigger ablation; query-interval ablation; trigger coverage and
-post-change action response.]
+[Five-step query-interval and event-notification ablations on the frozen
+180-pair subset; trigger coverage, open-loop exposure, and post-change action
+response.]
 
 ### 7.4 Failure analysis
 
