@@ -287,7 +287,18 @@ def _core_assignments(tasks: Sequence[Dict[str, Any]]) -> Dict[Tuple[str, int], 
     assignments: Dict[Tuple[str, int], Tuple[str, int]] = {}
     for stratum in sorted(strata):
         selected = set()
-        for change_type in CHANGE_TYPE_ORDER:
+        # Allocate the scarcest event first. Observation events accept every
+        # task, while clutter and relocation events require specific scene
+        # structure; greedy allocation in display order can consume the few
+        # eligible tasks before their constrained event is assigned.
+        selection_order = sorted(
+            CHANGE_TYPE_ORDER,
+            key=lambda event: (
+                sum(event in eligible_change_types(task) for task in strata[stratum]),
+                CHANGE_TYPE_ORDER.index(event),
+            ),
+        )
+        for change_type in selection_order:
             candidates = [
                 task
                 for task in strata[stratum]
