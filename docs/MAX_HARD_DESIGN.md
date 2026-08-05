@@ -58,8 +58,10 @@ The two relocation directions are deterministic per task, never randomly
 resampled per rollout. Candidate directions must pass real-MuJoCo stability,
 support, contact, and visibility checks before release. Failed task/event
 configurations are replaced by another eligible task in the same Core stratum;
-Full keeps the task and assigns another eligible event. No infeasible case is
-counted as a policy failure.
+Full keeps the task and falls back to a non-geometric observation event. This
+can introduce a small Full event-count imbalance after feasibility filtering;
+Core remains exactly balanced. No infeasible case is counted as a policy
+failure.
 
 ## LIBERO-Plus compatibility
 

@@ -341,10 +341,15 @@ def _full_assignments(
         key=lambda task: _stable_seed((SAMPLER_VERSION, "full", *_task_key(task)))
     )
     for task in remaining:
+        task_had_failure = any(
+            suite == task["task_suite_name"] and task_index == task["task_index"]
+            for suite, task_index, _ in rejected
+        )
         eligible = [
             event
             for event in eligible_change_types(task)
             if (*_task_key(task), event) not in rejected
+            and (not task_had_failure or event in CHANGE_TYPE_ORDER[:4])
         ]
         if not eligible:
             raise HardBuildError("task %s has no dynamic event" % (_task_key(task),))

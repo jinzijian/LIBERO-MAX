@@ -6,6 +6,7 @@ from libero_max.hard import (
     PLUS_DIFFICULTIES,
     _build_case,
     _core_assignments,
+    _full_assignments,
     eligible_change_types,
 )
 
@@ -94,6 +95,20 @@ class HardManifestTest(unittest.TestCase):
         self.assertEqual(change["relative_to"], "target")
         self.assertTrue(change["preserve_initial_z"])
         self.assertNotIn("path_target", change)
+
+    def test_full_falls_back_to_observation_after_a_physical_failure(self):
+        tasks = [
+            _task("Objects Layout", 4, 1),
+            _task("Objects Layout", 4, 2),
+        ]
+        assignments = _full_assignments(
+            tasks,
+            {},
+            {("libero_spatial", 1, "obstacle_insertion")},
+        )
+        self.assertIn(
+            assignments[("libero_spatial", 1)][0], CHANGE_TYPE_ORDER[:4]
+        )
 
 
 if __name__ == "__main__":
