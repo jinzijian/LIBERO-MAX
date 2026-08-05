@@ -600,9 +600,41 @@ def _manifest(profile: str, cases: List[Dict[str, Any]]) -> Dict[str, Any]:
     return manifest
 
 
+def _frozen_core_assignments(
+    core: Dict[str, Any], tasks: Sequence[Dict[str, Any]]
+) -> Dict[Tuple[str, int], Tuple[str, int]]:
+    errors = validate_manifest(core)
+    if errors:
+        raise HardBuildError("frozen Core is invalid: %s" % "; ".join(errors))
+    if len(core.get("cases", [])) != 1400:
+        raise HardBuildError("frozen Core must contain exactly 1400 cases")
+    tasks_by_key = {_task_key(task): task for task in tasks}
+    assignments = {}
+    for case in core["cases"]:
+        key = (case["task_suite_name"], case["task_index"])
+        if key in assignments or key not in tasks_by_key:
+            raise HardBuildError("frozen Core has an unknown or duplicate task")
+        event = case["scenario"]["change_type"]
+        draw = case["scenario"].get("randomization", {}).get("draw_id")
+        if event not in eligible_change_types(tasks_by_key[key]) or draw not in {
+            0,
+            1,
+        }:
+            raise HardBuildError("frozen Core contains an ineligible assignment")
+        rebuilt = _build_case(tasks_by_key[key], event, draw)
+        if rebuilt["case_id"] != case["case_id"]:
+            raise HardBuildError("frozen Core assignment is not reproducible")
+        assignments[key] = (event, draw)
+    event_counts = Counter(event for event, _ in assignments.values())
+    if any(event_counts[event] != 175 for event in CHANGE_TYPE_ORDER):
+        raise HardBuildError("frozen Core is not globally event-balanced")
+    return assignments
+
+
 def build_hard_manifests(
     catalog: Dict[str, Any],
     rejected_configurations: Iterable[Tuple[str, int, str]] = (),
+    frozen_core: Optional[Dict[str, Any]] = None,
 ) -> Tuple[Dict[str, Any], Dict[str, Any]]:
     tasks = catalog.get("tasks")
     if not isinstance(tasks, list) or len(tasks) != 10030:
@@ -610,7 +642,11 @@ def build_hard_manifests(
     if len({_task_key(task) for task in tasks}) != len(tasks):
         raise HardBuildError("catalog contains duplicate suite/task keys")
     rejected = set(rejected_configurations)
-    core_assignments = _core_assignments(tasks, rejected)
+    core_assignments = (
+        _core_assignments(tasks, rejected)
+        if frozen_core is None
+        else _frozen_core_assignments(frozen_core, tasks)
+    )
     full_assignments = _full_assignments(tasks, core_assignments, rejected)
     full_cases = []
     core_cases = []

@@ -7,6 +7,8 @@ from libero_max.hard import (
     _build_case,
     _core_assignments,
     _full_assignments,
+    _frozen_core_assignments,
+    _manifest,
     eligible_change_types,
     expand_rejected_by_physical_scene,
 )
@@ -158,6 +160,28 @@ class HardManifestTest(unittest.TestCase):
         )
         self.assertIn(
             assignments[("libero_spatial", 1)][0], CHANGE_TYPE_ORDER[:4]
+        )
+
+    def test_frozen_core_assignments_are_reproduced_exactly(self):
+        tasks = []
+        index = 0
+        for category in PLUS_CATEGORIES:
+            for difficulty in PLUS_DIFFICULTIES:
+                for _ in range(48):
+                    tasks.append(_task(category, difficulty, index))
+                    index += 1
+        assignments = _core_assignments(tasks)
+        tasks_by_key = {
+            (task["task_suite_name"], task["task_index"]): task
+            for task in tasks
+        }
+        cases = [
+            _build_case(tasks_by_key[key], event, draw)
+            for key, (event, draw) in assignments.items()
+        ]
+        frozen = _manifest("core", cases)
+        self.assertEqual(
+            _frozen_core_assignments(frozen, tasks), assignments
         )
 
 

@@ -62,6 +62,11 @@ def main() -> int:
     parser.add_argument("--full", type=Path, required=True)
     parser.add_argument("--summary", type=Path, required=True)
     parser.add_argument(
+        "--frozen-core",
+        type=Path,
+        help="preserve an already preflighted Core while repairing Full",
+    )
+    parser.add_argument(
         "--smoke",
         type=Path,
         help="optional eight-case manifest containing one case per event",
@@ -108,7 +113,12 @@ def main() -> int:
     rejected = expand_rejected_by_physical_scene(
         catalog["tasks"], rejected, args.expand_rejection_change_type
     )
-    core, full = build_hard_manifests(catalog, rejected)
+    frozen_core = (
+        json.loads(args.frozen_core.read_text(encoding="utf-8"))
+        if args.frozen_core is not None
+        else None
+    )
+    core, full = build_hard_manifests(catalog, rejected, frozen_core=frozen_core)
     summary = {
         "core": hard_manifest_summary(core),
         "full": hard_manifest_summary(full),
