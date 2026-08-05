@@ -116,7 +116,10 @@ class LiberoMujocoBackend:
                     "alternate_goal[%d].arguments must be non-empty strings" % index
                 )
             results.append(
-                bool(self.env._eval_predicate([predicate, *arguments]))
+                # LIBERO's parsed BDDL predicates are lower-case even though
+                # task catalogs conventionally preserve the source spelling
+                # (for example, ``In`` and ``On``).
+                bool(self.env._eval_predicate([predicate.lower(), *arguments]))
             )
         return all(results)
 

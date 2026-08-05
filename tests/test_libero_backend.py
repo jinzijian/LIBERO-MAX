@@ -19,6 +19,16 @@ class FakeWrapper:
         self.env = FakeBaseEnv()
 
 
+class FakePredicateEnv(FakeBaseEnv):
+    def __init__(self):
+        super().__init__()
+        self.predicates = []
+
+    def _eval_predicate(self, state):
+        self.predicates.append(state)
+        return True
+
+
 class LiberoBackendTest(unittest.TestCase):
     def test_sim_is_resolved_lazily_after_hard_reset(self):
         wrapper = FakeWrapper()
@@ -28,6 +38,16 @@ class LiberoBackendTest(unittest.TestCase):
         wrapper.env.sim = replacement
         self.assertIsNot(original, replacement)
         self.assertIs(backend.sim, replacement)
+
+    def test_goal_satisfied_normalizes_catalog_predicate_names(self):
+        env = FakePredicateEnv()
+        backend = LiberoMujocoBackend(env)
+        self.assertTrue(
+            backend.goal_satisfied(
+                [{"predicate": "In", "arguments": ["item", "container"]}]
+            )
+        )
+        self.assertEqual(env.predicates, [["in", "item", "container"]])
 
     def test_distractor_batch_moves_each_unique_object(self):
         backend = object.__new__(LiberoMujocoBackend)

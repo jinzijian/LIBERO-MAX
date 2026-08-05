@@ -28,9 +28,9 @@ def main() -> int:
         if index % args.num_shards != args.shard_index:
             continue
         suite_name = case["task_suite_name"]
-        suite = suite_cache.setdefault(
-            suite_name, benchmark.get_benchmark_dict()[suite_name]()
-        )
+        if suite_name not in suite_cache:
+            suite_cache[suite_name] = benchmark.get_benchmark_dict()[suite_name]()
+        suite = suite_cache[suite_name]
         env = None
         errors = []
         alternate_goal_initially_satisfied = None
