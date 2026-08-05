@@ -67,6 +67,26 @@ class ResultSummaryTest(unittest.TestCase):
             len(summary["overall"]["paired_robustness_delta_95ci_bootstrap"]), 2
         )
 
+    def test_small_mcnemar_p_value_is_not_rounded_to_zero(self):
+        records = []
+        for index in range(50):
+            record = copy.deepcopy(self.results[0])
+            record.update(
+                {
+                    "pair_id": "regression-%d" % index,
+                    "scenario_id": "regression-%d" % index,
+                    "seed": index,
+                    "control_correct": True,
+                    "intervention_correct": False,
+                }
+            )
+            records.append(record)
+        summary = summarize_results(records)
+        self.assertEqual(
+            summary["overall"]["mcnemar_exact_two_sided_p"],
+            2.0 ** (1 - len(records)),
+        )
+
     def test_response_latency_includes_incorrect_responses(self):
         records = copy.deepcopy(self.results[:2])
         records[0]["intervention_correct"] = False

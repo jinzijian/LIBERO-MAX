@@ -208,7 +208,10 @@ def _mcnemar_exact(gains: int, regressions: int) -> Optional[float]:
     tail = sum(
         math.comb(discordant, k) for k in range(min(gains, regressions) + 1)
     ) / (2**discordant)
-    return round(min(1.0, 2 * tail), 10)
+    # Preserve scientific-notation-scale p-values. Decimal-place rounding turns
+    # strong paired evidence (for example, dozens of one-sided regressions)
+    # into a misleading literal 0.0.
+    return min(1.0, 2 * tail)
 
 
 def _paired_bootstrap_delta(
