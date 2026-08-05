@@ -9,6 +9,9 @@ from pathlib import Path
 from typing import Any, Dict
 
 import numpy as np
+# LIBERO-Plus sensor-noise variants use this NumPy 1.x dtype alias.
+if not hasattr(np, "float_"):
+    np.float_ = np.float64
 
 from libero_max.cosmos_integration import CosmosInterventionEnv, retain_action_prefix
 from libero_max.manifest import load_manifest

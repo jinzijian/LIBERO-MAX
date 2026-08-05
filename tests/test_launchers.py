@@ -42,6 +42,10 @@ class CosmosLauncherTest(unittest.TestCase):
             preflight.index(opt_out),
             preflight.index("from cosmos_policy.experiments.robot.libero"),
         )
+        self.assertLess(
+            preflight.index('if not hasattr(np, "float_")'),
+            preflight.index("from libero.libero"),
+        )
 
     def test_persistent_runner_disables_upstream_rollout_videos(self) -> None:
         runner = (ROOT / "scripts/run_cosmos_persistent_shard.py").read_text(

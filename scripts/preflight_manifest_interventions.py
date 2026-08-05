@@ -13,6 +13,10 @@ from typing import Any, Dict, List
 os.environ.setdefault("TORCH_FORCE_NO_WEIGHTS_ONLY_LOAD", "1")
 
 import numpy as np
+# LIBERO-Plus sensor-noise variants still use the removed NumPy 1.x dtype
+# alias. It is exactly equivalent to float64 in that code path.
+if not hasattr(np, "float_"):
+    np.float_ = np.float64
 from libero.libero import benchmark
 
 from cosmos_policy.experiments.robot.libero.libero_utils import get_libero_env
