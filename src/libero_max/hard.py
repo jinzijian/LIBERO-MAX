@@ -291,6 +291,7 @@ def _core_assignments(
     assignments: Dict[Tuple[str, int], Tuple[str, int]] = {}
     for stratum in sorted(strata):
         selected = set()
+        stratum_assignments: Dict[Tuple[str, int], Tuple[str, int]] = {}
         # Allocate the scarcest event first. Observation events accept every
         # task, while clutter and relocation events require specific scene
         # structure; greedy allocation in display order can consume the few
@@ -316,16 +317,79 @@ def _core_assignments(
                 )
             )
             if len(candidates) < CORE_PER_EVENT_PER_STRATUM:
-                raise HardBuildError(
-                    "%s lacks %d eligible tasks for %s"
-                    % (stratum, CORE_PER_EVENT_PER_STRATUM, change_type)
-                )
+                stratum_assignments = {}
+                break
             for rank, task in enumerate(candidates[:CORE_PER_EVENT_PER_STRATUM]):
                 key = _task_key(task)
                 selected.add(key)
-                assignments[key] = (change_type, rank % 2)
-        if len(selected) != CORE_PER_STRATUM:
+                stratum_assignments[key] = (change_type, rank % 2)
+        if len(stratum_assignments) != CORE_PER_STRATUM:
+            # Repeated feasibility rejection can make the simple scarcity
+            # ordering paint itself into a corner even when a valid balanced
+            # allocation still exists. Deterministic augmenting-path matching
+            # finds that allocation without relaxing any event quota.
+            slots = [
+                (event, rank)
+                for event in CHANGE_TYPE_ORDER
+                for rank in range(CORE_PER_EVENT_PER_STRATUM)
+            ]
+            candidates_by_event = {}
+            for event in CHANGE_TYPE_ORDER:
+                candidates = [
+                    task
+                    for task in strata[stratum]
+                    if event in eligible_change_types(task)
+                    and (*_task_key(task), event) not in rejected
+                ]
+                candidates.sort(
+                    key=lambda task: _stable_seed(
+                        (
+                            SAMPLER_VERSION,
+                            "core-matching",
+                            *stratum,
+                            event,
+                            *_task_key(task),
+                        )
+                    )
+                )
+                candidates_by_event[event] = candidates
+            slots.sort(
+                key=lambda slot: (
+                    len(candidates_by_event[slot[0]]),
+                    CHANGE_TYPE_ORDER.index(slot[0]),
+                    slot[1],
+                )
+            )
+            task_to_slot = {}
+            slot_to_task = {}
+
+            def assign(slot, seen_tasks):
+                event, _ = slot
+                for task in candidates_by_event[event]:
+                    key = _task_key(task)
+                    if key in seen_tasks:
+                        continue
+                    seen_tasks.add(key)
+                    previous = task_to_slot.get(key)
+                    if previous is None or assign(previous, seen_tasks):
+                        task_to_slot[key] = slot
+                        slot_to_task[slot] = task
+                        return True
+                return False
+
+            for slot in slots:
+                if not assign(slot, set()):
+                    raise HardBuildError(
+                        "%s cannot satisfy five feasible tasks per event"
+                        % (stratum,)
+                    )
+            stratum_assignments = {
+                _task_key(task): (event, rank % 2)
+                for (event, rank), task in slot_to_task.items()
+            }
+        if len(stratum_assignments) != CORE_PER_STRATUM:
             raise AssertionError("core stratum does not contain exactly 40 tasks")
+        assignments.update(stratum_assignments)
     return assignments
 
 
