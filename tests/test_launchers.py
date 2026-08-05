@@ -65,6 +65,15 @@ class CosmosLauncherTest(unittest.TestCase):
         self.assertIn('"MUJOCO_EGL_DEVICE_ID": gpu', launcher)
         self.assertIn('"--num-shards"', launcher)
 
+    def test_hard_preflight_uses_plus_overlay_and_physical_egl_ids(self) -> None:
+        launcher = (
+            ROOT / "scripts/run_max_hard_preflight.sh"
+        ).read_text(encoding="utf-8")
+        self.assertIn("libero-plus-python-overlay", launcher)
+        self.assertIn("LIBERO-plus", launcher)
+        self.assertIn('MUJOCO_EGL_DEVICE_ID="$gpu"', launcher)
+        self.assertIn('--num-shards "${#gpu_ids[@]}"', launcher)
+
 
 if __name__ == "__main__":
     unittest.main()
