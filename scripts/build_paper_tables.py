@@ -371,6 +371,17 @@ def main() -> None:
                 - int(left_records[key]["control_correct"])
                 for key in common
             ]
+            robustness_differences = [
+                (
+                    int(right_records[key]["intervention_correct"])
+                    - int(right_records[key]["control_correct"])
+                )
+                - (
+                    int(left_records[key]["intervention_correct"])
+                    - int(left_records[key]["control_correct"])
+                )
+                for key in common
+            ]
             left_only = sum(value == -1 for value in differences)
             right_only = sum(value == 1 for value in differences)
             control_left_only = sum(value == -1 for value in control_differences)
@@ -399,6 +410,15 @@ def main() -> None:
                     ),
                     "control_mcnemar_p": _mcnemar(
                         control_left_only, control_right_only
+                    ),
+                    "robustness_right_minus_left": (
+                        None
+                        if not robustness_differences
+                        else sum(robustness_differences)
+                        / len(robustness_differences)
+                    ),
+                    "robustness_right_minus_left_95ci": _paired_delta_ci(
+                        robustness_differences
                     ),
                 }
             )
@@ -435,6 +455,21 @@ def main() -> None:
         )
     (args.output_dir / "control_repeatability.md").write_text(
         "\n".join(control_comparison_lines) + "\n", encoding="utf-8"
+    )
+    robustness_lines = [
+        "| Comparison | Common pairs | Difference in paired robustness delta (95% CI) |",
+        "| --- | ---: | ---: |",
+    ]
+    for row in comparisons:
+        robustness_lines.append(
+            "| {left} vs {right} | {common_pairs} | {delta} {ci} |".format(
+                **row,
+                delta=_percent(row["robustness_right_minus_left"]),
+                ci=_interval(row["robustness_right_minus_left_95ci"]),
+            )
+        )
+    (args.output_dir / "robustness_comparison.md").write_text(
+        "\n".join(robustness_lines) + "\n", encoding="utf-8"
     )
     (args.output_dir / "results.json").write_text(
         json.dumps(
