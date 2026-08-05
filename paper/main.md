@@ -133,10 +133,10 @@ execution-commitment methods vary the accepted action prefix based on
 state-dependent reliability ([Chen et al., 2026](https://arxiv.org/abs/2605.11567)).
 LIBERO-MAX exposes this issue through an evaluator-side quantity: the number of
 environment steps between the physical event and the first policy query that
-can observe it. We compare shorter query intervals, observation history,
-explicit change notification, and online adaptation, but do not equate a
-parameter update or a changed action chunk with correct episode-level
-adaptation; the changed arm must still satisfy its response-aware outcome.
+can observe it. We compare a shorter query interval and explicit change
+notification, but do not equate a changed action chunk with correct
+episode-level adaptation; the changed arm must still satisfy its
+response-aware outcome.
 
 ## 3. LIBERO-MAX
 
