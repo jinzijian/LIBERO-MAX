@@ -123,7 +123,21 @@ def main() -> int:
     _write(args.summary, summary)
     if args.smoke is not None:
         selected = {}
-        for case in core["cases"]:
+        suite_priority = {
+            "libero_spatial": 0,
+            "libero_object": 1,
+            "libero_10": 2,
+            "libero_goal": 3,
+        }
+        smoke_candidates = sorted(
+            core["cases"],
+            key=lambda case: (
+                suite_priority.get(case["task_suite_name"], 99),
+                case.get("substrate_difficulty") or 99,
+                case["task_index"],
+            ),
+        )
+        for case in smoke_candidates:
             selected.setdefault(case["scenario"]["change_type"], case)
         smoke = dict(core)
         smoke["benchmark_id"] = "libero-max-hard-smoke"
