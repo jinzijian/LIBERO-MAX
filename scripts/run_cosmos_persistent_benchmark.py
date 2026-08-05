@@ -33,6 +33,34 @@ def main() -> int:
     (args.output_root / "manifest.json").write_text(
         json.dumps(manifest, indent=2, sort_keys=True) + "\n", encoding="utf-8"
     )
+    checkpoint = (
+        args.t5_embeddings.resolve().parent
+        / "Cosmos-Policy-LIBERO-Predict2-2B.pt"
+    )
+    run_config = {
+        "model": "Cosmos-Policy-LIBERO-Predict2-2B",
+        "checkpoint": str(checkpoint),
+        "checkpoint_bytes": checkpoint.stat().st_size,
+        "t5_embeddings": str(args.t5_embeddings.resolve()),
+        "t5_embeddings_bytes": args.t5_embeddings.stat().st_size,
+        "physical_gpus": gpus,
+        "workers": len(gpus),
+        "query_interval": (
+            args.query_interval
+            if args.query_interval is not None
+            else manifest["protocol"]["query_interval"]
+        ),
+        "policy_seed_contract": sorted(
+            {case["policy_seed"] for case in manifest["cases"]}
+        ),
+        "deterministic": True,
+        "control_replay_before_event": True,
+        "rollout_videos_disabled": True,
+    }
+    (args.output_root / "run_config.json").write_text(
+        json.dumps(run_config, indent=2, sort_keys=True) + "\n",
+        encoding="utf-8",
+    )
     runner = Path(__file__).resolve().parent / "run_cosmos_persistent_shard.py"
     processes = []
     log_handles = []
