@@ -59,11 +59,12 @@ The v1 physical-completion track contains six changes:
    approach corridor.
 
 These axes cover perceptual degradation, viewpoint shift, geometric
-replanning, target identity under clutter, and collision-aware detours without
-requiring a model-specific textual refusal or termination interface. Intent
-revision and infeasibility awareness are important extensions, but they
-require response-aware scorers and are not silently reduced to the original
-LIBERO success predicate.
+replanning, target identity under clutter, and collision-aware detours. A
+separate 96-pair Intent Core changes the target or receptacle named by the
+instruction, or cancels the task. It uses alternate BDDL goal predicates and a
+frozen ten-step safe-stop contract rather than silently reusing the original
+LIBERO success predicate. Explicit infeasibility awareness remains outside v1
+because it requires a model-agnostic abstention interface.
 
 Our contributions are:
 
@@ -71,6 +72,8 @@ Our contributions are:
   after execution begins;
 - six simulator-grounded intervention types with semantic proximity triggers,
   deterministic random draws, severity controls, and explicit validity checks;
+- a response-aware intent-revision track covering target updates, receptacle
+  updates, and task cancellation;
 - reporting that decomposes paired outcomes and includes coverage, uncertainty,
   pre-change action equality, post-change action response, and open-loop
   exposure;
@@ -118,9 +121,8 @@ state-dependent steerability
 real-robot target switch conveyed by human gaze
 ([Zuo et al., 2026](https://arxiv.org/abs/2605.30282)). These results establish
 that instruction or referent revision is a real and nontrivial problem. For
-that reason, LIBERO-MAX treats intent revision as a future response-aware track
-rather than folding it into the physical-completion score used in the first
-release.
+that reason, LIBERO-MAX evaluates intent revision in a separate response-aware
+track rather than folding it into the physical-completion score.
 
 ### Online adaptation and replanning
 
@@ -192,6 +194,18 @@ A matched pair is valid only when:
 Unreached triggers and invalid interventions are reported separately; they are
 not counted as ordinary policy failures.
 
+### 3.5 Intent revision
+
+Intent Core contains 96 deterministic matched pairs: 30 target updates, 18
+receptacle updates, and 48 cancellations. Updates are correct only when the
+alternate task predicate is satisfied after the model has received the new
+instruction. Cancellation is correct only when, during the first ten executed
+steps after the updated instruction reaches the policy, end-effector net
+motion is at most 2 cm, path length is at most 4 cm, target motion is at most
+1 cm, and the superseded goal is not completed. All alternate predicates and
+trigger entities are instantiated in the source environment and are checked
+to be unsatisfied before rollout.
+
 ## 4. Metrics
 
 For pair \(i\), let \(c_i\) and \(z_i\) be control and intervention
@@ -241,6 +255,10 @@ with every configuration to separate policy and intervention variation. The v1
 manifest is frozen only after task-specific relocation and insertion poses pass
 physical preflight and trigger-coverage calibration.
 
+Intent Core adds 96 matched pairs and uses the same 18 cm target-proximity
+trigger. Its correctness label is response-aware and is therefore reported
+separately from physical goal completion.
+
 ## 6. Experimental Setup
 
 ### Models and baselines
@@ -248,12 +266,13 @@ physical preflight and trigger-coverage calibration.
 1. Cosmos Policy Predict2-2B with its default 16-step action commitment.
 2. pi0.5-LIBERO with its official five-step replanning interval and
    deterministic matched flow noise.
-3. The same VLA with shorter closed-loop query intervals.
-4. Online-adaptation method with a fully specified update contract.
-5. Oracle change-notified diagnostic.
+3. Cosmos Policy on a frozen 180-pair, six-axis-balanced subset with a
+   five-step closed-loop query interval.
+4. Cosmos Policy on the same subset with an evaluator-provided event
+   notification appended to the task instruction.
 
-The oracle measures headroom from knowing that a change occurred and is not a
-deployable baseline.
+The event-notified diagnostic measures headroom from knowing that a change
+occurred and is not a deployable baseline.
 
 ### Reproducibility
 
@@ -289,10 +308,11 @@ failed replanning, simulator-invalid cases, and base-task failures.]
 
 The first release uses simulation, task-native inserted objects, and a geometric
 proximity trigger available to the evaluator but not exposed to the policy.
-Goal completion alone cannot establish change detection. Safety claims require
-instrumented collision or termination coverage. Intent revision and explicit
-infeasibility reporting remain separate tracks until model-agnostic response
-interfaces and scorers are implemented.
+Goal completion alone cannot establish change detection. Physical-track safety
+claims remain limited because robot--object collision instrumentation is not
+complete. Intent scoring covers instruction updates and cancellation, but
+explicit infeasibility reporting remains future work until a model-agnostic
+abstention interface is available.
 
 ## 9. Conclusion
 
