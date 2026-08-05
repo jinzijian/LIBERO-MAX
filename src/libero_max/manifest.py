@@ -102,6 +102,9 @@ def validate_manifest(data: Any) -> List[str]:
                 "protocol.scoring_track must be one of: %s"
                 % ", ".join(sorted(SCORING_TRACKS))
             )
+        for field in PROTOCOL_OPTIONAL_FIELDS:
+            if field in protocol and not _nonempty_string(protocol[field]):
+                errors.append("protocol.%s must be a non-empty string" % field)
 
     cases = data.get("cases")
     if not isinstance(cases, list) or not cases:
@@ -141,6 +144,21 @@ def validate_manifest(data: Any) -> List[str]:
                 "%s.timing_bucket must be one of: %s"
                 % (label, ", ".join(sorted(TIMING_BUCKETS)))
             )
+        for field in (
+            "task_name",
+            "substrate_category",
+            "dynamic_phase",
+        ):
+            if field in case and not _nonempty_string(case[field]):
+                errors.append("%s.%s must be a non-empty string" % (label, field))
+        if "substrate_difficulty" in case:
+            difficulty = case["substrate_difficulty"]
+            if difficulty is not None and (
+                not _is_integer(difficulty) or difficulty not in {1, 2, 3, 4, 5}
+            ):
+                errors.append(
+                    "%s.substrate_difficulty must be null or 1 through 5" % label
+                )
 
         scenario = case.get("scenario")
         scenario_errors = validate_scenario(scenario)

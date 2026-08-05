@@ -40,6 +40,30 @@ class ManifestTest(unittest.TestCase):
         }
         self.assertTrue(any("aligned" in error for error in validate_manifest(broken)))
 
+    def test_plus_metadata_is_strict_when_present(self):
+        enriched = copy.deepcopy(self.manifest)
+        enriched["protocol"].update(
+            {
+                "substrate": "LIBERO-Plus",
+                "profile": "core",
+                "source_benchmark_commit": "4976dc3",
+                "selection_contract": "stratified",
+            }
+        )
+        enriched["cases"][0].update(
+            {
+                "task_name": "task",
+                "substrate_category": "Sensor Noise",
+                "substrate_difficulty": 5,
+                "dynamic_phase": "pre_grasp_proximity",
+            }
+        )
+        self.assertEqual(validate_manifest(enriched), [])
+        enriched["cases"][0]["substrate_difficulty"] = 6
+        self.assertTrue(
+            any("substrate_difficulty" in error for error in validate_manifest(enriched))
+        )
+
 
 if __name__ == "__main__":
     unittest.main()
