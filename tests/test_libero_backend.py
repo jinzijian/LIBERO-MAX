@@ -113,6 +113,50 @@ class LiberoBackendTest(unittest.TestCase):
                 "distractor",
             )
 
+    def test_sensor_corruption_is_seeded_and_preserves_non_images(self):
+        backend = object.__new__(LiberoMujocoBackend)
+        backend._observation_corruption = {}
+        backend._observation_counter = 0
+        backend._set_sensor_corruption(
+            {
+                "seed": 17,
+                "noise_std": 12.0,
+                "occlusion_fraction": 0.1,
+            }
+        )
+        observation = {
+            "agentview_image": np.full((20, 20, 3), 127, dtype=np.uint8),
+            "robot0_eef_pos": np.array([1.0, 2.0, 3.0]),
+        }
+        first = backend.transform_observation(observation)
+        backend._observation_counter = 0
+        repeated = backend.transform_observation(observation)
+        np.testing.assert_array_equal(
+            first["agentview_image"], repeated["agentview_image"]
+        )
+        self.assertFalse(
+            np.array_equal(first["agentview_image"], observation["agentview_image"])
+        )
+        np.testing.assert_array_equal(
+            first["robot0_eef_pos"], observation["robot0_eef_pos"]
+        )
+
+    def test_visual_theme_changes_only_rgb_channels(self):
+        backend = object.__new__(LiberoMujocoBackend)
+        model = type("Model", (), {})()
+        model.geom_rgba = np.array([[0.2, 0.4, 0.8, 0.5]], dtype=np.float64)
+        backend.env = type(
+            "Env", (), {"sim": type("Sim", (), {"model": model})()}
+        )()
+        result = backend._set_visual_theme(
+            {
+                "rgb_permutation": [2, 0, 1],
+                "rgb_multiplier": [1.0, 1.0, 1.0],
+            }
+        )
+        np.testing.assert_allclose(model.geom_rgba, [[0.8, 0.2, 0.4, 0.5]])
+        self.assertEqual(result["changed_arrays"], ["geom_rgba"])
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -18,6 +18,12 @@ TIMING_BUCKETS = {"early", "middle", "late"}
 SCORING_TRACKS = {"physical_completion", "intent_response"}
 MANIFEST_FIELDS = {"benchmark_id", "benchmark_version", "protocol", "cases"}
 PROTOCOL_FIELDS = {"arms", "query_interval", "scoring_track"}
+PROTOCOL_OPTIONAL_FIELDS = {
+    "substrate",
+    "profile",
+    "source_benchmark_commit",
+    "selection_contract",
+}
 CASE_FIELDS = {
     "case_id",
     "task_suite_name",
@@ -26,6 +32,12 @@ CASE_FIELDS = {
     "policy_seed",
     "timing_bucket",
     "scenario",
+}
+CASE_OPTIONAL_FIELDS = {
+    "task_name",
+    "substrate_category",
+    "substrate_difficulty",
+    "dynamic_phase",
 }
 
 
@@ -41,10 +53,12 @@ def _nonempty_string(value: Any) -> bool:
     return isinstance(value, str) and bool(value.strip())
 
 
-def _field_errors(data: Dict[str, Any], expected: set, label: str) -> List[str]:
+def _field_errors(
+    data: Dict[str, Any], expected: set, label: str, optional: set = frozenset()
+) -> List[str]:
     errors: List[str] = []
     missing = sorted(expected - set(data))
-    unknown = sorted(set(data) - expected)
+    unknown = sorted(set(data) - expected - optional)
     if missing:
         errors.append("%s missing fields: %s" % (label, ", ".join(missing)))
     if unknown:
@@ -68,7 +82,14 @@ def validate_manifest(data: Any) -> List[str]:
     if not isinstance(protocol, dict):
         errors.append("protocol must be a JSON object")
     else:
-        errors.extend(_field_errors(protocol, PROTOCOL_FIELDS, "protocol"))
+        errors.extend(
+            _field_errors(
+                protocol,
+                PROTOCOL_FIELDS,
+                "protocol",
+                PROTOCOL_OPTIONAL_FIELDS,
+            )
+        )
         arms = protocol.get("arms")
         if arms != ["control", "intervention"]:
             errors.append("protocol.arms must be [control, intervention] in that order")
@@ -94,7 +115,9 @@ def validate_manifest(data: Any) -> List[str]:
         if not isinstance(case, dict):
             errors.append("%s must be a JSON object" % label)
             continue
-        errors.extend(_field_errors(case, CASE_FIELDS, label))
+        errors.extend(
+            _field_errors(case, CASE_FIELDS, label, CASE_OPTIONAL_FIELDS)
+        )
         case_id = case.get("case_id")
         if not _nonempty_string(case_id):
             errors.append("%s.case_id must be a non-empty string" % label)
@@ -139,9 +162,15 @@ def validate_manifest(data: Any) -> List[str]:
                     "%s physical_completion only supports continue or replan" % label
                 )
             trigger = scenario["trigger"]
-            if trigger["type"] not in {"fixed_step", "on_proximity"}:
+            if trigger["type"] not in {
+                "fixed_step",
+                "on_proximity",
+                "before_grasp",
+                "after_grasp",
+                "before_place",
+            }:
                 errors.append(
-                    "%s Cosmos physical pilot requires fixed_step or on_proximity"
+                    "%s physical track requires a supported online trigger"
                     % label
                 )
             elif (

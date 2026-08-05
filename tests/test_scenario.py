@@ -85,6 +85,17 @@ class ScenarioValidationTest(unittest.TestCase):
         scenario["trigger"]["distance_m"] = 0
         self.assertIn("must be positive", " ".join(validate_scenario(scenario)))
 
+    def test_before_place_requires_target_and_distance(self):
+        scenario = copy.deepcopy(self.scenarios[0])
+        scenario["trigger"] = {
+            "type": "before_place",
+            "value": "basket_1",
+            "distance_m": 0.2,
+        }
+        self.assertIn("target_entity", " ".join(validate_scenario(scenario)))
+        scenario["trigger"]["target_entity"] = "soup_1"
+        self.assertEqual(validate_scenario(scenario), [])
+
     def test_duplicate_scenario_seed_is_rejected(self):
         scenarios = self.scenarios + [copy.deepcopy(self.scenarios[0])]
         self.assertIn(

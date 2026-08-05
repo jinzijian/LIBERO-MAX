@@ -17,6 +17,8 @@ CHANGE_FAMILIES = {
 CHANGE_TYPES = {
     "illumination_switch",
     "camera_shift",
+    "visual_theme_switch",
+    "sensor_noise_onset",
     "target_relocation",
     "receptacle_relocation",
     "distractor_burst",
@@ -31,6 +33,7 @@ SEVERITIES = {"low", "medium", "high"}
 TRIGGER_TYPES = {
     "after_grasp",
     "before_grasp",
+    "before_place",
     "after_subgoal",
     "on_region_entry",
     "on_proximity",
@@ -181,7 +184,7 @@ def _validate_trigger(trigger: Any) -> List[str]:
 
     errors: List[str] = []
     missing = {"type", "value"} - set(trigger)
-    unknown = set(trigger) - {"type", "value", "distance_m"}
+    unknown = set(trigger) - {"type", "value", "distance_m", "target_entity"}
     if missing:
         errors.append("trigger missing fields: " + ", ".join(sorted(missing)))
     if unknown:
@@ -193,18 +196,27 @@ def _validate_trigger(trigger: Any) -> List[str]:
         errors.append("trigger.type must be one of: " + ", ".join(sorted(TRIGGER_TYPES)))
         return errors
 
-    if trigger_type == "on_proximity":
+    if trigger_type in {"on_proximity", "before_grasp", "before_place"}:
         if not _nonempty_string(value):
-            errors.append("on_proximity trigger.value must name an entity")
+            errors.append("%s trigger.value must name an entity" % trigger_type)
         distance = trigger.get("distance_m")
-        if (
+        distance_required = trigger_type in {"on_proximity", "before_place"}
+        if (distance_required or distance is not None) and (
             isinstance(distance, bool)
             or not isinstance(distance, (int, float))
             or distance <= 0
         ):
-            errors.append("on_proximity trigger.distance_m must be positive")
-    elif "distance_m" in trigger:
-        errors.append("trigger.distance_m is only valid for on_proximity")
+            errors.append("%s trigger.distance_m must be positive" % trigger_type)
+        if trigger_type == "before_place" and not _nonempty_string(
+            trigger.get("target_entity")
+        ):
+            errors.append("before_place trigger.target_entity must name the grasped object")
+        if trigger_type != "before_place" and "target_entity" in trigger:
+            errors.append("trigger.target_entity is only valid for before_place")
+    elif "distance_m" in trigger or "target_entity" in trigger:
+        errors.append(
+            "trigger.distance_m and target_entity are only valid for proximity phases"
+        )
     elif trigger_type == "fixed_step":
         if not _is_integer(value) or value < 1:
             errors.append("fixed_step trigger.value must be an integer >= 1")

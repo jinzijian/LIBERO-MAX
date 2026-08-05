@@ -9,6 +9,7 @@ from .scenario import validate_scenario
 EVENT_PREFIXES = {
     "before_grasp": "pregrasp",
     "after_grasp": "grasp",
+    "before_place": "preplace",
     "after_subgoal": "subgoal",
     "on_region_entry": "region",
     "on_proximity": "proximity",

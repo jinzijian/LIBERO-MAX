@@ -44,6 +44,15 @@ class LiberoMujocoBackend:
             raise LiberoBackendError("environment does not expose a MuJoCo sim")
         self.env = base_env
         self._removed_positions: Dict[str, np.ndarray] = {}
+        self._observation_corruption: Dict[str, Any] = {}
+        self._observation_counter = 0
+
+    def reset_episode_state(self) -> None:
+        """Clear wrapper-side state after LIBERO hard-resets an episode."""
+
+        self._removed_positions = {}
+        self._observation_corruption = {}
+        self._observation_counter = 0
 
     @property
     def sim(self) -> Any:
@@ -61,6 +70,8 @@ class LiberoMujocoBackend:
             "insert_distractors": self._insert_distractors,
             "remove_object": self._remove_object,
             "set_lighting": self._set_lighting,
+            "set_visual_theme": self._set_visual_theme,
+            "set_sensor_corruption": self._set_sensor_corruption,
         }
         if operation not in handlers:
             raise LiberoBackendError("unsupported physical operation: %s" % operation)
@@ -74,7 +85,38 @@ class LiberoMujocoBackend:
             self.env._post_process()
         if hasattr(self.env, "_update_observables"):
             self.env._update_observables(force=True)
-        return self.env._get_observations()
+        return self.transform_observation(self.env._get_observations())
+
+    def transform_observation(self, observation: Dict[str, Any]) -> Dict[str, Any]:
+        """Apply an enabled sensor event without changing simulator physics."""
+
+        if not self._observation_corruption:
+            return observation
+        result = dict(observation)
+        config = self._observation_corruption
+        seed = int(config["seed"]) + self._observation_counter
+        self._observation_counter += 1
+        rng = np.random.RandomState(seed)
+        for key, value in observation.items():
+            if not key.endswith("_image"):
+                continue
+            image = np.asarray(value)
+            if image.ndim != 3 or image.shape[-1] not in {1, 3, 4}:
+                continue
+            work = image.astype(np.float32)
+            noise_std = float(config["noise_std"])
+            if noise_std:
+                work += rng.normal(0.0, noise_std, size=work.shape)
+            fraction = float(config["occlusion_fraction"])
+            if fraction:
+                height, width = work.shape[:2]
+                block_height = max(1, int(round(height * math.sqrt(fraction))))
+                block_width = max(1, int(round(width * math.sqrt(fraction))))
+                top = int(rng.randint(0, max(1, height - block_height + 1)))
+                left = int(rng.randint(0, max(1, width - block_width + 1)))
+                work[top : top + block_height, left : left + block_width] = 0
+            result[key] = np.clip(work, 0, 255).astype(image.dtype)
+        return result
 
     def distance_to_entity(
         self, observation: Dict[str, Any], entity_name: str
@@ -91,6 +133,21 @@ class LiberoMujocoBackend:
 
         entity, fixture = self._entity(entity_name)
         return self._entity_position(entity, fixture).tolist()
+
+    def is_grasping(self, entity_name: str) -> bool:
+        """Return LIBERO's own grasp predicate for a movable object."""
+
+        entity, fixture = self._entity(entity_name)
+        if fixture:
+            return False
+        try:
+            gripper = self.env.robots[0].gripper
+            contact_geoms = entity.contact_geoms
+            return bool(self.env._check_grasp(gripper, contact_geoms))
+        except (AttributeError, IndexError, TypeError, ValueError) as exc:
+            raise LiberoBackendError(
+                "cannot evaluate grasp state for %s" % entity_name
+            ) from exc
 
     def goal_satisfied(self, goal: List[Dict[str, Any]]) -> bool:
         """Evaluate an explicit LIBERO goal without mutating the task definition."""
@@ -134,6 +191,7 @@ class LiberoMujocoBackend:
 
         before_position = np.asarray(self.sim.model.cam_pos[camera_id]).copy()
         before_quaternion = np.asarray(self.sim.model.cam_quat[camera_id]).copy()
+        before_fovy = float(self.sim.model.cam_fovy[camera_id])
         position = before_position.copy()
         quaternion = before_quaternion.copy()
         changed = False
@@ -152,6 +210,22 @@ class LiberoMujocoBackend:
             quaternion = _quat_multiply_wxyz(yaw_quaternion, quaternion)
             quaternion /= np.linalg.norm(quaternion)
             changed = True
+        if "fovy_degrees" in change:
+            fovy = float(change["fovy_degrees"])
+            if not math.isfinite(fovy) or not 5.0 <= fovy <= 150.0:
+                raise LiberoBackendError(
+                    "fovy_degrees must be finite and between 5 and 150"
+                )
+            self.sim.model.cam_fovy[camera_id] = fovy
+            changed = True
+        elif "delta_fovy_degrees" in change:
+            fovy = before_fovy + float(change["delta_fovy_degrees"])
+            if not math.isfinite(fovy) or not 5.0 <= fovy <= 150.0:
+                raise LiberoBackendError(
+                    "resulting camera field of view must be between 5 and 150"
+                )
+            self.sim.model.cam_fovy[camera_id] = fovy
+            changed = True
         if not changed:
             raise LiberoBackendError(
                 "shift_camera requires delta_position_m and/or yaw_degrees"
@@ -166,6 +240,8 @@ class LiberoMujocoBackend:
             "position_after_m": position.tolist(),
             "quaternion_before_wxyz": before_quaternion.tolist(),
             "quaternion_after_wxyz": quaternion.tolist(),
+            "fovy_before_degrees": before_fovy,
+            "fovy_after_degrees": float(self.sim.model.cam_fovy[camera_id]),
         }
 
     def _entity(self, name: Any) -> Tuple[Any, bool]:
@@ -346,3 +422,56 @@ class LiberoMujocoBackend:
             "ambient_before": before["ambient"].tolist(),
             "ambient_after": np.asarray(model.light_ambient).tolist(),
         }
+
+    def _set_visual_theme(self, change: Dict[str, Any]) -> Dict[str, Any]:
+        permutation = change.get("rgb_permutation", [2, 0, 1])
+        multiplier = change.get("rgb_multiplier", [0.8, 1.1, 1.25])
+        if (
+            not isinstance(permutation, list)
+            or sorted(permutation) != [0, 1, 2]
+        ):
+            raise LiberoBackendError("rgb_permutation must permute [0, 1, 2]")
+        scale = np.asarray(multiplier, dtype=np.float64)
+        if scale.shape != (3,) or not np.all(np.isfinite(scale)) or np.any(scale < 0):
+            raise LiberoBackendError("rgb_multiplier must contain three non-negative numbers")
+        model = self.sim.model
+        changed_arrays = []
+        evidence = {}
+        for name in ("geom_rgba", "mat_rgba"):
+            if not hasattr(model, name):
+                continue
+            rgba = getattr(model, name)
+            before = np.asarray(rgba).copy()
+            rgba[:, :3] = np.clip(before[:, permutation] * scale, 0.0, 1.0)
+            changed_arrays.append(name)
+            evidence[name + "_rgb_mean_before"] = before[:, :3].mean(axis=0).tolist()
+            evidence[name + "_rgb_mean_after"] = (
+                np.asarray(rgba)[:, :3].mean(axis=0).tolist()
+            )
+        if not changed_arrays:
+            raise LiberoBackendError("MuJoCo model exposes no visual RGBA arrays")
+        return {
+            "operation": "set_visual_theme",
+            "rgb_permutation": permutation,
+            "rgb_multiplier": scale.tolist(),
+            "changed_arrays": changed_arrays,
+            **evidence,
+        }
+
+    def _set_sensor_corruption(self, change: Dict[str, Any]) -> Dict[str, Any]:
+        noise_std = float(change.get("noise_std", 0.0))
+        fraction = float(change.get("occlusion_fraction", 0.0))
+        seed = change.get("seed")
+        if not math.isfinite(noise_std) or not 0.0 <= noise_std <= 100.0:
+            raise LiberoBackendError("noise_std must be between 0 and 100")
+        if not math.isfinite(fraction) or not 0.0 <= fraction <= 0.5:
+            raise LiberoBackendError("occlusion_fraction must be between 0 and 0.5")
+        if not isinstance(seed, int) or isinstance(seed, bool) or seed < 0:
+            raise LiberoBackendError("set_sensor_corruption requires a non-negative seed")
+        self._observation_corruption = {
+            "noise_std": noise_std,
+            "occlusion_fraction": fraction,
+            "seed": seed,
+        }
+        self._observation_counter = 0
+        return {"operation": "set_sensor_corruption", **self._observation_corruption}

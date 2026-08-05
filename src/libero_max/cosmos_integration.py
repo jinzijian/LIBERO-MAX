@@ -138,6 +138,8 @@ class CosmosInterventionEnv:
         self.trigger_observation = None
         self.executed_actions = []
         self.original_goal_completed_after_event = False
+        if hasattr(self.backend, "reset_episode_state"):
+            self.backend.reset_episode_state()
         self.runtime.reset(self.task_description)
         return result
 
@@ -157,6 +159,8 @@ class CosmosInterventionEnv:
 
     def step(self, action: Any) -> Any:
         observation, reward, done, info = self._env.step(action)
+        if self.runtime.applied and hasattr(self.backend, "transform_observation"):
+            observation = self.backend.transform_observation(observation)
         original_done = bool(done)
         self.total_env_steps += 1
         policy_step = max(0, self.total_env_steps - self.warmup_steps)
@@ -178,6 +182,33 @@ class CosmosInterventionEnv:
                         "distance_m": proximity_distance,
                         "policy_step": policy_step,
                     }
+        elif trigger["type"] in {"before_grasp", "after_grasp", "before_place"} and policy_step > 0:
+            trigger_type = trigger["type"]
+            grasp_target = trigger.get("target_entity", trigger["value"])
+            grasping = self.backend.is_grasping(grasp_target)
+            if trigger_type == "after_grasp" and grasping:
+                trigger_events = frozenset({"grasp:%s" % trigger["value"]})
+            elif trigger_type == "before_grasp" and not grasping:
+                proximity_distance = self.backend.distance_to_entity(
+                    observation, trigger["value"]
+                )
+                if proximity_distance <= trigger.get("distance_m", 0.18):
+                    trigger_events = frozenset({"pregrasp:%s" % trigger["value"]})
+            elif trigger_type == "before_place" and grasping:
+                proximity_distance = self.backend.distance_to_entity(
+                    observation, trigger["value"]
+                )
+                if proximity_distance <= trigger["distance_m"]:
+                    trigger_events = frozenset({"preplace:%s" % trigger["value"]})
+            if trigger_events and self.trigger_observation is None:
+                self.trigger_observation = {
+                    "type": trigger_type,
+                    "entity": trigger["value"],
+                    "target_entity": grasp_target,
+                    "threshold_m": trigger.get("distance_m"),
+                    "distance_m": proximity_distance,
+                    "policy_step": policy_step,
+                }
 
         can_apply = (
             self.arm == "intervention"
