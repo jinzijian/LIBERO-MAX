@@ -67,6 +67,22 @@ def _parse_run(value: str) -> Tuple[str, Path]:
     return name, Path(root)
 
 
+def _binary_metrics(records: List[Dict[str, Any]]) -> Dict[str, Any]:
+    total = len(records)
+    if not total:
+        return {"n": 0, "control": None, "intervention": None, "delta": None}
+    control = sum(bool(record["control_correct"]) for record in records) / total
+    intervention = (
+        sum(bool(record["intervention_correct"]) for record in records) / total
+    )
+    return {
+        "n": total,
+        "control": control,
+        "intervention": intervention,
+        "delta": intervention - control,
+    }
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--run", action="append", type=_parse_run, required=True)
@@ -176,6 +192,116 @@ def main() -> None:
         )
     (args.output_dir / "by_severity.md").write_text(
         "\n".join(severity_lines) + "\n", encoding="utf-8"
+    )
+
+    stratified_lines = [
+        "| Model | Change type | Severity | n | Control | Change | Delta |",
+        "| --- | --- | --- | ---: | ---: | ---: | ---: |",
+    ]
+    for run in runs:
+        records = [
+            record
+            for record in run["records"]
+            if record.get("change_type") is not None
+            and record.get("severity") is not None
+        ]
+        groups = sorted(
+            {(record["change_type"], record["severity"]) for record in records}
+        )
+        for change_type, severity in groups:
+            metrics = _binary_metrics(
+                [
+                    record
+                    for record in records
+                    if record["change_type"] == change_type
+                    and record["severity"] == severity
+                ]
+            )
+            stratified_lines.append(
+                "| %s | %s | %s | %d | %s | %s | %s |"
+                % (
+                    run["name"],
+                    change_type,
+                    severity,
+                    metrics["n"],
+                    _percent(metrics["control"]),
+                    _percent(metrics["intervention"]),
+                    _percent(metrics["delta"]),
+                )
+            )
+    (args.output_dir / "by_type_severity.md").write_text(
+        "\n".join(stratified_lines) + "\n", encoding="utf-8"
+    )
+
+    draw_lines = [
+        "| Model | Change type | Draw | n | Control | Change | Delta |",
+        "| --- | --- | ---: | ---: | ---: | ---: | ---: |",
+    ]
+    for run in runs:
+        records = [
+            record
+            for record in run["records"]
+            if record.get("change_type") is not None
+            and record.get("intervention_draw_id") is not None
+        ]
+        groups = sorted(
+            {
+                (record["change_type"], record["intervention_draw_id"])
+                for record in records
+            }
+        )
+        for change_type, draw_id in groups:
+            metrics = _binary_metrics(
+                [
+                    record
+                    for record in records
+                    if record["change_type"] == change_type
+                    and record["intervention_draw_id"] == draw_id
+                ]
+            )
+            draw_lines.append(
+                "| %s | %s | %s | %d | %s | %s | %s |"
+                % (
+                    run["name"],
+                    change_type,
+                    draw_id,
+                    metrics["n"],
+                    _percent(metrics["control"]),
+                    _percent(metrics["intervention"]),
+                    _percent(metrics["delta"]),
+                )
+            )
+    (args.output_dir / "by_type_draw.md").write_text(
+        "\n".join(draw_lines) + "\n", encoding="utf-8"
+    )
+
+    suite_lines = [
+        "| Model | Suite | n | Control | Change | Delta |",
+        "| --- | --- | ---: | ---: | ---: | ---: |",
+    ]
+    for run in runs:
+        records = [
+            record
+            for record in run["records"]
+            if record.get("task_suite_name") is not None
+        ]
+        for suite in sorted({record["task_suite_name"] for record in records}):
+            metrics = _binary_metrics(
+                [record for record in records if record["task_suite_name"] == suite]
+            )
+            suite_lines.append(
+                "| %s | %s | %d | %s | %s | %s |"
+                % (
+                    run["name"],
+                    suite,
+                    metrics["n"],
+                    _percent(metrics["control"]),
+                    _percent(metrics["intervention"]),
+                    _percent(metrics["delta"]),
+                )
+            )
+    (args.output_dir / "by_suite.md").write_text(
+        "\n".join(suite_lines) + "\n", encoding="utf-8"
     )
 
     diagnostic_lines = [
