@@ -8,6 +8,7 @@ from libero_max.hard import (
     _core_assignments,
     _full_assignments,
     eligible_change_types,
+    expand_rejected_by_physical_scene,
 )
 
 
@@ -132,6 +133,18 @@ class HardManifestTest(unittest.TestCase):
         for entity in task["distractor_objects"]:
             task["initial_placements"][entity]["support_entity"] = "shelf"
         self.assertNotIn("obstacle_insertion", eligible_change_types(task))
+
+    def test_physical_rejection_expands_across_equivalent_plus_variants(self):
+        left = _task("Light Conditions", 1, 1)
+        right = _task("Camera Viewpoints", 5, 2)
+        expanded = expand_rejected_by_physical_scene(
+            [left, right],
+            {("libero_spatial", 1, "obstacle_insertion")},
+            ["obstacle_insertion"],
+        )
+        self.assertIn(
+            ("libero_spatial", 2, "obstacle_insertion"), expanded
+        )
 
     def test_full_falls_back_to_observation_after_a_physical_failure(self):
         tasks = [

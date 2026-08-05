@@ -6,7 +6,11 @@ import json
 import re
 from pathlib import Path
 
-from libero_max.hard import build_hard_manifests, hard_manifest_summary
+from libero_max.hard import (
+    build_hard_manifests,
+    expand_rejected_by_physical_scene,
+    hard_manifest_summary,
+)
 
 
 CASE_ID_PATTERN = re.compile(
@@ -85,12 +89,25 @@ def main() -> int:
             "listed by --retry-change-type"
         ),
     )
+    parser.add_argument(
+        "--expand-rejection-change-type",
+        action="append",
+        default=[],
+        help=(
+            "propagate rejected task/event configurations across Plus variants "
+            "with an identical physical scene signature"
+        ),
+    )
     args = parser.parse_args()
     catalog = json.loads(args.catalog.read_text(encoding="utf-8"))
     rejected = _rejected_configurations(
         args.reject_preflight, args.retry_change_type
     )
     rejected.update(_rejected_configurations(args.force_reject_preflight))
+    raw_rejected_count = len(rejected)
+    rejected = expand_rejected_by_physical_scene(
+        catalog["tasks"], rejected, args.expand_rejection_change_type
+    )
     core, full = build_hard_manifests(catalog, rejected)
     summary = {
         "core": hard_manifest_summary(core),
@@ -99,6 +116,7 @@ def main() -> int:
             case["case_id"] for case in core["cases"]
         }.issubset({case["case_id"] for case in full["cases"]}),
         "rejected_task_event_configurations": len(rejected),
+        "directly_rejected_task_event_configurations": raw_rejected_count,
     }
     _write(args.core, core)
     _write(args.full, full)

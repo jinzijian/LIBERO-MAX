@@ -1,6 +1,7 @@
 """Deterministic LIBERO-MAX Hard construction on the LIBERO-Plus substrate."""
 
 import hashlib
+import json
 import math
 import random
 from collections import Counter, defaultdict
@@ -46,6 +47,45 @@ def _stable_seed(parts: Iterable[Any]) -> int:
 
 def _task_key(task: Dict[str, Any]) -> Tuple[str, int]:
     return task["task_suite_name"], task["task_index"]
+
+
+def _physical_scene_signature(task: Dict[str, Any]) -> str:
+    """Identify Plus variants that share the same physical task layout."""
+
+    payload = {
+        "fixtures": task.get("fixtures"),
+        "objects": task.get("objects"),
+        "initial_placements": task.get("initial_placements"),
+        "trigger_entity": task.get("trigger_entity"),
+        "primary_target": task.get("primary_target"),
+        "primary_receptacle": task.get("primary_receptacle"),
+    }
+    return json.dumps(payload, sort_keys=True, separators=(",", ":"))
+
+
+def expand_rejected_by_physical_scene(
+    tasks: Sequence[Dict[str, Any]],
+    rejected: Set[Tuple[str, int, str]],
+    change_types: Iterable[str],
+) -> Set[Tuple[str, int, str]]:
+    """Propagate failed physical placements across equivalent Plus variants."""
+
+    expanded = set(rejected)
+    selected_types = set(change_types)
+    if not selected_types:
+        return expanded
+    tasks_by_key = {_task_key(task): task for task in tasks}
+    failed_signatures = {
+        (_physical_scene_signature(tasks_by_key[(suite, task_index)]), event)
+        for suite, task_index, event in rejected
+        if event in selected_types and (suite, task_index) in tasks_by_key
+    }
+    for task in tasks:
+        signature = _physical_scene_signature(task)
+        for event in selected_types:
+            if (signature, event) in failed_signatures:
+                expanded.add((*_task_key(task), event))
+    return expanded
 
 
 def _supported_distractors(task: Dict[str, Any]) -> List[str]:
