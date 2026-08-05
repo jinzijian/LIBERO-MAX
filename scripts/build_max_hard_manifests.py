@@ -21,6 +21,11 @@ def main() -> int:
     parser.add_argument("--core", type=Path, required=True)
     parser.add_argument("--full", type=Path, required=True)
     parser.add_argument("--summary", type=Path, required=True)
+    parser.add_argument(
+        "--smoke",
+        type=Path,
+        help="optional eight-case manifest containing one case per event",
+    )
     args = parser.parse_args()
     catalog = json.loads(args.catalog.read_text(encoding="utf-8"))
     core, full = build_hard_manifests(catalog)
@@ -34,6 +39,15 @@ def main() -> int:
     _write(args.core, core)
     _write(args.full, full)
     _write(args.summary, summary)
+    if args.smoke is not None:
+        selected = {}
+        for case in core["cases"]:
+            selected.setdefault(case["scenario"]["change_type"], case)
+        smoke = dict(core)
+        smoke["benchmark_id"] = "libero-max-hard-smoke"
+        smoke["protocol"] = dict(core["protocol"], profile="smoke")
+        smoke["cases"] = [selected[event] for event in sorted(selected)]
+        _write(args.smoke, smoke)
     print(json.dumps(summary, indent=2, sort_keys=True))
     return 0
 
