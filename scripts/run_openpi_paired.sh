@@ -24,6 +24,10 @@ pythonpath="$PROJECT_DIR/src:$OPENPI_DIR/packages/openpi-client/src:$OPENPI_CLIE
 mkdir -p "$OUTPUT_ROOT"
 for arm in control intervention; do
   arm_dir="$OUTPUT_ROOT/$arm"
+  control_trace_args=()
+  if [[ "$arm" == intervention ]]; then
+    control_trace_args=(--control-trace "$OUTPUT_ROOT/control/trace.jsonl")
+  fi
   mkdir -p "$arm_dir"
   : > "$arm_dir/trace.jsonl"
   MUJOCO_GL=egl \
@@ -41,6 +45,7 @@ for arm in control intervention; do
     --port "$PORT" \
     --replan-steps "$REPLAN_STEPS" \
     --trace "$arm_dir/trace.jsonl" \
+    "${control_trace_args[@]}" \
     > "$arm_dir/console.log" 2>&1
 done
 

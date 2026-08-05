@@ -24,6 +24,7 @@ SCENARIO = {
 class FakeEnv:
     def __init__(self):
         self.steps = 0
+        self.sim = object()
 
     def reset(self):
         self.steps = 0
@@ -137,6 +138,54 @@ class CosmosIntegrationTest(unittest.TestCase):
             states, custom = module.load_initial_states(None, None, 0)
         self.assertEqual(states, ["s2"])
         self.assertIsNone(custom)
+
+    def test_intervention_replays_control_queries_before_event(self):
+        captured = []
+        module = SimpleNamespace()
+
+        def original_run_episode(cfg, env, *args, **kwargs):
+            env.reset()
+            env.set_init_state([1, 2, 3])
+            result = module.get_action(None, None, None, None, "fake task")
+            captured.append(result["actions"])
+            return (False,)
+
+        module.get_libero_env = lambda *args, **kwargs: (FakeEnv(), "fake task")
+        module.run_episode = original_run_episode
+        module.load_initial_states = lambda *args, **kwargs: (["s0"], None)
+        module.TASK_MAX_STEPS = {"libero_object": 280}
+        module.get_action = lambda *args, **kwargs: {"actions": [[1.0, 2.0]]}
+        cfg = SimpleNamespace(
+            task_suite_name="libero_object",
+            seed=195,
+            num_open_loop_steps=16,
+        )
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            control_trace = root / "control.jsonl"
+            control_trace.write_text(
+                json.dumps(
+                    {
+                        "policy_queries": [
+                            {"policy_step": 0, "actions": [[9.0, 8.0]]}
+                        ]
+                    }
+                )
+                + "\n"
+            )
+            install_cosmos_hooks(
+                module,
+                scenario=SCENARIO,
+                arm="intervention",
+                trace_path=root / "intervention.jsonl",
+                original_task_index=0,
+                control_trace_path=control_trace,
+            )
+            env, _ = module.get_libero_env(None)
+            module.run_episode(cfg, env, "fake task")
+            row = json.loads((root / "intervention.jsonl").read_text())
+        self.assertEqual(captured[0][0].tolist(), [9.0, 8.0])
+        self.assertEqual(row["policy_queries"][0]["source"], "control_replay")
 
     def test_setup_is_applied_to_control_and_recorded(self):
         scenario = copy.deepcopy(SCENARIO)

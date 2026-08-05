@@ -25,6 +25,10 @@ SCENARIO_FILE="$(cd "$(dirname "$SCENARIO_FILE")" && pwd)/$(basename "$SCENARIO_
 
 for arm in control intervention; do
   arm_dir="$OUTPUT_ROOT/$arm"
+  control_trace_path=""
+  if [[ "$arm" == intervention ]]; then
+    control_trace_path="$OUTPUT_ROOT/control/trace.jsonl"
+  fi
   mkdir -p "$arm_dir/eval"
   : > "$arm_dir/trace.jsonl"
   (
@@ -41,6 +45,7 @@ for arm in control intervention; do
     LIBERO_MAX_INIT_STATE_INDEX="$INIT_STATE_INDEX" \
     LIBERO_MAX_SCENARIO_FILE="$SCENARIO_FILE" \
     LIBERO_MAX_TRACE_PATH="$arm_dir/trace.jsonl" \
+    LIBERO_MAX_CONTROL_TRACE_PATH="$control_trace_path" \
     PYTHONPATH="$PROJECT_DIR/src:$ROBOSUITE_DIR:$cosmos_site_packages:$LEGACY_SITE_PACKAGES:$LIBERO_DIR:$COSMOS_POLICY_DIR${PYTHONPATH:+:$PYTHONPATH}" \
     "$COSMOS_POLICY_DIR/.venv/bin/python" \
       "$PROJECT_DIR/scripts/run_cosmos_libero_max.py" \

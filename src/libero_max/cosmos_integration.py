@@ -231,7 +231,10 @@ class CosmosInterventionEnv:
         return observation, reward, effective_done, info
 
     def record_policy_query(
-        self, actions: Any, instruction: Optional[str] = None
+        self,
+        actions: Any,
+        instruction: Optional[str] = None,
+        source: str = "model",
     ) -> Dict[str, Any]:
         import numpy as np
 
@@ -250,6 +253,7 @@ class CosmosInterventionEnv:
             ).hexdigest(),
             "actions": action_array.tolist(),
             "instruction": instruction or self.runtime.current_instruction,
+            "source": source,
         }
         self.policy_queries.append(query)
         return query
@@ -404,6 +408,7 @@ def install_cosmos_hooks(
     trace_path: Path,
     original_task_index: int,
     init_state_index: int = 0,
+    control_trace_path: Optional[Path] = None,
 ) -> None:
     """Patch the already-imported Cosmos evaluator without editing upstream."""
 
@@ -412,6 +417,21 @@ def install_cosmos_hooks(
     original_load_initial_states = run_libero_eval.load_initial_states
     original_get_action = run_libero_eval.get_action
     active_env: Dict[str, Optional[CosmosInterventionEnv]] = {"value": None}
+    control_queries: Dict[int, Any] = {}
+    if control_trace_path is not None:
+        rows = [
+            json.loads(line)
+            for line in Path(control_trace_path).read_text(encoding="utf-8").splitlines()
+            if line.strip()
+        ]
+        if len(rows) != 1:
+            raise CosmosIntegrationError(
+                "control trace must contain exactly one episode"
+            )
+        control_queries = {
+            query["policy_step"]: query["actions"]
+            for query in rows[0].get("policy_queries", [])
+        }
 
     def load_selected_initial_state(cfg: Any, task_suite: Any, task_id: int, log_file=None):
         initial_states, custom_states = original_load_initial_states(
@@ -474,8 +494,30 @@ def install_cosmos_hooks(
                 kwargs = dict(kwargs)
                 kwargs["task_label_or_embedding"] = instruction
         result = original_get_action(*args, **kwargs)
+        source = "model"
+        if (
+            env is not None
+            and env.arm == "intervention"
+            and not env.runtime.applied
+            and control_queries
+        ):
+            import numpy as np
+
+            policy_step = max(0, env.total_env_steps - env.warmup_steps)
+            if policy_step not in control_queries:
+                raise CosmosIntegrationError(
+                    "control trace is missing pre-event query step %d" % policy_step
+                )
+            result = dict(result)
+            result["actions"] = [
+                np.asarray(action, dtype=np.float32)
+                for action in control_queries[policy_step]
+            ]
+            source = "control_replay"
         if env is not None:
-            env.record_policy_query(result["actions"], instruction=instruction)
+            env.record_policy_query(
+                result["actions"], instruction=instruction, source=source
+            )
         return result
 
     run_libero_eval.get_libero_env = get_libero_env_with_intervention

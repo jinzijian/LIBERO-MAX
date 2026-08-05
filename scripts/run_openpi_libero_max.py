@@ -50,6 +50,7 @@ def main() -> int:
     parser.add_argument("--port", type=int, required=True)
     parser.add_argument("--replan-steps", type=int, default=5)
     parser.add_argument("--trace", type=Path, required=True)
+    parser.add_argument("--control-trace", type=Path)
     args = parser.parse_args()
     if args.replan_steps < 1:
         parser.error("--replan-steps must be positive")
@@ -67,6 +68,19 @@ def main() -> int:
     if errors or len(scenarios) != 1:
         raise ValueError("scenario must contain exactly one valid record: %s" % errors)
     scenario = scenarios[0]
+    control_queries = {}
+    if args.control_trace is not None:
+        rows = [
+            json.loads(line)
+            for line in args.control_trace.read_text(encoding="utf-8").splitlines()
+            if line.strip()
+        ]
+        if len(rows) != 1:
+            raise ValueError("control trace must contain exactly one episode")
+        control_queries = {
+            query["policy_step"]: query["actions"]
+            for query in rows[0].get("policy_queries", [])
+        }
     suite = benchmark.get_benchmark_dict()[args.suite]()
     task = suite.get_task(args.task_index)
     initial_states = suite.get_task_init_states(args.task_index)
@@ -118,25 +132,49 @@ def main() -> int:
                     image_tools.resize_with_pad(wrist, 224, 224)
                 )
                 instruction = wrapped.runtime.current_instruction
-                request = {
-                    "observation/image": image,
-                    "observation/wrist_image": wrist,
-                    "observation/state": np.concatenate(
-                        (
-                            observation["robot0_eef_pos"],
-                            _quat2axisangle(observation["robot0_eef_quat"]),
-                            observation["robot0_gripper_qpos"],
+                policy_step = max(
+                    0, wrapped.total_env_steps - wrapped.warmup_steps
+                )
+                replay = (
+                    args.arm == "intervention"
+                    and not wrapped.runtime.applied
+                    and bool(control_queries)
+                )
+                if replay:
+                    if policy_step not in control_queries:
+                        raise ValueError(
+                            "control trace is missing pre-event query step %d"
+                            % policy_step
                         )
-                    ),
-                    "prompt": instruction,
-                    "libero_max_noise_seed": _noise_seed(
-                        args.policy_seed, query_index
-                    ),
-                }
-                actions = np.asarray(client.infer(request)["actions"], dtype=np.float32)
+                    actions = np.asarray(
+                        control_queries[policy_step], dtype=np.float32
+                    )
+                    source = "control_replay"
+                else:
+                    request = {
+                        "observation/image": image,
+                        "observation/wrist_image": wrist,
+                        "observation/state": np.concatenate(
+                            (
+                                observation["robot0_eef_pos"],
+                                _quat2axisangle(observation["robot0_eef_quat"]),
+                                observation["robot0_gripper_qpos"],
+                            )
+                        ),
+                        "prompt": instruction,
+                        "libero_max_noise_seed": _noise_seed(
+                            args.policy_seed, query_index
+                        ),
+                    }
+                    actions = np.asarray(
+                        client.infer(request)["actions"], dtype=np.float32
+                    )
+                    source = "model"
                 if actions.ndim != 2 or len(actions) < args.replan_steps:
                     raise ValueError("pi0.5 returned an invalid action chunk")
-                wrapped.record_policy_query(actions, instruction=instruction)
+                wrapped.record_policy_query(
+                    actions, instruction=instruction, source=source
+                )
                 action_plan.extend(actions[: args.replan_steps])
                 query_index += 1
             action = action_plan.popleft()
