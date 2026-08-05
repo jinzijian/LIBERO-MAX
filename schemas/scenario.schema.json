@@ -26,6 +26,8 @@
       "enum": [
         "illumination_switch",
         "camera_shift",
+        "visual_theme_switch",
+        "sensor_noise_onset",
         "target_relocation",
         "receptacle_relocation",
         "distractor_burst",
@@ -47,6 +49,7 @@
           "enum": [
             "after_grasp",
             "before_grasp",
+            "before_place",
             "after_subgoal",
             "on_region_entry",
             "on_proximity",
@@ -55,7 +58,8 @@
           ]
         },
         "value": {},
-        "distance_m": {"type": "number", "exclusiveMinimum": 0}
+        "distance_m": {"type": "number", "exclusiveMinimum": 0},
+        "target_entity": {"type": "string", "minLength": 1}
       }
     },
     "change": {

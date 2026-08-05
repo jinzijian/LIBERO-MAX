@@ -15,7 +15,11 @@
       "properties": {
         "arms": {"const": ["control", "intervention"]},
         "query_interval": {"type": "integer", "minimum": 1},
-        "scoring_track": {"enum": ["physical_completion"]}
+        "scoring_track": {"enum": ["physical_completion", "intent_response"]},
+        "substrate": {"type": "string", "minLength": 1},
+        "profile": {"type": "string", "minLength": 1},
+        "source_benchmark_commit": {"type": "string", "minLength": 1},
+        "selection_contract": {"type": "string", "minLength": 1}
       }
     },
     "cases": {
@@ -42,6 +46,14 @@
           "init_state_index": {"type": "integer", "minimum": 0},
           "policy_seed": {"type": "integer", "minimum": 0},
           "timing_bucket": {"enum": ["early", "middle", "late"]},
+          "task_name": {"type": "string", "minLength": 1},
+          "substrate_category": {"type": "string", "minLength": 1},
+          "substrate_difficulty": {
+            "type": ["integer", "null"],
+            "minimum": 1,
+            "maximum": 5
+          },
+          "dynamic_phase": {"type": "string", "minLength": 1},
           "scenario": {"$ref": "scenario.schema.json"}
         }
       }

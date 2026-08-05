@@ -26,6 +26,8 @@
       "enum": [
         "illumination_switch",
         "camera_shift",
+        "visual_theme_switch",
+        "sensor_noise_onset",
         "target_relocation",
         "receptacle_relocation",
         "distractor_burst",
@@ -62,6 +64,13 @@
     "task_index": {"type": "integer", "minimum": 0},
     "init_state_index": {"type": "integer", "minimum": 0},
     "policy_seed": {"type": "integer", "minimum": 0},
+    "substrate_category": {"type": "string", "minLength": 1},
+    "substrate_difficulty": {
+      "type": ["integer", "null"],
+      "minimum": 1,
+      "maximum": 5
+    },
+    "dynamic_phase": {"type": "string", "minLength": 1},
     "scoring_mode": {"type": "string", "minLength": 1},
     "intervention_event_step": {"type": "integer", "minimum": 0},
     "policy_response_query_step": {"type": "integer", "minimum": 0},
