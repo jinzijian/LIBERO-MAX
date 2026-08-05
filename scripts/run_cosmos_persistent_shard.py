@@ -78,6 +78,14 @@ def main() -> int:
     from cosmos_policy.utils.utils import set_seed_everywhere
     from libero.libero import benchmark
 
+    # Paper runs retain structured paired traces. Upstream run_episode saves
+    # two MP4s per arm by default, which would create tens of thousands of
+    # redundant videos in Full and can exhaust the shared filesystem.
+    run_libero_eval.save_rollout_video = lambda *call_args, **call_kwargs: None
+    run_libero_eval.save_rollout_video_with_future_image_predictions = (
+        lambda *call_args, **call_kwargs: None
+    )
+
     asset_dir = args.asset_dir.resolve()
     t5_path = (
         args.t5_embeddings or asset_dir / "libero_t5_embeddings.pkl"

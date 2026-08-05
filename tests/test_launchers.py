@@ -43,6 +43,16 @@ class CosmosLauncherTest(unittest.TestCase):
             preflight.index("from cosmos_policy.experiments.robot.libero"),
         )
 
+    def test_persistent_runner_disables_upstream_rollout_videos(self) -> None:
+        runner = (ROOT / "scripts/run_cosmos_persistent_shard.py").read_text(
+            encoding="utf-8"
+        )
+        self.assertIn("run_libero_eval.save_rollout_video = lambda", runner)
+        self.assertIn(
+            "run_libero_eval.save_rollout_video_with_future_image_predictions",
+            runner,
+        )
+
 
 if __name__ == "__main__":
     unittest.main()
