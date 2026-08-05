@@ -63,6 +63,12 @@ can introduce a small Full event-count imbalance after feasibility filtering;
 Core remains exactly balanced. No infeasible case is counted as a policy
 failure.
 
+Obstacle failures are conservatively propagated across Plus variants with the
+same physical scene signature so camera, lighting, language, or robot-start
+variants do not repeatedly select the same bad placement. If a scarce 7 x 5
+cell loses event capacity, it exchanges event slots with a feasible donor cell;
+the Core still retains 40 cases per cell and exactly 175 cases per event.
+
 ## LIBERO-Plus compatibility
 
 The installed Plus benchmark exposes 10,030 tasks across `libero_spatial`,
