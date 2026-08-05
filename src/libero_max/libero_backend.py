@@ -46,6 +46,7 @@ class LiberoMujocoBackend:
         self._removed_positions: Dict[str, np.ndarray] = {}
         self._observation_corruption: Dict[str, Any] = {}
         self._observation_counter = 0
+        self._observation_brightness = 1.0
 
     def reset_episode_state(self) -> None:
         """Clear wrapper-side state after LIBERO hard-resets an episode."""
@@ -53,6 +54,7 @@ class LiberoMujocoBackend:
         self._removed_positions = {}
         self._observation_corruption = {}
         self._observation_counter = 0
+        self._observation_brightness = 1.0
 
     @property
     def sim(self) -> Any:
@@ -90,11 +92,12 @@ class LiberoMujocoBackend:
     def transform_observation(self, observation: Dict[str, Any]) -> Dict[str, Any]:
         """Apply an enabled sensor event without changing simulator physics."""
 
-        if not self._observation_corruption:
+        brightness = float(getattr(self, "_observation_brightness", 1.0))
+        if not self._observation_corruption and brightness == 1.0:
             return observation
         result = dict(observation)
         config = self._observation_corruption
-        seed = int(config["seed"]) + self._observation_counter
+        seed = int(config.get("seed", 0)) + self._observation_counter
         self._observation_counter += 1
         rng = np.random.RandomState(seed)
         for key, value in observation.items():
@@ -104,10 +107,12 @@ class LiberoMujocoBackend:
             if image.ndim != 3 or image.shape[-1] not in {1, 3, 4}:
                 continue
             work = image.astype(np.float32)
-            noise_std = float(config["noise_std"])
+            if brightness != 1.0:
+                work *= brightness
+            noise_std = float(config.get("noise_std", 0.0))
             if noise_std:
                 work += rng.normal(0.0, noise_std, size=work.shape)
-            fraction = float(config["occlusion_fraction"])
+            fraction = float(config.get("occlusion_fraction", 0.0))
             if fraction:
                 height, width = work.shape[:2]
                 block_height = max(1, int(round(height * math.sqrt(fraction))))
@@ -416,11 +421,17 @@ class LiberoMujocoBackend:
         model.light_ambient[:] = before["ambient"] * scale
         model.light_diffuse[:] = before["diffuse"] * scale
         model.light_specular[:] = before["specular"] * scale
+        # Some Plus scenes are rendered entirely through emission / headlight
+        # paths and ignore the model light arrays. A small deterministic camera
+        # exposure response makes the same exogenous light event observable in
+        # those scenes without changing geometry or task feasibility.
+        self._observation_brightness = 0.75 if scale < 1.0 else 1.25
         return {
             "operation": "set_lighting",
             "scale": scale,
             "ambient_before": before["ambient"].tolist(),
             "ambient_after": np.asarray(model.light_ambient).tolist(),
+            "observation_brightness_scale": self._observation_brightness,
         }
 
     def _set_visual_theme(self, change: Dict[str, Any]) -> Dict[str, Any]:
