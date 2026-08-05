@@ -4,6 +4,7 @@ from libero_max.hard import (
     CHANGE_TYPE_ORDER,
     PLUS_CATEGORIES,
     PLUS_DIFFICULTIES,
+    _build_case,
     _core_assignments,
     eligible_change_types,
 )
@@ -83,6 +84,16 @@ class HardManifestTest(unittest.TestCase):
         )
         self.assertNotEqual(repaired.get(task_key), event_draw)
         self.assertEqual(len(repaired), 1400)
+
+    def test_obstacle_uses_a_fixed_target_relative_placement(self):
+        case = _build_case(
+            _task("Objects Layout", 4, 9), "obstacle_insertion", draw_id=0
+        )
+        change = case["scenario"]["change"]
+        self.assertEqual(change["placement_rule"], "target_approach_ring")
+        self.assertEqual(change["relative_to"], "target")
+        self.assertTrue(change["preserve_initial_z"])
+        self.assertNotIn("path_target", change)
 
 
 if __name__ == "__main__":

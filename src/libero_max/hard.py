@@ -200,9 +200,10 @@ def _sample_change(
         return "OBSTACLE", "high", setup, {
             "operation": "insert_obstacle",
             "object": obstacle,
-            "path_target": task["trigger_entity"],
-            "path_fraction": (0.45, 0.60)[draw_id],
-            "lateral_offset_m": (0.02, -0.02)[draw_id],
+            "relative_to": task["trigger_entity"],
+            "offset_m": ([0.14, 0.0, 0.0], [0.0, -0.14, 0.0])[draw_id],
+            "preserve_initial_z": True,
+            "placement_rule": "target_approach_ring",
             "support_entity": _support_for(task, obstacle),
         }
     raise AssertionError("unhandled change type: %s" % change_type)

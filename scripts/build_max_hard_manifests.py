@@ -14,8 +14,9 @@ CASE_ID_PATTERN = re.compile(
 )
 
 
-def _rejected_configurations(paths):
+def _rejected_configurations(paths, retry_change_types=()):
     rejected = set()
+    retry_change_types = set(retry_change_types)
     for path in paths:
         report = json.loads(path.read_text(encoding="utf-8"))
         for case in report.get("cases", []):
@@ -32,6 +33,8 @@ def _rejected_configurations(paths):
                 continue
             match = CASE_ID_PATTERN.match(case.get("case_id", ""))
             change_type = case.get("change_type")
+            if change_type in retry_change_types:
+                continue
             if match is None or not isinstance(change_type, str):
                 raise ValueError(
                     "cannot recover task/event key from failed case %r"
@@ -60,6 +63,12 @@ def main() -> int:
         help="optional eight-case manifest containing one case per event",
     )
     parser.add_argument(
+        "--retry-change-type",
+        action="append",
+        default=[],
+        help="ignore earlier failures for an event whose placement rule changed",
+    )
+    parser.add_argument(
         "--reject-preflight",
         type=Path,
         action="append",
@@ -68,7 +77,9 @@ def main() -> int:
     )
     args = parser.parse_args()
     catalog = json.loads(args.catalog.read_text(encoding="utf-8"))
-    rejected = _rejected_configurations(args.reject_preflight)
+    rejected = _rejected_configurations(
+        args.reject_preflight, args.retry_change_type
+    )
     core, full = build_hard_manifests(catalog, rejected)
     summary = {
         "core": hard_manifest_summary(core),
