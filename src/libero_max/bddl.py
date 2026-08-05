@@ -1,7 +1,66 @@
 """Small dependency-free BDDL catalog parser for benchmark construction."""
 
 import re
-from typing import Any, Dict, List, Optional
+from pathlib import Path
+from typing import Any, Dict, List, Optional, Tuple
+
+
+def resolve_libero_bddl_path(
+    bddl_root: Path, problem_folder: str, bddl_file: str
+) -> Tuple[Path, Dict[str, Any]]:
+    """Resolve both materialized LIBERO tasks and LIBERO-Plus virtual tasks.
+
+    LIBERO-Plus represents camera / robot-initial-state variants as virtual
+    filenames of the form ``<base>_view_<five values>_initstate_<id>.bddl``.
+    Its environment wrapper strips that suffix before loading the BDDL.  The
+    benchmark catalog must mirror that behavior instead of incorrectly
+    reporting those tasks as missing files.
+    """
+
+    requested = bddl_root / problem_folder / bddl_file
+    if requested.is_file():
+        return requested, {"kind": "materialized"}
+
+    marker = "_view_"
+    init_marker = "_initstate_"
+    stem = Path(bddl_file).stem
+    if marker not in stem or init_marker not in stem:
+        raise FileNotFoundError(str(requested))
+    base_name, encoded = stem.rsplit(marker, 1)
+    view_text, init_text = encoded.rsplit(init_marker, 1)
+    view_parts = view_text.split("_")
+    if len(view_parts) != 5 or not all(
+        re.fullmatch(r"-?\d+(?:\.\d+)?", part) for part in view_parts
+    ):
+        raise ValueError("invalid LIBERO-Plus virtual view suffix: %s" % bddl_file)
+    init_parts = init_text.split("_noise_", 1)
+    if not re.fullmatch(r"\d+", init_parts[0]):
+        raise ValueError("invalid LIBERO-Plus init-state suffix: %s" % bddl_file)
+    noise = 0
+    if len(init_parts) == 2:
+        if not re.fullmatch(r"\d+", init_parts[1]):
+            raise ValueError("invalid LIBERO-Plus noise suffix: %s" % bddl_file)
+        noise = int(init_parts[1])
+
+    resolved = bddl_root / problem_folder / (base_name + ".bddl")
+    if not resolved.is_file():
+        raise FileNotFoundError(
+            "%s (virtual LIBERO-Plus task resolved to missing %s)"
+            % (requested, resolved)
+        )
+    horizon, vertical, scale_percent, endpoint_rot, endpoint_vertical = (
+        float(part) for part in view_parts
+    )
+    return resolved, {
+        "kind": "libero_plus_virtual",
+        "horizon_view_degrees": horizon,
+        "vertical_view_degrees": vertical,
+        "scale_factor": scale_percent / 100.0,
+        "endpoint_rotation_degrees": endpoint_rot,
+        "endpoint_vertical_degrees": endpoint_vertical,
+        "robot_init_state": int(init_parts[0]),
+        "sensor_noise_level": noise,
+    }
 
 
 def extract_section(text: str, name: str) -> str:

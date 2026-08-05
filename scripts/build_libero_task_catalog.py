@@ -7,7 +7,11 @@ from pathlib import Path
 
 from libero.libero import benchmark
 
-from libero_max.bddl import is_planar_workspace_placement, parse_bddl_metadata
+from libero_max.bddl import (
+    is_planar_workspace_placement,
+    parse_bddl_metadata,
+    resolve_libero_bddl_path,
+)
 
 
 DEFAULT_SUITES = "libero_spatial,libero_object,libero_goal,libero_10"
@@ -34,16 +38,51 @@ def _primary_receptacle(metadata):
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--bddl-root", type=Path, required=True)
+    parser.add_argument(
+        "--classification-json",
+        type=Path,
+        help="optional LIBERO-Plus task_classification.json",
+    )
     parser.add_argument("--suites", default=DEFAULT_SUITES)
     parser.add_argument("--output", type=Path, required=True)
     args = parser.parse_args()
+    classifications = None
+    if args.classification_json is not None:
+        classifications = json.loads(
+            args.classification_json.read_text(encoding="utf-8")
+        )
     rows = []
     for suite_name in [item.strip() for item in args.suites.split(",")]:
         suite = benchmark.get_benchmark_dict()[suite_name](task_order_index=0)
+        suite_classifications = None
+        if classifications is not None:
+            suite_classifications = classifications.get(suite_name)
+            if not isinstance(suite_classifications, list):
+                raise ValueError("classification JSON is missing %s" % suite_name)
+            if len(suite_classifications) != suite.n_tasks:
+                raise ValueError(
+                    "%s classification count %d != benchmark count %d"
+                    % (suite_name, len(suite_classifications), suite.n_tasks)
+                )
         for task_index in range(suite.n_tasks):
             task = suite.get_task(task_index)
-            bddl_path = args.bddl_root / task.problem_folder / task.bddl_file
+            bddl_path, bddl_resolution = resolve_libero_bddl_path(
+                args.bddl_root, task.problem_folder, task.bddl_file
+            )
             metadata = parse_bddl_metadata(bddl_path.read_text(encoding="utf-8"))
+            classification = None
+            if suite_classifications is not None:
+                classification = suite_classifications[task_index]
+                if classification.get("name") != task.name:
+                    raise ValueError(
+                        "%s task %d classification name mismatch: %r != %r"
+                        % (
+                            suite_name,
+                            task_index,
+                            classification.get("name"),
+                            task.name,
+                        )
+                    )
             primary_target = (
                 metadata["manipulated_objects"][0]
                 if metadata["manipulated_objects"]
@@ -61,7 +100,19 @@ def main() -> int:
                     "task_index": task_index,
                     "task_name": task.name,
                     "language": task.language,
+                    "requested_bddl_file": task.bddl_file,
                     "bddl_file": str(bddl_path),
+                    "bddl_resolution": bddl_resolution,
+                    "plus_category": (
+                        classification.get("category")
+                        if classification is not None
+                        else None
+                    ),
+                    "plus_difficulty_level": (
+                        classification.get("difficulty_level")
+                        if classification is not None
+                        else None
+                    ),
                     **metadata,
                     "trigger_entity": trigger_entity,
                     "primary_target": primary_target,
@@ -83,6 +134,10 @@ def main() -> int:
     report = {
         "suites": sorted({row["task_suite_name"] for row in rows}),
         "task_count": len(rows),
+        "virtual_bddl_task_count": sum(
+            row["bddl_resolution"]["kind"] == "libero_plus_virtual"
+            for row in rows
+        ),
         "target_relocation_task_count": sum(
             row["supports_target_relocation"] for row in rows
         ),
