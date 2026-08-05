@@ -277,9 +277,16 @@ occurred and is not a deployable baseline.
 
 ### Reproducibility
 
-Report checkpoint hashes, text-embedding assets, normalization statistics,
-action chunk, query interval, simulator versions, manifest hash, GPU type, and
-all missing/invalid/duplicate cases.
+All experiments run on eight NVIDIA A800-SXM4-80GB GPUs (driver 535.129.03).
+The simulator uses LIBERO commit `8f1084e3`, robosuite 1.4.0, and MuJoCo 3.2.6.
+Cosmos Policy uses code commit `18a2acca`; the Predict2-2B policy weight, LIBERO
+T5 cache, and normalization-statistic SHA256 digests begin `8818528d`,
+`8a034996`, and `5b119a98`, respectively. pi0.5 uses OpenPI commit `15a9616a`
+and checkpoint-tree digest `b351d2a0`. The notification-aware T5 cache digest
+is `3120e109`. Physical Core, Intent Core, and the 180-pair ablation manifest
+have SHA256 digests `ac49a313`, `a3a21c22`, and `eea6a011`. We report every
+missing, invalid, duplicate, or trigger-unreached pair rather than imputing it
+as a policy failure.
 
 ## 7. Results
 
