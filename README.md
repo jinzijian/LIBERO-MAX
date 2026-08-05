@@ -15,21 +15,24 @@ The name expands to:
 Can a VLA model detect an externally introduced change, revise its behavior,
 and still produce the appropriate outcome without causing a new failure?
 
-"Appropriate outcome" is deliberately broader than task completion. Depending
-on the change, the correct response may be to replan, ask for clarification,
-stop safely, acknowledge cancellation, or report that the task is no longer
-feasible.
+"Appropriate outcome" is deliberately broader than the original task
+predicate. The physical track remains feasible and requires task completion;
+the intent track requires the revised goal or a measured safe stop after
+cancellation.
 
 ## Benchmark scope
 
 LIBERO-MAX covers changes introduced during an episode, including:
 
 - lighting changes and camera displacement;
-- target-object or receptacle relocation and removal;
+- reachable target-object or receptacle relocation;
 - newly introduced obstacles;
 - sudden bursts of multiple visually confusing distractors;
-- user instruction modification or cancellation;
-- transitions from feasible to infeasible tasks.
+- user instruction modification or cancellation.
+
+Every v1 physical intervention is preflighted to remain reachable and
+finishable. Explicit infeasibility awareness is reserved for a future track
+with a model-agnostic abstention interface.
 
 A change is **exogenous** when it is introduced by the environment, benchmark,
 or user rather than being caused solely by the robot's own execution error.
