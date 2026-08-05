@@ -144,6 +144,21 @@ def main() -> int:
                 "task_index": case["task_index"],
                 "init_state_index": case["init_state_index"],
                 "policy_seed": case["policy_seed"],
+                **(
+                    {"substrate_category": case["substrate_category"]}
+                    if "substrate_category" in case
+                    else {}
+                ),
+                **(
+                    {"substrate_difficulty": case["substrate_difficulty"]}
+                    if "substrate_difficulty" in case
+                    else {}
+                ),
+                **(
+                    {"dynamic_phase": case["dynamic_phase"]}
+                    if "dynamic_phase" in case
+                    else {}
+                ),
                 "scoring_mode": (
                     "intent_response" if intent else "libero_goal_completion"
                 ),
@@ -197,6 +212,9 @@ def main() -> int:
             "by_severity": metrics.get("by_severity", {}),
             "by_timing_bucket": metrics.get("by_timing_bucket", {}),
             "by_response_mode": metrics.get("by_response_mode", {}),
+            "by_substrate_category": metrics.get("by_substrate_category", {}),
+            "by_substrate_difficulty": metrics.get("by_substrate_difficulty", {}),
+            "by_dynamic_phase": metrics.get("by_dynamic_phase", {}),
         },
         "measurement_notes": {
             "adaptation_latency": (

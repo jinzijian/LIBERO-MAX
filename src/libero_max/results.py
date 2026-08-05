@@ -37,6 +37,9 @@ OPTIONAL_RESULT_FIELDS = {
     "open_loop_exposure_steps",
     "mean_absolute_raw_pixel_delta",
     "post_event_action_chunk_mad",
+    "substrate_category",
+    "substrate_difficulty",
+    "dynamic_phase",
 }
 RESULT_FIELDS = REQUIRED_RESULT_FIELDS | OPTIONAL_RESULT_FIELDS
 
@@ -118,11 +121,22 @@ def validate_result(record: Any) -> List[str]:
             not _is_integer(record[field]) or record[field] < 0
         ):
             errors.append("%s must be a non-negative integer" % field)
-    for field in ("task_suite_name", "scoring_mode"):
+    for field in (
+        "task_suite_name",
+        "scoring_mode",
+        "substrate_category",
+        "dynamic_phase",
+    ):
         if field in record and (
             not isinstance(record[field], str) or not record[field].strip()
         ):
             errors.append("%s must be a non-empty string" % field)
+    if "substrate_difficulty" in record:
+        difficulty = record["substrate_difficulty"]
+        if difficulty is not None and (
+            not _is_integer(difficulty) or difficulty not in {1, 2, 3, 4, 5}
+        ):
+            errors.append("substrate_difficulty must be null or 1 through 5")
     for field in ("mean_absolute_raw_pixel_delta", "post_event_action_chunk_mad"):
         value = record.get(field)
         if value is not None and (
@@ -363,7 +377,10 @@ def summarize_results(
         )
 
     def grouped(field: str) -> Dict[str, Any]:
-        values = sorted({record[field] for record in selected if field in record})
+        values = sorted(
+            {record[field] for record in selected if field in record},
+            key=lambda value: (value is None, str(value)),
+        )
         return {
             str(value): _metric_block(
                 [record for record in selected if record.get(field) == value]
@@ -386,4 +403,7 @@ def summarize_results(
         "by_severity": grouped("severity"),
         "by_timing_bucket": grouped("timing_bucket"),
         "by_response_mode": grouped("expected_response_mode"),
+        "by_substrate_category": grouped("substrate_category"),
+        "by_substrate_difficulty": grouped("substrate_difficulty"),
+        "by_dynamic_phase": grouped("dynamic_phase"),
     }

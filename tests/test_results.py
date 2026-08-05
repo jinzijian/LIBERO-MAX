@@ -121,6 +121,27 @@ class ResultSummaryTest(unittest.TestCase):
         self.assertEqual(summary["overall"]["episodes"], 2)
         self.assertEqual(summary["by_intervention_draw"]["0"]["episodes"], 2)
 
+    def test_plus_strata_include_null_difficulty_without_sort_errors(self):
+        records = [copy.deepcopy(self.results[0]), copy.deepcopy(self.results[1])]
+        records[0].update(
+            {
+                "substrate_category": "Light Conditions",
+                "substrate_difficulty": None,
+                "dynamic_phase": "pre_grasp_proximity",
+            }
+        )
+        records[1].update(
+            {
+                "substrate_category": "Sensor Noise",
+                "substrate_difficulty": 5,
+                "dynamic_phase": "pre_grasp_proximity",
+            }
+        )
+        summary = summarize_results(records)
+        self.assertEqual(
+            set(summary["by_substrate_difficulty"]), {"5", "None"}
+        )
+
 
 if __name__ == "__main__":
     unittest.main()
