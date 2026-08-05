@@ -75,11 +75,22 @@ def main() -> int:
         default=[],
         help="exclude failed task/event configurations from a preflight report",
     )
+    parser.add_argument(
+        "--force-reject-preflight",
+        type=Path,
+        action="append",
+        default=[],
+        help=(
+            "exclude failures from a preflight report even when its event is "
+            "listed by --retry-change-type"
+        ),
+    )
     args = parser.parse_args()
     catalog = json.loads(args.catalog.read_text(encoding="utf-8"))
     rejected = _rejected_configurations(
         args.reject_preflight, args.retry_change_type
     )
+    rejected.update(_rejected_configurations(args.force_reject_preflight))
     core, full = build_hard_manifests(catalog, rejected)
     summary = {
         "core": hard_manifest_summary(core),
