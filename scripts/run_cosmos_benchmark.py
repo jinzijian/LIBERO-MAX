@@ -94,6 +94,12 @@ def main() -> int:
         "--gpus", default="0", help="comma-separated physical GPU IDs"
     )
     parser.add_argument(
+        "--workers-per-gpu",
+        type=int,
+        default=1,
+        help="independent sequential queues assigned to each physical GPU",
+    )
+    parser.add_argument(
         "--launcher",
         type=Path,
         default=Path(__file__).resolve().parent / "run_cosmos_paired_smoke.sh",
@@ -104,14 +110,20 @@ def main() -> int:
     gpus = [item.strip() for item in args.gpus.split(",") if item.strip()]
     if not gpus:
         parser.error("--gpus must contain at least one GPU ID")
+    if args.workers_per_gpu < 1:
+        parser.error("--workers-per-gpu must be positive")
     args.output_root.mkdir(parents=True, exist_ok=True)
     _write_json(args.output_root / "manifest.json", manifest)
 
     failures: List[str] = []
-    queues = {
-        gpu: manifest["cases"][index :: len(gpus)] for index, gpu in enumerate(gpus)
-    }
-    with ThreadPoolExecutor(max_workers=len(gpus)) as executor:
+    worker_gpus = [
+        gpu for gpu in gpus for _ in range(args.workers_per_gpu)
+    ]
+    queues = [
+        (gpu, manifest["cases"][index :: len(worker_gpus)])
+        for index, gpu in enumerate(worker_gpus)
+    ]
+    with ThreadPoolExecutor(max_workers=len(worker_gpus)) as executor:
         futures = {
             executor.submit(
                 _run_gpu_queue,
@@ -120,8 +132,8 @@ def main() -> int:
                 args.output_root,
                 args.launcher,
                 args.resume,
-            ): gpu
-            for gpu, cases in queues.items()
+            ): (slot, gpu)
+            for slot, (gpu, cases) in enumerate(queues)
             if cases
         }
         for future in as_completed(futures):
