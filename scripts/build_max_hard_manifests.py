@@ -21,6 +21,15 @@ def _rejected_configurations(paths):
         for case in report.get("cases", []):
             if case.get("passed"):
                 continue
+            # The first Plus audit exposed a NumPy-2 compatibility alias in
+            # upstream sensor-noise tasks. Those transitions were not tested,
+            # so do not treat them as an infeasible task/event configuration;
+            # the compatibility-fixed preflight must execute them again.
+            if any(
+                "np.float_" in error
+                for error in case.get("validation_errors", [])
+            ):
+                continue
             match = CASE_ID_PATTERN.match(case.get("case_id", ""))
             change_type = case.get("change_type")
             if match is None or not isinstance(change_type, str):
