@@ -217,10 +217,11 @@ not sufficient evidence that adaptation was correct.
 ## 5. Benchmark Construction
 
 The installed task catalog contains 40 tasks across LIBERO Spatial, Object,
-Goal, and LIBERO-10. Illumination and camera changes apply to all 40. Valid
-planar target relocation applies to 33 tasks, movable-receptacle relocation to
-27, five-object bursts to 12, and task-native obstacle insertion to 39. This
-produces 191 task--change-type cells.
+Goal, and LIBERO-10. After deterministic task--change--draw pruning, the frozen
+release contains 177 task--change-type cells. Illumination and camera changes
+apply to all 40 tasks; retained planar target relocation applies to 31,
+movable-receptacle relocation to 26, five-object bursts to 12, and task-native
+obstacle insertion to 28.
 
 The v1 candidate provides two profiles:
 
@@ -228,11 +229,11 @@ The v1 candidate provides two profiles:
 | --- | ---: | ---: | ---: |
 | Illumination switch | 40 | 360 | 1,080 |
 | Camera shift | 40 | 360 | 1,080 |
-| Target relocation | 33 | 198 | 594 |
-| Receptacle relocation | 27 | 162 | 486 |
-| Distractor burst | 12 | 108 | 324 |
-| Obstacle insertion | 39 | 351 | 1,053 |
-| **Total** |  | **1,539** | **4,617** |
+| Target relocation | 31 | 186 | 558 |
+| Receptacle relocation | 26 | 156 | 468 |
+| Distractor burst | 12 | 99 | 297 |
+| Obstacle insertion | 28 | 174 | 522 |
+| **Total** |  | **1,335** | **4,005** |
 
 Core evaluates every unique frozen configuration once and rotates three policy
 seeds evenly within each task--change-type cell. Full crosses each policy seed
@@ -244,9 +245,10 @@ physical preflight and trigger-coverage calibration.
 
 ### Models and baselines
 
-1. Frozen VLA with its default action chunk.
-2. The same VLA with shorter closed-loop query intervals.
-3. Observation-history or explicit replanning baseline.
+1. Cosmos Policy Predict2-2B with its default 16-step action commitment.
+2. pi0.5-LIBERO with its official five-step replanning interval and
+   deterministic matched flow noise.
+3. The same VLA with shorter closed-loop query intervals.
 4. Online-adaptation method with a fully specified update contract.
 5. Oracle change-notified diagnostic.
 

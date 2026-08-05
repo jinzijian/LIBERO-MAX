@@ -146,8 +146,9 @@ policy seeds with every retained intervention configuration. All 1,335 unique
 physical scenarios passed the real-MuJoCo preflight; the release records the 62
 candidate configurations excluded by the feasibility filter. Policy rollout,
 trigger-coverage, and benchmark-result validation remain empirical work rather
-than properties of the dataset release. Intent and infeasibility tracks still
-require response-aware scorers. See
+than properties of the dataset release. The intent track now has a separate
+96-pair Core manifest with alternate-goal and cancellation safe-stop scorers;
+the infeasibility track still requires a response-aware interface. See
 [`docs/PAPER_PLAN.md`](docs/PAPER_PLAN.md) for the paper-scale roadmap and claim
 boundaries. Pilot intervention and proximity-threshold evidence is recorded in
 [`docs/PILOT_CALIBRATION.md`](docs/PILOT_CALIBRATION.md).

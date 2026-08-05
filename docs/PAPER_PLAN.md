@@ -1,7 +1,8 @@
 # LIBERO-MAX Paper Plan
 
-Status: Track A v1.0.0 physical test sets frozen; multi-model paired evaluation
-and Track B/C scorers remain implementation work.
+Status: Track A v1.0.0 physical test sets frozen. Track B has a deterministic
+96-pair Core manifest and response-aware goal-update/safe-stop scorers. Model
+runs and Track C remain empirical work.
 
 The five-case pilot centers on three intuitive stressors. The v1 paper main
 track expands to six: illumination, camera shift, target relocation,
@@ -21,7 +22,7 @@ largest gap between static task competence and mid-execution responsiveness?
 | Track | Families | Correctness signal | Current status |
 | --- | --- | --- | --- |
 | A. Physical adaptation | `OBS`, `GEO`, `CLUTTER`, `OBSTACLE` | original LIBERO goal completion, paired against no-change control | v1.0.0 Core/Full frozen; policy evaluation pending |
-| B. Intent revision | `INTENT` | alternate goal predicate, safe cancellation, or clarification response | runtime core only; Cosmos language-query hook and scorers missing |
+| B. Intent revision | `INTENT` | alternate goal predicate or frozen ten-step safe-stop contract | 96-pair Core manifest and Cosmos language-query hook implemented; real preflight and model runs pending |
 | C. Feasibility awareness | `FEAS` | safe abstention plus explicit infeasibility report | taxonomy only; action/text protocol and scorer missing |
 
 Track A is the first empirical paper milestone. Track B and C must not reuse
@@ -82,7 +83,10 @@ ordinary LIBERO task success as their correctness label.
    and freeze matched Core/Full v1.0.0. **Done.**
 4. Run Core, then Full, to decouple policy/intervention
    randomness.
-5. Add at least two model families and the oracle-notified diagnostic.
+5. Evaluate Cosmos Policy Predict2-2B and pi0.5-LIBERO on the same frozen cases,
+   then add the oracle-notified diagnostic.
+6. Preflight and evaluate the 96-pair intent Core without reusing the original
+   LIBERO success predicate for the changed arm.
 
 The current task-0 mechanics and 18 cm trigger calibration are recorded in
 [`PILOT_CALIBRATION.md`](PILOT_CALIBRATION.md).

@@ -15,7 +15,7 @@ SUPPORTED_SUITES = {
     "libero_90",
 }
 TIMING_BUCKETS = {"early", "middle", "late"}
-SCORING_TRACKS = {"physical_completion"}
+SCORING_TRACKS = {"physical_completion", "intent_response"}
 MANIFEST_FIELDS = {"benchmark_id", "benchmark_version", "protocol", "cases"}
 PROTOCOL_FIELDS = {"arms", "query_interval", "scoring_track"}
 CASE_FIELDS = {
@@ -152,6 +152,20 @@ def validate_manifest(data: Any) -> List[str]:
                 errors.append(
                     "%s trigger step must be aligned to protocol.query_interval" % label
                 )
+        if not scenario_errors and scoring_track == "intent_response":
+            if scenario["change_family"] != "INTENT":
+                errors.append("%s intent_response only supports INTENT" % label)
+            if scenario["expected_response_mode"] not in {"follow_update", "stop"}:
+                errors.append(
+                    "%s intent_response only supports follow_update or stop" % label
+                )
+            if scenario["change"].get("operation") not in {
+                "replace_instruction",
+                "cancel_instruction",
+            }:
+                errors.append("%s intent_response requires an intent operation" % label)
+            if scenario["trigger"]["type"] != "on_proximity":
+                errors.append("%s intent_response requires on_proximity" % label)
 
         if (
             _nonempty_string(case_id)

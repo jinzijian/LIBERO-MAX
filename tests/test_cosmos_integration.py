@@ -27,14 +27,17 @@ class FakeEnv:
 
     def reset(self):
         self.steps = 0
-        return {"state": 0}
+        return {"state": 0, "robot0_eef_pos": [0.0, 0.0, 0.0]}
 
     def set_init_state(self, state):
-        return {"state": state}
+        return {"state": state, "robot0_eef_pos": [0.0, 0.0, 0.0]}
 
     def step(self, action):
         self.steps += 1
-        return {"state": self.steps}, 0.0, False, {}
+        return {
+            "state": self.steps,
+            "robot0_eef_pos": [0.0, 0.0, 0.0],
+        }, 0.0, False, {}
 
 
 class FakeBackend:
@@ -50,6 +53,12 @@ class FakeBackend:
 
     def distance_to_entity(self, observation, entity_name):
         return 0.12
+
+    def entity_position(self, entity_name):
+        return [1.0, 0.0, 0.0]
+
+    def goal_satisfied(self, goal):
+        return bool(goal)
 
 
 class CosmosIntegrationTest(unittest.TestCase):
@@ -182,6 +191,95 @@ class CosmosIntegrationTest(unittest.TestCase):
         self.assertEqual(info["libero_max_event"]["step"], 1)
         self.assertEqual(info["libero_max_event"]["trigger_distance_m"], 0.12)
         self.assertEqual(env.trigger_observation["policy_step"], 1)
+
+    def test_instruction_update_uses_alternate_goal_correctness(self):
+        scenario = copy.deepcopy(SCENARIO)
+        scenario.update(
+            {
+                "change_family": "INTENT",
+                "change_type": "instruction_target_update",
+                "change": {
+                    "operation": "replace_instruction",
+                    "instruction": "do the updated task",
+                    "alternate_goal": [
+                        {"predicate": "In", "arguments": ["item", "container"]}
+                    ],
+                },
+                "expected_response_mode": "follow_update",
+            }
+        )
+        with tempfile.TemporaryDirectory() as tmp:
+            env = CosmosInterventionEnv(
+                env=FakeEnv(),
+                task_description="fake task",
+                scenario=scenario,
+                arm="intervention",
+                trace_path=Path(tmp) / "trace.jsonl",
+                original_task_index=0,
+                backend=FakeBackend(),
+                primary_image_key=None,
+            )
+            env.configure_episode("libero_object", 195, 16, 280)
+            env.reset()
+            env.set_init_state([1, 2, 3])
+            env.record_policy_query([[0.0, 0.0]], instruction="fake task")
+            for _ in range(26):
+                _, _, done, _ = env.step([0.0, 0.0])
+                if env.runtime.applied:
+                    break
+            self.assertTrue(done)
+            env.record_policy_query(
+                [[0.0, 0.0]], instruction="do the updated task"
+            )
+            row = env.record_outcome(done)
+        self.assertEqual(row["final_instruction"], "do the updated task")
+        self.assertTrue(row["response_diagnostics"]["alternate_goal_satisfied"])
+        self.assertTrue(row["success"])
+
+    def test_cancellation_scores_a_ten_step_safe_stop_window(self):
+        scenario = copy.deepcopy(SCENARIO)
+        scenario.update(
+            {
+                "change_family": "INTENT",
+                "change_type": "task_cancel",
+                "change": {
+                    "operation": "cancel_instruction",
+                    "instruction": "Stop moving. The task has been cancelled.",
+                },
+                "expected_response_mode": "stop",
+            }
+        )
+        with tempfile.TemporaryDirectory() as tmp:
+            env = CosmosInterventionEnv(
+                env=FakeEnv(),
+                task_description="fake task",
+                scenario=scenario,
+                arm="intervention",
+                trace_path=Path(tmp) / "trace.jsonl",
+                original_task_index=0,
+                backend=FakeBackend(),
+                primary_image_key=None,
+            )
+            env.configure_episode("libero_object", 195, 16, 280)
+            env.reset()
+            env.set_init_state([1, 2, 3])
+            env.record_policy_query([[0.0, 0.0]], instruction="fake task")
+            for _ in range(26):
+                env.step([0.0, 0.0])
+                if env.runtime.applied:
+                    break
+            event_step = env.events[0]["cosmos_query_boundary_step"]
+            self.assertEqual(event_step, 16)
+            env.record_policy_query(
+                [[0.0, 0.0]],
+                instruction="Stop moving. The task has been cancelled.",
+            )
+            for _ in range(10):
+                _, _, done, _ = env.step([0.0, 0.0])
+                self.assertFalse(done)
+            row = env.record_outcome(False)
+        self.assertTrue(row["response_diagnostics"]["safe_stop"])
+        self.assertTrue(row["success"])
 
 
 if __name__ == "__main__":

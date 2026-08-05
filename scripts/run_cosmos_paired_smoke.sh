@@ -8,6 +8,7 @@ ROBOSUITE_DIR="${ROBOSUITE_DIR:-/vepfs/zijian/alter-wam-deps/robosuite-1.4.0}"
 LEGACY_SITE_PACKAGES="${LEGACY_SITE_PACKAGES:-/vepfs/zijian/alter-wam-deps/.venv-libero/lib/python3.10/site-packages}"
 LIBERO_CONFIG_DIR="${LIBERO_CONFIG_DIR:-/vepfs/zijian/alter-wam-deps/libero-config}"
 ASSET_DIR="${ASSET_DIR:-/vepfs/zijian/alter-wam-deps/cosmos-assets/Cosmos-Policy-LIBERO-Predict2-2B}"
+T5_EMBEDDINGS_PATH="${T5_EMBEDDINGS_PATH:-$ASSET_DIR/libero_t5_embeddings.pkl}"
 HF_HOME_DIR="${HF_HOME_DIR:-/vepfs/zijian/alter-wam-deps/hf-cache-cosmos}"
 GPU_ID="${GPU_ID:?set GPU_ID to one free physical GPU}"
 OUTPUT_ROOT="${OUTPUT_ROOT:-$PROJECT_DIR/artifacts/cosmos_paired_smoke}"
@@ -51,7 +52,7 @@ for arm in control intervention; do
       --normalize_proprio True \
       --unnormalize_actions True \
       --dataset_stats_path "$ASSET_DIR/libero_dataset_statistics.json" \
-      --t5_text_embeddings_path "$ASSET_DIR/libero_t5_embeddings.pkl" \
+      --t5_text_embeddings_path "$T5_EMBEDDINGS_PATH" \
       --trained_with_image_aug True \
       --chunk_size 16 \
       --num_open_loop_steps 16 \

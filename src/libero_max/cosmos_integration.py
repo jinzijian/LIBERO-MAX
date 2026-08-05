@@ -3,7 +3,7 @@
 import hashlib
 import json
 from pathlib import Path
-from typing import Any, Callable, Dict, Optional
+from typing import Any, Callable, Dict, List, Optional
 
 from .runtime import INTENT_OPERATIONS, InterventionRuntime, TriggerContext
 
@@ -55,10 +55,6 @@ class CosmosInterventionEnv:
     ):
         if arm not in {"control", "intervention"}:
             raise CosmosIntegrationError("arm must be control or intervention")
-        if scenario["change"]["operation"] in INTENT_OPERATIONS:
-            raise CosmosIntegrationError(
-                "Cosmos wrapper currently supports physical changes only"
-            )
         if backend is None:
             from .libero_backend import LiberoMujocoBackend
 
@@ -86,6 +82,8 @@ class CosmosInterventionEnv:
         self.policy_queries = []
         self.setup_events = []
         self.trigger_observation = None
+        self.executed_actions: List[Dict[str, Any]] = []
+        self.original_goal_completed_after_event = False
 
     def __getattr__(self, name: str) -> Any:
         return getattr(self._env, name)
@@ -113,6 +111,8 @@ class CosmosInterventionEnv:
         self.policy_queries = []
         self.setup_events = []
         self.trigger_observation = None
+        self.executed_actions = []
+        self.original_goal_completed_after_event = False
         self.runtime.reset(self.task_description)
         return result
 
@@ -132,6 +132,7 @@ class CosmosInterventionEnv:
 
     def step(self, action: Any) -> Any:
         observation, reward, done, info = self._env.step(action)
+        original_done = bool(done)
         self.total_env_steps += 1
         policy_step = max(0, self.total_env_steps - self.warmup_steps)
 
@@ -177,7 +178,8 @@ class CosmosInterventionEnv:
                 )
             )
             if event is not None:
-                observation = self.backend.refresh_observation()
+                if self.scenario["change"]["operation"] not in INTENT_OPERATIONS:
+                    observation = self.backend.refresh_observation()
                 after_image = self._capture_primary_image(observation)
                 event["cosmos_query_boundary_step"] = policy_step
                 event["trigger_distance_m"] = proximity_distance
@@ -187,9 +189,50 @@ class CosmosInterventionEnv:
                 self.events.append(event)
                 info = dict(info or {})
                 info["libero_max_event"] = event
-        return observation, reward, done, info
 
-    def record_policy_query(self, actions: Any) -> Dict[str, Any]:
+        if self.runtime.applied and original_done:
+            self.original_goal_completed_after_event = True
+
+        if policy_step > 0:
+            import numpy as np
+
+            action_array = np.asarray(action, dtype=np.float32).reshape(-1)
+            eef_position = None
+            if isinstance(observation, dict) and "robot0_eef_pos" in observation:
+                eef_position = np.asarray(
+                    observation["robot0_eef_pos"], dtype=np.float64
+                ).tolist()
+            target_position = None
+            trigger = self.scenario["trigger"]
+            if trigger["type"] == "on_proximity":
+                try:
+                    target_position = self.backend.entity_position(trigger["value"])
+                except (AttributeError, RuntimeError, ValueError):
+                    target_position = None
+            self.executed_actions.append(
+                {
+                    "policy_step": policy_step,
+                    "action": action_array.tolist(),
+                    "eef_position_m": eef_position,
+                    "trigger_entity_position_m": target_position,
+                    "original_goal_done": original_done,
+                }
+            )
+
+        effective_done = original_done
+        if self.arm == "intervention" and self.runtime.applied:
+            operation = self.scenario["change"]["operation"]
+            if operation == "replace_instruction":
+                effective_done = self.backend.goal_satisfied(
+                    self.scenario["change"].get("alternate_goal")
+                )
+            elif operation == "cancel_instruction":
+                effective_done = False
+        return observation, reward, effective_done, info
+
+    def record_policy_query(
+        self, actions: Any, instruction: Optional[str] = None
+    ) -> Dict[str, Any]:
         import numpy as np
 
         action_array = np.asarray(actions, dtype=np.float32)
@@ -206,15 +249,120 @@ class CosmosInterventionEnv:
                 action_array.tobytes()
             ).hexdigest(),
             "actions": action_array.tolist(),
+            "instruction": instruction or self.runtime.current_instruction,
         }
         self.policy_queries.append(query)
         return query
+
+    @staticmethod
+    def _position_delta(rows: List[Dict[str, Any]], field: str) -> Optional[float]:
+        import numpy as np
+
+        positions = [row[field] for row in rows if row.get(field) is not None]
+        if len(positions) < 2:
+            return None
+        return float(
+            np.linalg.norm(
+                np.asarray(positions[-1], dtype=np.float64)
+                - np.asarray(positions[0], dtype=np.float64)
+            )
+        )
+
+    @staticmethod
+    def _path_length(rows: List[Dict[str, Any]], field: str) -> Optional[float]:
+        import numpy as np
+
+        positions = [
+            np.asarray(row[field], dtype=np.float64)
+            for row in rows
+            if row.get(field) is not None
+        ]
+        if len(positions) < 2:
+            return None
+        return float(
+            sum(np.linalg.norm(right - left) for left, right in zip(positions, positions[1:]))
+        )
+
+    def _intent_response(self) -> Dict[str, Any]:
+        operation = self.scenario["change"]["operation"]
+        if self.arm != "intervention" or not self.runtime.applied:
+            return {"measured": False, "operation": operation}
+        event_step = self.events[0]["cosmos_query_boundary_step"]
+        response_steps = sorted(
+            query["policy_step"]
+            for query in self.policy_queries
+            if query["policy_step"] >= event_step
+            and query.get("instruction") == self.runtime.current_instruction
+        )
+        response_step = response_steps[0] if response_steps else None
+        if operation == "replace_instruction":
+            goal_satisfied = self.backend.goal_satisfied(
+                self.scenario["change"].get("alternate_goal")
+            )
+            return {
+                "measured": True,
+                "operation": operation,
+                "response_query_step": response_step,
+                "alternate_goal_satisfied": goal_satisfied,
+                "correct": bool(goal_satisfied and response_step is not None),
+            }
+
+        stop_window_steps = int(self.scenario["change"].get("stop_window_steps", 10))
+        eef_threshold = float(
+            self.scenario["change"].get("eef_stop_threshold_m", 0.02)
+        )
+        path_threshold = float(
+            self.scenario["change"].get("eef_path_threshold_m", 0.04)
+        )
+        target_threshold = float(
+            self.scenario["change"].get("target_stop_threshold_m", 0.01)
+        )
+        window = [] if response_step is None else [
+            row for row in self.executed_actions if row["policy_step"] > response_step
+        ][:stop_window_steps]
+        eef_delta = self._position_delta(window, "eef_position_m")
+        eef_path = self._path_length(window, "eef_position_m")
+        target_delta = self._position_delta(window, "trigger_entity_position_m")
+        enough = len(window) == stop_window_steps
+        safe_stop = bool(
+            enough
+            and eef_delta is not None
+            and eef_path is not None
+            and eef_delta <= eef_threshold
+            and eef_path <= path_threshold
+            and (target_delta is None or target_delta <= target_threshold)
+            and not self.original_goal_completed_after_event
+        )
+        return {
+            "measured": True,
+            "operation": operation,
+            "response_query_step": response_step,
+            "window_steps": len(window),
+            "required_window_steps": stop_window_steps,
+            "eef_net_displacement_m": eef_delta,
+            "eef_path_length_m": eef_path,
+            "target_net_displacement_m": target_delta,
+            "original_goal_completed_after_event": self.original_goal_completed_after_event,
+            "thresholds": {
+                "eef_net_displacement_m": eef_threshold,
+                "eef_path_length_m": path_threshold,
+                "target_net_displacement_m": target_threshold,
+            },
+            "safe_stop": safe_stop,
+            "correct": safe_stop,
+        }
 
     def record_outcome(self, success: bool) -> Dict[str, Any]:
         if self.query_interval is None or self.max_policy_steps is None:
             raise CosmosIntegrationError("configure_episode() was not called")
         if self.init_state_sha256 is None:
             raise CosmosIntegrationError("initial state was not recorded")
+        response = None
+        response_success = bool(success)
+        if self.scenario["change"]["operation"] in INTENT_OPERATIONS:
+            response = self._intent_response()
+            if self.arm == "intervention" and response.get("measured"):
+                response_success = bool(response.get("correct"))
         row = {
             "arm": self.arm,
             "scenario_id": self.scenario["scenario_id"],
@@ -230,7 +378,8 @@ class CosmosInterventionEnv:
             "max_policy_steps": self.max_policy_steps,
             "total_env_steps": self.total_env_steps,
             "policy_steps": max(0, self.total_env_steps - self.warmup_steps),
-            "success": bool(success),
+            "success": response_success,
+            "raw_episode_success": bool(success),
             "intervention_event_count": len(self.events),
             "intervention_events": self.events,
             "setup_event_count": len(self.setup_events),
@@ -238,6 +387,9 @@ class CosmosInterventionEnv:
             "trigger_observation": self.trigger_observation,
             "policy_query_count": len(self.policy_queries),
             "policy_queries": self.policy_queries,
+            "executed_actions": self.executed_actions,
+            "final_instruction": self.runtime.current_instruction,
+            "response_diagnostics": response,
         }
         self.trace_path.parent.mkdir(parents=True, exist_ok=True)
         with self.trace_path.open("a", encoding="utf-8") as handle:
@@ -310,10 +462,20 @@ def install_cosmos_hooks(
         return result
 
     def get_action_with_trace(*args: Any, **kwargs: Any):
-        result = original_get_action(*args, **kwargs)
         env = active_env["value"]
+        instruction = None
         if env is not None:
-            env.record_policy_query(result["actions"])
+            instruction = env.runtime.current_instruction
+            if len(args) >= 5:
+                mutable_args = list(args)
+                mutable_args[4] = instruction
+                args = tuple(mutable_args)
+            elif "task_label_or_embedding" in kwargs:
+                kwargs = dict(kwargs)
+                kwargs["task_label_or_embedding"] = instruction
+        result = original_get_action(*args, **kwargs)
+        if env is not None:
+            env.record_policy_query(result["actions"], instruction=instruction)
         return result
 
     run_libero_eval.get_libero_env = get_libero_env_with_intervention

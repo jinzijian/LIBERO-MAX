@@ -14,6 +14,17 @@ def _load_json(path: Path) -> Dict[str, Any]:
     return json.loads(path.read_text(encoding="utf-8"))
 
 
+def _load_trace(path: Path) -> Dict[str, Any]:
+    rows = [
+        json.loads(line)
+        for line in path.read_text(encoding="utf-8").splitlines()
+        if line.strip()
+    ]
+    if len(rows) != 1:
+        raise ValueError("%s must contain exactly one row, found %d" % (path, len(rows)))
+    return rows[0]
+
+
 def _validate_case(case: Dict[str, Any], summary: Dict[str, Any]) -> List[str]:
     errors: List[str] = []
     if not summary.get("matched"):
@@ -56,11 +67,31 @@ def main() -> int:
     records: List[Dict[str, Any]] = []
     missing: List[str] = []
     invalid: Dict[str, List[str]] = {}
+    terminal_invalid: Dict[str, List[str]] = {}
     for case in manifest["cases"]:
         case_id = case["case_id"]
         summary_path = args.root / "cases" / case_id / "paired_summary.json"
         if not summary_path.exists():
-            missing.append(case_id)
+            intervention_trace = (
+                args.root / "cases" / case_id / "intervention" / "trace.jsonl"
+            )
+            control_trace = args.root / "cases" / case_id / "control" / "trace.jsonl"
+            if intervention_trace.exists() and control_trace.exists():
+                try:
+                    intervention = _load_trace(intervention_trace)
+                    control = _load_trace(control_trace)
+                    reasons = []
+                    if intervention.get("intervention_event_count") == 0:
+                        reasons.append("trigger_unreached")
+                    if control.get("init_state_sha256") != intervention.get(
+                        "init_state_sha256"
+                    ):
+                        reasons.append("initial_state_mismatch")
+                    terminal_invalid[case_id] = reasons or ["paired_summary_missing"]
+                except (OSError, ValueError, json.JSONDecodeError) as exc:
+                    invalid[case_id] = ["failed to load terminal traces: %s" % exc]
+            else:
+                missing.append(case_id)
             continue
         try:
             paired = _load_json(summary_path)
@@ -72,6 +103,11 @@ def main() -> int:
             invalid[case_id] = errors
             continue
         event = paired["intervention"]["intervention_events"][0]
+        intent = manifest["protocol"]["scoring_track"] == "intent_response"
+        response = paired["intervention"].get("response_diagnostics") or {}
+        safety_violations = None
+        if intent and case["scenario"]["expected_response_mode"] == "stop":
+            safety_violations = 0 if response.get("safe_stop") else 1
         records.append(
             {
                 "pair_id": case_id,
@@ -98,15 +134,19 @@ def main() -> int:
                 "expected_response_mode": case["scenario"]["expected_response_mode"],
                 "control_correct": bool(paired["control_success"]),
                 "intervention_correct": bool(paired["intervention_success"]),
-                "adaptation_latency_steps": None,
-                "safety_violations": None,
+                "adaptation_latency_steps": (
+                    paired["open_loop_exposure_steps"] if intent else None
+                ),
+                "safety_violations": safety_violations,
                 "severity": case["scenario"]["severity"],
                 "timing_bucket": case["timing_bucket"],
                 "task_suite_name": case["task_suite_name"],
                 "task_index": case["task_index"],
                 "init_state_index": case["init_state_index"],
                 "policy_seed": case["policy_seed"],
-                "scoring_mode": "libero_goal_completion",
+                "scoring_mode": (
+                    "intent_response" if intent else "libero_goal_completion"
+                ),
                 "intervention_event_step": event["cosmos_query_boundary_step"],
                 "policy_response_query_step": paired[
                     "policy_response_query_step"
@@ -132,7 +172,17 @@ def main() -> int:
         "completed": len(records),
         "missing": sorted(missing),
         "invalid": invalid,
-        "complete": not missing and not invalid and len(records) == len(manifest["cases"]),
+        "terminal_invalid": terminal_invalid,
+        "trigger_unreached": sum(
+            "trigger_unreached" in reasons for reasons in terminal_invalid.values()
+        ),
+        "execution_complete": not missing and not invalid,
+        "complete": (
+            not missing
+            and not invalid
+            and not terminal_invalid
+            and len(records) == len(manifest["cases"])
+        ),
     }
     report = {
         "benchmark_id": manifest["benchmark_id"],
@@ -149,8 +199,16 @@ def main() -> int:
             "by_response_mode": metrics.get("by_response_mode", {}),
         },
         "measurement_notes": {
-            "adaptation_latency": "not measured by the current Cosmos action-only adapter",
-            "safety_violations": "not measured in physical pilot v0.1",
+            "adaptation_latency": (
+                "event-to-first-updated-instruction-query steps"
+                if manifest["protocol"]["scoring_track"] == "intent_response"
+                else "not measured by the physical-completion adapter"
+            ),
+            "safety_violations": (
+                "task cancellation uses the frozen ten-step safe-stop contract"
+                if manifest["protocol"]["scoring_track"] == "intent_response"
+                else "not measured in the physical-completion track"
+            ),
         },
     }
     output = args.root / "benchmark_summary.json"

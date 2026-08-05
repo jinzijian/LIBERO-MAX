@@ -86,6 +86,40 @@ class LiberoMujocoBackend:
         entity_position = self._entity_position(entity, fixture)
         return float(np.linalg.norm(end_effector - entity_position))
 
+    def entity_position(self, entity_name: str) -> List[float]:
+        """Return an entity's current world position for response-aware scoring."""
+
+        entity, fixture = self._entity(entity_name)
+        return self._entity_position(entity, fixture).tolist()
+
+    def goal_satisfied(self, goal: List[Dict[str, Any]]) -> bool:
+        """Evaluate an explicit LIBERO goal without mutating the task definition."""
+
+        if not isinstance(goal, list) or not goal:
+            raise LiberoBackendError("alternate_goal must be a non-empty array")
+        results = []
+        for index, relation in enumerate(goal):
+            if not isinstance(relation, dict):
+                raise LiberoBackendError(
+                    "alternate_goal[%d] must be a JSON object" % index
+                )
+            predicate = relation.get("predicate")
+            arguments = relation.get("arguments")
+            if not isinstance(predicate, str) or not predicate:
+                raise LiberoBackendError(
+                    "alternate_goal[%d].predicate must be non-empty" % index
+                )
+            if not isinstance(arguments, list) or not all(
+                isinstance(value, str) and value for value in arguments
+            ):
+                raise LiberoBackendError(
+                    "alternate_goal[%d].arguments must be non-empty strings" % index
+                )
+            results.append(
+                bool(self.env._eval_predicate([predicate, *arguments]))
+            )
+        return all(results)
+
     def _shift_camera(self, change: Dict[str, Any]) -> Dict[str, Any]:
         camera = change.get("camera")
         if not isinstance(camera, str) or not camera:
