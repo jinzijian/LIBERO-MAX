@@ -10,7 +10,7 @@ from typing import Any, Dict
 
 import numpy as np
 
-from libero_max.cosmos_integration import CosmosInterventionEnv
+from libero_max.cosmos_integration import CosmosInterventionEnv, retain_action_prefix
 from libero_max.manifest import load_manifest
 from summarize_cosmos_paired_smoke import summarize_pair
 
@@ -216,6 +216,7 @@ def main() -> int:
                     else:
                         result = original_get_action(*call_args, **call_kwargs)
                         source = "model"
+                    result = retain_action_prefix(result, query_interval)
                     wrapped.record_policy_query(
                         result["actions"], instruction=instruction, source=source
                     )

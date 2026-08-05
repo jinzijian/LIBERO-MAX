@@ -12,6 +12,27 @@ class CosmosIntegrationError(RuntimeError):
     """Raised when Cosmos integration invariants are not satisfied."""
 
 
+def retain_action_prefix(result: Dict[str, Any], steps: int) -> Dict[str, Any]:
+    """Return a model result containing only the actions to be executed.
+
+    Upstream Cosmos extends ``deque(maxlen=num_open_loop_steps)`` with the full
+    predicted chunk. For a shorter commitment, ``deque`` silently retains the
+    suffix. Explicit truncation implements the intended receding-horizon
+    contract: execute the first ``steps`` actions.
+    """
+
+    if steps < 1:
+        raise CosmosIntegrationError("action-prefix length must be positive")
+    actions = result.get("actions")
+    if actions is None or len(actions) < steps:
+        raise CosmosIntegrationError(
+            "model returned fewer than %d actions" % steps
+        )
+    limited = dict(result)
+    limited["actions"] = actions[:steps]
+    return limited
+
+
 def _state_digest(state: Any) -> str:
     if hasattr(state, "tobytes"):
         payload = state.tobytes()
@@ -547,6 +568,11 @@ def install_cosmos_hooks(
         else:
             result = original_get_action(*args, **kwargs)
             source = "model"
+        prefix_steps = getattr(cfg, "num_open_loop_steps", None)
+        if prefix_steps is None and env is not None:
+            prefix_steps = env.query_interval
+        if prefix_steps is not None:
+            result = retain_action_prefix(result, int(prefix_steps))
         if env is not None:
             env.record_policy_query(
                 result["actions"], instruction=instruction, source=source

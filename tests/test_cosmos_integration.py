@@ -5,7 +5,11 @@ import unittest
 from pathlib import Path
 from types import SimpleNamespace
 
-from libero_max.cosmos_integration import CosmosInterventionEnv, install_cosmos_hooks
+from libero_max.cosmos_integration import (
+    CosmosInterventionEnv,
+    install_cosmos_hooks,
+    retain_action_prefix,
+)
 
 
 SCENARIO = {
@@ -19,6 +23,17 @@ SCENARIO = {
     "expected_response_mode": "continue",
     "safety_constraints": [],
 }
+
+
+class ActionPrefixTest(unittest.TestCase):
+    def test_short_commitment_retains_predicted_prefix(self):
+        result = {
+            "actions": [[0], [1], [2], [3]],
+            "value_prediction": 0.5,
+        }
+        limited = retain_action_prefix(result, 2)
+        self.assertEqual(limited["actions"], [[0], [1]])
+        self.assertEqual(result["actions"], [[0], [1], [2], [3]])
 
 
 class FakeEnv:
@@ -191,7 +206,7 @@ class CosmosIntegrationTest(unittest.TestCase):
         cfg = SimpleNamespace(
             task_suite_name="libero_object",
             seed=195,
-            num_open_loop_steps=16,
+            num_open_loop_steps=1,
         )
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
