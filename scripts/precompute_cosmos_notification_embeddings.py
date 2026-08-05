@@ -17,9 +17,12 @@ def main() -> None:
     parser.add_argument("source", type=Path)
     parser.add_argument("output", type=Path)
     parser.add_argument("--notification", required=True)
+    parser.add_argument("--batch-size", type=int, default=4)
     args = parser.parse_args()
     if not args.notification.strip():
         parser.error("--notification must be non-empty")
+    if args.batch_size < 1:
+        parser.error("--batch-size must be positive")
     catalog = json.loads(args.catalog.read_text(encoding="utf-8"))
     prompts = sorted(
         {
@@ -34,9 +37,11 @@ def main() -> None:
     if missing:
         from cosmos_policy._src.predict2.inference.get_t5_emb import get_text_embedding
 
-        encoded = get_text_embedding(missing)
-        for prompt, embedding in zip(missing, encoded):
-            embeddings[prompt] = embedding[None].cpu()
+        for start in range(0, len(missing), args.batch_size):
+            batch = missing[start : start + args.batch_size]
+            encoded = get_text_embedding(batch)
+            for prompt, embedding in zip(batch, encoded):
+                embeddings[prompt] = embedding[None].cpu()
     args.output.parent.mkdir(parents=True, exist_ok=True)
     temporary = args.output.with_suffix(args.output.suffix + ".tmp")
     with temporary.open("wb") as handle:
