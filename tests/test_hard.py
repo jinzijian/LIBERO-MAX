@@ -86,6 +86,35 @@ class HardManifestTest(unittest.TestCase):
         self.assertNotEqual(repaired.get(task_key), event_draw)
         self.assertEqual(len(repaired), 1400)
 
+    def test_scarce_cell_is_rebalanced_without_changing_global_event_quota(self):
+        tasks = []
+        index = 0
+        scarce_keys = []
+        for category in PLUS_CATEGORIES:
+            for difficulty in PLUS_DIFFICULTIES:
+                for _ in range(48):
+                    task = _task(category, difficulty, index)
+                    tasks.append(task)
+                    if category == PLUS_CATEGORIES[0] and difficulty == 1:
+                        scarce_keys.append((task["task_suite_name"], index))
+                    index += 1
+        rejected = {
+            (suite, task_index, "distractor_burst")
+            for suite, task_index in scarce_keys[4:]
+        }
+        assignments = _core_assignments(tasks, rejected)
+        counts = {
+            event: sum(draw[0] == event for draw in assignments.values())
+            for event in CHANGE_TYPE_ORDER
+        }
+        scarce_distractors = sum(
+            assignments.get(key, (None, None))[0] == "distractor_burst"
+            for key in scarce_keys
+        )
+        self.assertEqual(len(assignments), 1400)
+        self.assertEqual(counts, {event: 175 for event in CHANGE_TYPE_ORDER})
+        self.assertEqual(scarce_distractors, 4)
+
     def test_obstacle_uses_a_fixed_target_relative_placement(self):
         case = _build_case(
             _task("Objects Layout", 4, 9), "obstacle_insertion", draw_id=0

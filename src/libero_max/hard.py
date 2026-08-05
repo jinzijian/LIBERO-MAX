@@ -275,6 +275,86 @@ def _build_case(
     }
 
 
+def _stratum_candidates(
+    tasks: Sequence[Dict[str, Any]],
+    stratum: Tuple[str, int],
+    event: str,
+    rejected: Set[Tuple[str, int, str]],
+    sampler_label: str,
+) -> List[Dict[str, Any]]:
+    candidates = [
+        task
+        for task in tasks
+        if event in eligible_change_types(task)
+        and (*_task_key(task), event) not in rejected
+    ]
+    candidates.sort(
+        key=lambda task: _stable_seed(
+            (SAMPLER_VERSION, sampler_label, *stratum, event, *_task_key(task))
+        )
+    )
+    return candidates
+
+
+def _match_stratum(
+    tasks: Sequence[Dict[str, Any]],
+    stratum: Tuple[str, int],
+    quotas: Dict[str, int],
+    rejected: Set[Tuple[str, int, str]],
+) -> Optional[Dict[Tuple[str, int], Tuple[str, int]]]:
+    """Find a deterministic task-to-event matching for one 40-task cell."""
+
+    if sum(quotas.values()) != CORE_PER_STRATUM:
+        raise AssertionError("Core stratum quotas must sum to 40")
+    candidates_by_event = {
+        event: _stratum_candidates(
+            tasks, stratum, event, rejected, "core"
+        )
+        for event in CHANGE_TYPE_ORDER
+    }
+    if any(
+        len(candidates_by_event[event]) < quotas[event]
+        for event in CHANGE_TYPE_ORDER
+    ):
+        return None
+    slots = [
+        (event, rank)
+        for event in CHANGE_TYPE_ORDER
+        for rank in range(quotas[event])
+    ]
+    slots.sort(
+        key=lambda slot: (
+            len(candidates_by_event[slot[0]]) - quotas[slot[0]],
+            CHANGE_TYPE_ORDER.index(slot[0]),
+            slot[1],
+        )
+    )
+    task_to_slot = {}
+    slot_to_task = {}
+
+    def assign(slot, seen_tasks):
+        event, _ = slot
+        for task in candidates_by_event[event]:
+            key = _task_key(task)
+            if key in seen_tasks:
+                continue
+            seen_tasks.add(key)
+            previous = task_to_slot.get(key)
+            if previous is None or assign(previous, seen_tasks):
+                task_to_slot[key] = slot
+                slot_to_task[slot] = task
+                return True
+        return False
+
+    for slot in slots:
+        if not assign(slot, set()):
+            return None
+    return {
+        _task_key(task): (event, rank % 2)
+        for (event, rank), task in slot_to_task.items()
+    }
+
+
 def _core_assignments(
     tasks: Sequence[Dict[str, Any]],
     rejected: Set[Tuple[str, int, str]] = frozenset(),
@@ -284,112 +364,111 @@ def _core_assignments(
         key = (task.get("plus_category"), task.get("plus_difficulty_level"))
         if key[0] in PLUS_CATEGORIES and key[1] in PLUS_DIFFICULTIES:
             strata[key].append(task)
-    expected = {(category, difficulty) for category in PLUS_CATEGORIES for difficulty in PLUS_DIFFICULTIES}
+    expected = {
+        (category, difficulty)
+        for category in PLUS_CATEGORIES
+        for difficulty in PLUS_DIFFICULTIES
+    }
     if set(strata) != expected:
         raise HardBuildError("catalog does not cover all 7 x 5 Plus strata")
 
-    assignments: Dict[Tuple[str, int], Tuple[str, int]] = {}
-    for stratum in sorted(strata):
-        selected = set()
-        stratum_assignments: Dict[Tuple[str, int], Tuple[str, int]] = {}
-        # Allocate the scarcest event first. Observation events accept every
-        # task, while clutter and relocation events require specific scene
-        # structure; greedy allocation in display order can consume the few
-        # eligible tasks before their constrained event is assigned.
-        selection_order = sorted(
+    quotas = {
+        stratum: {
+            event: CORE_PER_EVENT_PER_STRATUM for event in CHANGE_TYPE_ORDER
+        }
+        for stratum in strata
+    }
+    # Feasibility filtering can leave a particular Plus cell with only four
+    # safe configurations for a scarce event. Preserve the exact global 175
+    # cases per event by swapping one quota with a donor cell (4/6 and 6/4),
+    # rather than relaxing the Core's event balance or accepting a bad scene.
+    seen_quota_states = set()
+    while True:
+        matches = {
+            stratum: _match_stratum(
+                strata[stratum], stratum, quotas[stratum], rejected
+            )
+            for stratum in sorted(strata)
+        }
+        failed = [stratum for stratum in sorted(strata) if matches[stratum] is None]
+        if not failed:
+            break
+        state = tuple(
+            (stratum, tuple(quotas[stratum][event] for event in CHANGE_TYPE_ORDER))
+            for stratum in sorted(strata)
+        )
+        if state in seen_quota_states:
+            raise HardBuildError("Core quota repair entered a cycle")
+        seen_quota_states.add(state)
+        stratum = failed[0]
+        availability = {
+            event: len(
+                _stratum_candidates(
+                    strata[stratum], stratum, event, rejected, "core"
+                )
+            )
+            for event in CHANGE_TYPE_ORDER
+        }
+        scarce_events = sorted(
             CHANGE_TYPE_ORDER,
             key=lambda event: (
-                sum(event in eligible_change_types(task) for task in strata[stratum]),
+                availability[event] - quotas[stratum][event],
                 CHANGE_TYPE_ORDER.index(event),
             ),
         )
-        for change_type in selection_order:
-            candidates = [
-                task
-                for task in strata[stratum]
-                if _task_key(task) not in selected
-                and change_type in eligible_change_types(task)
-                and (*_task_key(task), change_type) not in rejected
-            ]
-            candidates.sort(
-                key=lambda task: _stable_seed(
-                    (SAMPLER_VERSION, "core", *stratum, change_type, *_task_key(task))
-                )
-            )
-            if len(candidates) < CORE_PER_EVENT_PER_STRATUM:
-                stratum_assignments = {}
-                break
-            for rank, task in enumerate(candidates[:CORE_PER_EVENT_PER_STRATUM]):
-                key = _task_key(task)
-                selected.add(key)
-                stratum_assignments[key] = (change_type, rank % 2)
-        if len(stratum_assignments) != CORE_PER_STRATUM:
-            # Repeated feasibility rejection can make the simple scarcity
-            # ordering paint itself into a corner even when a valid balanced
-            # allocation still exists. Deterministic augmenting-path matching
-            # finds that allocation without relaxing any event quota.
-            slots = [
-                (event, rank)
-                for event in CHANGE_TYPE_ORDER
-                for rank in range(CORE_PER_EVENT_PER_STRATUM)
-            ]
-            candidates_by_event = {}
-            for event in CHANGE_TYPE_ORDER:
-                candidates = [
-                    task
-                    for task in strata[stratum]
-                    if event in eligible_change_types(task)
-                    and (*_task_key(task), event) not in rejected
-                ]
-                candidates.sort(
-                    key=lambda task: _stable_seed(
-                        (
-                            SAMPLER_VERSION,
-                            "core-matching",
-                            *stratum,
-                            event,
-                            *_task_key(task),
-                        )
-                    )
-                )
-                candidates_by_event[event] = candidates
-            slots.sort(
-                key=lambda slot: (
-                    len(candidates_by_event[slot[0]]),
-                    CHANGE_TYPE_ORDER.index(slot[0]),
-                    slot[1],
-                )
-            )
-            task_to_slot = {}
-            slot_to_task = {}
-
-            def assign(slot, seen_tasks):
-                event, _ = slot
-                for task in candidates_by_event[event]:
-                    key = _task_key(task)
-                    if key in seen_tasks:
+        repaired = False
+        donors = sorted(
+            (candidate for candidate in strata if candidate != stratum),
+            key=lambda candidate: _stable_seed(
+                (SAMPLER_VERSION, "core-quota-donor", *stratum, *candidate)
+            ),
+        )
+        for scarce in scarce_events:
+            if quotas[stratum][scarce] <= 0:
+                continue
+            for replacement in CHANGE_TYPE_ORDER[:4]:
+                if replacement == scarce:
+                    continue
+                for donor in donors:
+                    if quotas[donor][replacement] <= 0:
                         continue
-                    seen_tasks.add(key)
-                    previous = task_to_slot.get(key)
-                    if previous is None or assign(previous, seen_tasks):
-                        task_to_slot[key] = slot
-                        slot_to_task[slot] = task
-                        return True
-                return False
+                    local_trial = dict(quotas[stratum])
+                    donor_trial = dict(quotas[donor])
+                    local_trial[scarce] -= 1
+                    local_trial[replacement] += 1
+                    donor_trial[scarce] += 1
+                    donor_trial[replacement] -= 1
+                    if _match_stratum(
+                        strata[stratum], stratum, local_trial, rejected
+                    ) is None:
+                        continue
+                    if _match_stratum(
+                        strata[donor], donor, donor_trial, rejected
+                    ) is None:
+                        continue
+                    quotas[stratum] = local_trial
+                    quotas[donor] = donor_trial
+                    repaired = True
+                    break
+                if repaired:
+                    break
+            if repaired:
+                break
+        if not repaired:
+            raise HardBuildError(
+                "%s cannot be rebalanced after feasibility rejection"
+                % (stratum,)
+            )
 
-            for slot in slots:
-                if not assign(slot, set()):
-                    raise HardBuildError(
-                        "%s cannot satisfy five feasible tasks per event"
-                        % (stratum,)
-                    )
-            stratum_assignments = {
-                _task_key(task): (event, rank % 2)
-                for (event, rank), task in slot_to_task.items()
-            }
-        if len(stratum_assignments) != CORE_PER_STRATUM:
+    assignments: Dict[Tuple[str, int], Tuple[str, int]] = {}
+    for stratum in sorted(strata):
+        stratum_assignments = matches[stratum]
+        if stratum_assignments is None or len(stratum_assignments) != CORE_PER_STRATUM:
             raise AssertionError("core stratum does not contain exactly 40 tasks")
         assignments.update(stratum_assignments)
+    counts = Counter(event for event, _ in assignments.values())
+    if any(counts[event] != 175 for event in CHANGE_TYPE_ORDER):
+        raise AssertionError("Core event quotas are not globally balanced")
     return assignments
 
 
