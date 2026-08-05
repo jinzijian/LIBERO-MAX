@@ -442,30 +442,38 @@ def _core_assignments(
         for scarce in scarce_events:
             if quotas[stratum][scarce] <= 0:
                 continue
+            minimum_shift = max(
+                1, quotas[stratum][scarce] - availability[scarce]
+            )
             for replacement in CHANGE_TYPE_ORDER[:4]:
                 if replacement == scarce:
                     continue
-                for donor in donors:
-                    if quotas[donor][replacement] <= 0:
-                        continue
+                for shift in range(
+                    minimum_shift, quotas[stratum][scarce] + 1
+                ):
                     local_trial = dict(quotas[stratum])
-                    donor_trial = dict(quotas[donor])
-                    local_trial[scarce] -= 1
-                    local_trial[replacement] += 1
-                    donor_trial[scarce] += 1
-                    donor_trial[replacement] -= 1
+                    local_trial[scarce] -= shift
+                    local_trial[replacement] += shift
                     if _match_stratum(
                         strata[stratum], stratum, local_trial, rejected
                     ) is None:
                         continue
-                    if _match_stratum(
-                        strata[donor], donor, donor_trial, rejected
-                    ) is None:
-                        continue
-                    quotas[stratum] = local_trial
-                    quotas[donor] = donor_trial
-                    repaired = True
-                    break
+                    for donor in donors:
+                        if quotas[donor][replacement] < shift:
+                            continue
+                        donor_trial = dict(quotas[donor])
+                        donor_trial[scarce] += shift
+                        donor_trial[replacement] -= shift
+                        if _match_stratum(
+                            strata[donor], donor, donor_trial, rejected
+                        ) is None:
+                            continue
+                        quotas[stratum] = local_trial
+                        quotas[donor] = donor_trial
+                        repaired = True
+                        break
+                    if repaired:
+                        break
                 if repaired:
                     break
             if repaired:

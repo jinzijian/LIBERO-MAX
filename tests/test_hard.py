@@ -100,7 +100,7 @@ class HardManifestTest(unittest.TestCase):
                     index += 1
         rejected = {
             (suite, task_index, "distractor_burst")
-            for suite, task_index in scarce_keys[4:]
+            for suite, task_index in scarce_keys[2:]
         }
         assignments = _core_assignments(tasks, rejected)
         counts = {
@@ -113,7 +113,7 @@ class HardManifestTest(unittest.TestCase):
         )
         self.assertEqual(len(assignments), 1400)
         self.assertEqual(counts, {event: 175 for event in CHANGE_TYPE_ORDER})
-        self.assertEqual(scarce_distractors, 4)
+        self.assertEqual(scarce_distractors, 2)
 
     def test_obstacle_uses_a_fixed_target_support_placement(self):
         case = _build_case(
