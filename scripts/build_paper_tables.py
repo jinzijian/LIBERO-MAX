@@ -5,6 +5,7 @@ import argparse
 import json
 import math
 import random
+import statistics
 from pathlib import Path
 from typing import Any, Dict, List, Tuple
 
@@ -156,10 +157,82 @@ def main() -> None:
         "\n".join(type_lines) + "\n", encoding="utf-8"
     )
 
+    severity_names = ["low", "medium", "high"]
+    severity_lines = [
+        "| Model | " + " | ".join(severity_names) + " |",
+        "| --- | " + " | ".join("---:" for _ in severity_names) + " |",
+    ]
+    for run in runs:
+        blocks = run["summary"]["metrics"]["by_severity"]
+        severity_lines.append(
+            "| %s | %s |"
+            % (
+                run["name"],
+                " | ".join(
+                    _percent(blocks.get(name, {}).get("scenario_aware_outcome_accuracy"))
+                    for name in severity_names
+                ),
+            )
+        )
+    (args.output_dir / "by_severity.md").write_text(
+        "\n".join(severity_lines) + "\n", encoding="utf-8"
+    )
+
+    diagnostic_lines = [
+        "| Model | Exposure n | Exposure mean / median | Changed post-event chunk | Safety measured | Safety violation |",
+        "| --- | ---: | ---: | ---: | ---: | ---: |",
+    ]
+    for run in runs:
+        records = run["records"]
+        exposures = [
+            record["open_loop_exposure_steps"]
+            for record in records
+            if record.get("open_loop_exposure_steps") is not None
+        ]
+        action_mads = [
+            record["post_event_action_chunk_mad"]
+            for record in records
+            if record.get("post_event_action_chunk_mad") is not None
+        ]
+        safety = run["summary"]["metrics"]["overall"]
+        coverage = safety["safety_measurement_coverage"]
+        diagnostic_lines.append(
+            "| %s | %d | %s | %s | %d/%d | %s |"
+            % (
+                run["name"],
+                len(exposures),
+                (
+                    "--"
+                    if not exposures
+                    else "%.2f / %.1f"
+                    % (statistics.mean(exposures), statistics.median(exposures))
+                ),
+                (
+                    "--"
+                    if not action_mads
+                    else _percent(
+                        sum(value > 1e-8 for value in action_mads)
+                        / len(action_mads)
+                    )
+                ),
+                coverage["measured"],
+                coverage["total"],
+                _percent(safety["safety_violation_rate"]),
+            )
+        )
+    (args.output_dir / "diagnostics.md").write_text(
+        "\n".join(diagnostic_lines) + "\n", encoding="utf-8"
+    )
+
     comparisons = []
     for left_index, left in enumerate(runs):
         left_records = {record["pair_id"]: record for record in left["records"]}
         for right in runs[left_index + 1 :]:
+            if (
+                left["summary"]["protocol"]["scoring_track"]
+                != right["summary"]["protocol"]["scoring_track"]
+            ):
+                continue
             right_records = {record["pair_id"]: record for record in right["records"]}
             common = sorted(set(left_records) & set(right_records))
             differences = [
