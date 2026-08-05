@@ -78,16 +78,19 @@ def main() -> int:
     from cosmos_policy.utils.utils import set_seed_everywhere
     from libero.libero import benchmark
 
-    t5_path = args.t5_embeddings or args.asset_dir / "libero_t5_embeddings.pkl"
+    asset_dir = args.asset_dir.resolve()
+    t5_path = (
+        args.t5_embeddings or asset_dir / "libero_t5_embeddings.pkl"
+    ).resolve()
     cfg = run_libero_eval.PolicyEvalConfig(
         config="cosmos_predict2_2b_480p_libero__inference_only",
-        ckpt_path=str(args.asset_dir / "Cosmos-Policy-LIBERO-Predict2-2B.pt"),
+        ckpt_path=str(asset_dir / "Cosmos-Policy-LIBERO-Predict2-2B.pt"),
         config_file="cosmos_policy/config/config.py",
         use_wrist_image=True,
         use_proprio=True,
         normalize_proprio=True,
         unnormalize_actions=True,
-        dataset_stats_path=str(args.asset_dir / "libero_dataset_statistics.json"),
+        dataset_stats_path=str(asset_dir / "libero_dataset_statistics.json"),
         t5_text_embeddings_path=str(t5_path),
         trained_with_image_aug=True,
         chunk_size=16,
