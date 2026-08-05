@@ -251,6 +251,11 @@ def _metric_block(records: Sequence[Dict[str, Any]]) -> Dict[str, Any]:
     latencies = [
         record["adaptation_latency_steps"]
         for record in records
+        if record["adaptation_latency_steps"] is not None
+    ]
+    correct_latencies = [
+        record["adaptation_latency_steps"]
+        for record in records
         if record["intervention_correct"]
         and record["adaptation_latency_steps"] is not None
     ]
@@ -292,6 +297,19 @@ def _metric_block(records: Sequence[Dict[str, Any]]) -> Dict[str, Any]:
             "count": len(latencies),
             "mean": None if not latencies else round(statistics.mean(latencies), 6),
             "median": None if not latencies else statistics.median(latencies),
+        },
+        "correct_adaptation_latency_steps": {
+            "count": len(correct_latencies),
+            "mean": (
+                None
+                if not correct_latencies
+                else round(statistics.mean(correct_latencies), 6)
+            ),
+            "median": (
+                None
+                if not correct_latencies
+                else statistics.median(correct_latencies)
+            ),
         },
     }
 

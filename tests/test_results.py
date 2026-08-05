@@ -67,6 +67,22 @@ class ResultSummaryTest(unittest.TestCase):
             len(summary["overall"]["paired_robustness_delta_95ci_bootstrap"]), 2
         )
 
+    def test_response_latency_includes_incorrect_responses(self):
+        records = copy.deepcopy(self.results[:2])
+        records[0]["intervention_correct"] = False
+        records[0]["adaptation_latency_steps"] = 3
+        records[1]["intervention_correct"] = True
+        records[1]["adaptation_latency_steps"] = 5
+        summary = summarize_results(records)
+        self.assertEqual(
+            summary["overall"]["adaptation_latency_steps"],
+            {"count": 2, "mean": 4, "median": 4.0},
+        )
+        self.assertEqual(
+            summary["overall"]["correct_adaptation_latency_steps"],
+            {"count": 1, "mean": 5, "median": 5},
+        )
+
     def test_same_randomized_scenario_can_repeat_across_policy_seeds(self):
         records = [copy.deepcopy(self.results[0]), copy.deepcopy(self.results[0])]
         for index, record in enumerate(records):
