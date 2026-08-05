@@ -76,6 +76,15 @@ class CosmosLauncherTest(unittest.TestCase):
         self.assertIn('MUJOCO_EGL_DEVICE_ID="$gpu"', launcher)
         self.assertIn('--num-shards "${#gpu_ids[@]}"', launcher)
 
+    def test_hard_cosmos_wrapper_uses_plus_assets_and_persistent_runner(self) -> None:
+        launcher = (
+            ROOT / "scripts/run_max_hard_cosmos.sh"
+        ).read_text(encoding="utf-8")
+        self.assertIn("libero-plus-python-overlay", launcher)
+        self.assertIn("libero_plus_t5_embeddings.pkl", launcher)
+        self.assertIn("run_cosmos_persistent_benchmark.py", launcher)
+        self.assertIn('--gpus "$GPUS"', launcher)
+
 
 if __name__ == "__main__":
     unittest.main()

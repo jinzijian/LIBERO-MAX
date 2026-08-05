@@ -144,11 +144,9 @@ GPUS=0,1,2,3,4,5,6,7 bash scripts/run_max_hard_preflight.sh \
   artifacts/max_hard/core.final.json \
   artifacts/max_hard/core_preflight_final
 
-PYTHONPATH=src python scripts/run_cosmos_persistent_benchmark.py \
+GPUS=0,1,2,3,4,5,6,7 bash scripts/run_max_hard_cosmos.sh \
   artifacts/max_hard/core.final.json \
-  --output-root artifacts/max_hard/cosmos_core \
-  --gpus 0,1,2,3,4,5,6,7 \
-  --t5-embeddings /path/to/libero_plus_t5_embeddings.pkl
+  artifacts/max_hard/cosmos_core
 ```
 
 ## Repository layout
