@@ -543,3 +543,10 @@ def install_cosmos_hooks(
     run_libero_eval.run_episode = run_episode_with_trace
     run_libero_eval.load_initial_states = load_selected_initial_state
     run_libero_eval.get_action = get_action_with_trace
+    # Paper evaluation stores structured traces rather than per-episode videos.
+    # Disabling the upstream video path also keeps replay-only queries from
+    # requiring discarded future-image predictions.
+    run_libero_eval.save_rollout_video = lambda *args, **kwargs: None
+    run_libero_eval.save_rollout_video_with_future_image_predictions = (
+        lambda *args, **kwargs: None
+    )
