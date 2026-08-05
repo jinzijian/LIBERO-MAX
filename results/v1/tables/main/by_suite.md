@@ -1,0 +1,14 @@
+| Model | Suite | n | Control | Change | Delta |
+| --- | --- | ---: | ---: | ---: | ---: |
+| Cosmos2-Physical | libero_10 | 318 | 96.5 | 78.0 | -18.6 |
+| Cosmos2-Physical | libero_goal | 261 | 98.5 | 75.5 | -23.0 |
+| Cosmos2-Physical | libero_object | 456 | 100.0 | 78.7 | -21.3 |
+| Cosmos2-Physical | libero_spatial | 300 | 99.3 | 79.3 | -20.0 |
+| pi0.5-Physical | libero_10 | 318 | 94.0 | 76.1 | -17.9 |
+| pi0.5-Physical | libero_goal | 261 | 97.7 | 84.7 | -13.0 |
+| pi0.5-Physical | libero_object | 456 | 97.4 | 81.8 | -15.6 |
+| pi0.5-Physical | libero_spatial | 300 | 97.0 | 89.0 | -8.0 |
+| Cosmos2-Intent | libero_goal | 36 | 100.0 | 36.1 | -63.9 |
+| Cosmos2-Intent | libero_object | 60 | 100.0 | 0.0 | -100.0 |
+| pi0.5-Intent | libero_goal | 36 | 100.0 | 41.7 | -58.3 |
+| pi0.5-Intent | libero_object | 60 | 95.0 | 0.0 | -95.0 |

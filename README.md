@@ -147,11 +147,19 @@ six-type v1 physical test-set release. Core contains 1,335 matched pairs / 2,670
 episodes; Full contains 4,005 matched pairs / 8,010 episodes and crosses three
 policy seeds with every retained intervention configuration. All 1,335 unique
 physical scenarios passed the real-MuJoCo preflight; the release records the 62
-candidate configurations excluded by the feasibility filter. Policy rollout,
-trigger-coverage, and benchmark-result validation remain empirical work rather
-than properties of the dataset release. The intent track now has a separate
-96-pair Core manifest with alternate-goal and cancellation safe-stop scorers;
-the infeasibility track still requires a response-aware interface. See
+candidate configurations excluded by the feasibility filter.
+
+The v1 paper evaluation is complete for Cosmos Policy Predict2-2B and
+pi0.5-LIBERO: 1,335/1,335 Physical Core pairs and 96/96 Intent Core pairs per
+model, all with 100% trigger coverage. The release also includes a balanced
+180-pair Cosmos query-interval ablation and a matched explicit-notification
+ablation. In total, the reported experiments comprise 3,222 independently
+executed matched pairs / 6,444 rollouts. Aggregate tables, paired records, and
+the result contract are published in [`results/v1`](results/v1/README.md); the
+paper-ready write-up is in [`paper/main.md`](paper/main.md).
+
+The infeasibility track remains outside v1 because it still requires a
+model-agnostic abstention interface. See
 [`docs/PAPER_PLAN.md`](docs/PAPER_PLAN.md) for the paper-scale roadmap and claim
 boundaries. Pilot intervention and proximity-threshold evidence is recorded in
 [`docs/PILOT_CALIBRATION.md`](docs/PILOT_CALIBRATION.md).

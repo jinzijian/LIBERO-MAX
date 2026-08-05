@@ -230,7 +230,9 @@ correctness. We report the complete 2x2 outcome table:
 Primary metrics are intervention accuracy, paired robustness delta
 \(\frac{1}{N}\sum_i(z_i-c_i)\), and regression rate conditioned on control
 success. Wilson intervals accompany accuracy, paired bootstrap intervals
-accompany deltas, and exact McNemar tests use the two discordant cells.
+accompany deltas, and exact McNemar tests use the two discordant cells. We use
+2,000 bootstrap resamples for each within-run delta and 5,000 for paired
+cross-run differences, with a fixed bootstrap seed of zero.
 
 Diagnostic metrics include trigger coverage, open-loop exposure, the first
 post-change action-chunk difference, episode length, and measured safety
@@ -300,7 +302,7 @@ as a policy failure.
 
 ### 7.1 Main paired results
 
-| Model | Control acc. | Change acc. | Delta | Regressions | Recoveries | McNemar p |
+| Model | Control acc. (%) | Change acc. (%) | Delta, points (95% CI) | Regressions | Recoveries | McNemar p |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: |
 | Cosmos Policy Predict2-2B | 98.7 | 78.1 | -20.7 [-22.9, -18.4] | 285 | 9 | 2.59e-72 |
 | pi0.5-LIBERO | 96.6 | 82.6 | -13.9 [-16.0, -11.9] | 213 | 27 | 4.80e-37 |
@@ -315,7 +317,7 @@ difference-in-differences measure, pi0.5 has a 6.7-point smaller robustness gap
 
 ### 7.2 By intervention axis
 
-| Model | Light | Camera | Target move | Receptacle move | Burst-5 | Obstacle |
+| Model | Light (%) | Camera (%) | Target move (%) | Receptacle move (%) | Burst-5 (%) | Obstacle (%) |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: |
 | Cosmos Policy Predict2-2B | 98.1 | 96.9 | 38.2 | 66.7 | 93.9 | 41.4 |
 | pi0.5-LIBERO | 96.7 | 94.4 | 52.7 | 92.3 | 90.9 | 47.7 |
@@ -330,7 +332,7 @@ success is 33.3% for Cosmos and 27.8% for pi0.5.
 
 ### 7.3 Intent revision
 
-| Model | Control | Revised outcome | Target update | Receptacle update | Cancel safely |
+| Model | Control (%) | Revised outcome (%) | Target update (%) | Receptacle update (%) | Cancel safely (%) |
 | --- | ---: | ---: | ---: | ---: | ---: |
 | Cosmos Policy Predict2-2B | 100.0 | 13.5 | 0.0 | 61.1 | 4.2 |
 | pi0.5-LIBERO | 96.9 | 15.6 | 0.0 | 83.3 | 0.0 |
@@ -356,7 +358,11 @@ Reassess the scene and continue the task.” lowers success to 66.1%, a paired
 -6.1 points (95% CI [-10.6, -1.7]; p=0.0127). The corresponding control
 reruns differ by only +1.1 points (p=0.5), so ordinary cross-run drift does
 not explain the intervention degradation. The five-step Cosmos result is
-[Q5_RESULT_AFTER_180_OF_180].
+75.0%, versus 72.2% at q16: a paired +2.8 points (95% CI [-2.2, 7.8];
+p=0.3833). Its paired robustness gap improves by only 1.1 points (95% CI
+[-4.4, 6.7]), while mean event-to-query exposure falls from 7.94 to 1.98
+steps. Thus, more frequent replanning substantially reduces open-loop delay
+but does not by itself produce a statistically reliable adaptation gain.
 
 ### 7.5 Failure analysis
 

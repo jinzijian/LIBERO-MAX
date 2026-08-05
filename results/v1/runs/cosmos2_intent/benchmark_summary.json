@@ -1,0 +1,449 @@
+{
+  "benchmark_id": "libero-max-v1-intent-core",
+  "benchmark_version": "1.0.0",
+  "coverage": {
+    "complete": true,
+    "completed": 96,
+    "execution_complete": true,
+    "invalid": {},
+    "missing": [],
+    "planned": 96,
+    "terminal_invalid": {},
+    "trigger_unreached": 0
+  },
+  "measurement_notes": {
+    "adaptation_latency": "event-to-first-updated-instruction-query steps",
+    "safety_violations": "task cancellation uses the frozen ten-step safe-stop contract"
+  },
+  "metrics": {
+    "by_change_family": {
+      "INTENT": {
+        "adaptation_latency_steps": {
+          "count": 96,
+          "mean": 7.822917,
+          "median": 9.0
+        },
+        "control_accuracy": 1.0,
+        "control_accuracy_95ci_wilson": [
+          0.961524,
+          1.0
+        ],
+        "correct_adaptation_latency_steps": {
+          "count": 13,
+          "mean": 9.769231,
+          "median": 10
+        },
+        "episodes": 96,
+        "mcnemar_exact_two_sided_p": 2.0679515313825692e-25,
+        "outcome_table": {
+          "intervention_side_gain": 0,
+          "persistent_failure": 0,
+          "preserved_capability": 13,
+          "regression_under_change": 83
+        },
+        "paired_robustness_delta": -0.864583,
+        "paired_robustness_delta_95ci_bootstrap": [
+          -0.927083,
+          -0.791667
+        ],
+        "regression_rate": 0.864583,
+        "safety_measurement_coverage": {
+          "measured": 48,
+          "total": 96
+        },
+        "safety_violation_rate": 0.958333,
+        "scenario_aware_outcome_accuracy": 0.135417,
+        "scenario_aware_outcome_accuracy_95ci_wilson": [
+          0.080877,
+          0.218011
+        ]
+      }
+    },
+    "by_change_type": {
+      "instruction_receptacle_update": {
+        "adaptation_latency_steps": {
+          "count": 18,
+          "mean": 9.055556,
+          "median": 10.0
+        },
+        "control_accuracy": 1.0,
+        "control_accuracy_95ci_wilson": [
+          0.824121,
+          1.0
+        ],
+        "correct_adaptation_latency_steps": {
+          "count": 11,
+          "mean": 9.181818,
+          "median": 10
+        },
+        "episodes": 18,
+        "mcnemar_exact_two_sided_p": 0.015625,
+        "outcome_table": {
+          "intervention_side_gain": 0,
+          "persistent_failure": 0,
+          "preserved_capability": 11,
+          "regression_under_change": 7
+        },
+        "paired_robustness_delta": -0.388889,
+        "paired_robustness_delta_95ci_bootstrap": [
+          -0.611111,
+          -0.166667
+        ],
+        "regression_rate": 0.388889,
+        "safety_measurement_coverage": {
+          "measured": 0,
+          "total": 18
+        },
+        "safety_violation_rate": null,
+        "scenario_aware_outcome_accuracy": 0.611111,
+        "scenario_aware_outcome_accuracy_95ci_wilson": [
+          0.38619,
+          0.796948
+        ]
+      },
+      "instruction_target_update": {
+        "adaptation_latency_steps": {
+          "count": 30,
+          "mean": 7.1,
+          "median": 8.0
+        },
+        "control_accuracy": 1.0,
+        "control_accuracy_95ci_wilson": [
+          0.886487,
+          1.0
+        ],
+        "correct_adaptation_latency_steps": {
+          "count": 0,
+          "mean": null,
+          "median": null
+        },
+        "episodes": 30,
+        "mcnemar_exact_two_sided_p": 1.862645149230957e-09,
+        "outcome_table": {
+          "intervention_side_gain": 0,
+          "persistent_failure": 0,
+          "preserved_capability": 0,
+          "regression_under_change": 30
+        },
+        "paired_robustness_delta": -1.0,
+        "paired_robustness_delta_95ci_bootstrap": [
+          -1.0,
+          -1.0
+        ],
+        "regression_rate": 1.0,
+        "safety_measurement_coverage": {
+          "measured": 0,
+          "total": 30
+        },
+        "safety_violation_rate": null,
+        "scenario_aware_outcome_accuracy": 0.0,
+        "scenario_aware_outcome_accuracy_95ci_wilson": [
+          0.0,
+          0.113513
+        ]
+      },
+      "task_cancel": {
+        "adaptation_latency_steps": {
+          "count": 48,
+          "mean": 7.8125,
+          "median": 9.0
+        },
+        "control_accuracy": 1.0,
+        "control_accuracy_95ci_wilson": [
+          0.9259,
+          1.0
+        ],
+        "correct_adaptation_latency_steps": {
+          "count": 2,
+          "mean": 13,
+          "median": 13.0
+        },
+        "episodes": 48,
+        "mcnemar_exact_two_sided_p": 2.842170943040401e-14,
+        "outcome_table": {
+          "intervention_side_gain": 0,
+          "persistent_failure": 0,
+          "preserved_capability": 2,
+          "regression_under_change": 46
+        },
+        "paired_robustness_delta": -0.958333,
+        "paired_robustness_delta_95ci_bootstrap": [
+          -1.0,
+          -0.895833
+        ],
+        "regression_rate": 0.958333,
+        "safety_measurement_coverage": {
+          "measured": 48,
+          "total": 48
+        },
+        "safety_violation_rate": 0.958333,
+        "scenario_aware_outcome_accuracy": 0.041667,
+        "scenario_aware_outcome_accuracy_95ci_wilson": [
+          0.011502,
+          0.139757
+        ]
+      }
+    },
+    "by_intervention_draw": {},
+    "by_response_mode": {
+      "follow_update": {
+        "adaptation_latency_steps": {
+          "count": 48,
+          "mean": 7.833333,
+          "median": 9.0
+        },
+        "control_accuracy": 1.0,
+        "control_accuracy_95ci_wilson": [
+          0.9259,
+          1.0
+        ],
+        "correct_adaptation_latency_steps": {
+          "count": 11,
+          "mean": 9.181818,
+          "median": 10
+        },
+        "episodes": 48,
+        "mcnemar_exact_two_sided_p": 1.4551915228366852e-11,
+        "outcome_table": {
+          "intervention_side_gain": 0,
+          "persistent_failure": 0,
+          "preserved_capability": 11,
+          "regression_under_change": 37
+        },
+        "paired_robustness_delta": -0.770833,
+        "paired_robustness_delta_95ci_bootstrap": [
+          -0.875,
+          -0.645833
+        ],
+        "regression_rate": 0.770833,
+        "safety_measurement_coverage": {
+          "measured": 0,
+          "total": 48
+        },
+        "safety_violation_rate": null,
+        "scenario_aware_outcome_accuracy": 0.229167,
+        "scenario_aware_outcome_accuracy_95ci_wilson": [
+          0.133078,
+          0.365393
+        ]
+      },
+      "stop": {
+        "adaptation_latency_steps": {
+          "count": 48,
+          "mean": 7.8125,
+          "median": 9.0
+        },
+        "control_accuracy": 1.0,
+        "control_accuracy_95ci_wilson": [
+          0.9259,
+          1.0
+        ],
+        "correct_adaptation_latency_steps": {
+          "count": 2,
+          "mean": 13,
+          "median": 13.0
+        },
+        "episodes": 48,
+        "mcnemar_exact_two_sided_p": 2.842170943040401e-14,
+        "outcome_table": {
+          "intervention_side_gain": 0,
+          "persistent_failure": 0,
+          "preserved_capability": 2,
+          "regression_under_change": 46
+        },
+        "paired_robustness_delta": -0.958333,
+        "paired_robustness_delta_95ci_bootstrap": [
+          -1.0,
+          -0.895833
+        ],
+        "regression_rate": 0.958333,
+        "safety_measurement_coverage": {
+          "measured": 48,
+          "total": 48
+        },
+        "safety_violation_rate": 0.958333,
+        "scenario_aware_outcome_accuracy": 0.041667,
+        "scenario_aware_outcome_accuracy_95ci_wilson": [
+          0.011502,
+          0.139757
+        ]
+      }
+    },
+    "by_severity": {
+      "high": {
+        "adaptation_latency_steps": {
+          "count": 48,
+          "mean": 7.8125,
+          "median": 9.0
+        },
+        "control_accuracy": 1.0,
+        "control_accuracy_95ci_wilson": [
+          0.9259,
+          1.0
+        ],
+        "correct_adaptation_latency_steps": {
+          "count": 2,
+          "mean": 13,
+          "median": 13.0
+        },
+        "episodes": 48,
+        "mcnemar_exact_two_sided_p": 2.842170943040401e-14,
+        "outcome_table": {
+          "intervention_side_gain": 0,
+          "persistent_failure": 0,
+          "preserved_capability": 2,
+          "regression_under_change": 46
+        },
+        "paired_robustness_delta": -0.958333,
+        "paired_robustness_delta_95ci_bootstrap": [
+          -1.0,
+          -0.895833
+        ],
+        "regression_rate": 0.958333,
+        "safety_measurement_coverage": {
+          "measured": 48,
+          "total": 48
+        },
+        "safety_violation_rate": 0.958333,
+        "scenario_aware_outcome_accuracy": 0.041667,
+        "scenario_aware_outcome_accuracy_95ci_wilson": [
+          0.011502,
+          0.139757
+        ]
+      },
+      "medium": {
+        "adaptation_latency_steps": {
+          "count": 48,
+          "mean": 7.833333,
+          "median": 9.0
+        },
+        "control_accuracy": 1.0,
+        "control_accuracy_95ci_wilson": [
+          0.9259,
+          1.0
+        ],
+        "correct_adaptation_latency_steps": {
+          "count": 11,
+          "mean": 9.181818,
+          "median": 10
+        },
+        "episodes": 48,
+        "mcnemar_exact_two_sided_p": 1.4551915228366852e-11,
+        "outcome_table": {
+          "intervention_side_gain": 0,
+          "persistent_failure": 0,
+          "preserved_capability": 11,
+          "regression_under_change": 37
+        },
+        "paired_robustness_delta": -0.770833,
+        "paired_robustness_delta_95ci_bootstrap": [
+          -0.875,
+          -0.645833
+        ],
+        "regression_rate": 0.770833,
+        "safety_measurement_coverage": {
+          "measured": 0,
+          "total": 48
+        },
+        "safety_violation_rate": null,
+        "scenario_aware_outcome_accuracy": 0.229167,
+        "scenario_aware_outcome_accuracy_95ci_wilson": [
+          0.133078,
+          0.365393
+        ]
+      }
+    },
+    "by_timing_bucket": {
+      "middle": {
+        "adaptation_latency_steps": {
+          "count": 96,
+          "mean": 7.822917,
+          "median": 9.0
+        },
+        "control_accuracy": 1.0,
+        "control_accuracy_95ci_wilson": [
+          0.961524,
+          1.0
+        ],
+        "correct_adaptation_latency_steps": {
+          "count": 13,
+          "mean": 9.769231,
+          "median": 10
+        },
+        "episodes": 96,
+        "mcnemar_exact_two_sided_p": 2.0679515313825692e-25,
+        "outcome_table": {
+          "intervention_side_gain": 0,
+          "persistent_failure": 0,
+          "preserved_capability": 13,
+          "regression_under_change": 83
+        },
+        "paired_robustness_delta": -0.864583,
+        "paired_robustness_delta_95ci_bootstrap": [
+          -0.927083,
+          -0.791667
+        ],
+        "regression_rate": 0.864583,
+        "safety_measurement_coverage": {
+          "measured": 48,
+          "total": 96
+        },
+        "safety_violation_rate": 0.958333,
+        "scenario_aware_outcome_accuracy": 0.135417,
+        "scenario_aware_outcome_accuracy_95ci_wilson": [
+          0.080877,
+          0.218011
+        ]
+      }
+    },
+    "overall": {
+      "adaptation_latency_steps": {
+        "count": 96,
+        "mean": 7.822917,
+        "median": 9.0
+      },
+      "control_accuracy": 1.0,
+      "control_accuracy_95ci_wilson": [
+        0.961524,
+        1.0
+      ],
+      "correct_adaptation_latency_steps": {
+        "count": 13,
+        "mean": 9.769231,
+        "median": 10
+      },
+      "episodes": 96,
+      "mcnemar_exact_two_sided_p": 2.0679515313825692e-25,
+      "outcome_table": {
+        "intervention_side_gain": 0,
+        "persistent_failure": 0,
+        "preserved_capability": 13,
+        "regression_under_change": 83
+      },
+      "paired_robustness_delta": -0.864583,
+      "paired_robustness_delta_95ci_bootstrap": [
+        -0.927083,
+        -0.791667
+      ],
+      "regression_rate": 0.864583,
+      "safety_measurement_coverage": {
+        "measured": 48,
+        "total": 96
+      },
+      "safety_violation_rate": 0.958333,
+      "scenario_aware_outcome_accuracy": 0.135417,
+      "scenario_aware_outcome_accuracy_95ci_wilson": [
+        0.080877,
+        0.218011
+      ]
+    }
+  },
+  "protocol": {
+    "arms": [
+      "control",
+      "intervention"
+    ],
+    "query_interval": 16,
+    "scoring_track": "intent_response"
+  }
+}

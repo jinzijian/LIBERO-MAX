@@ -1,8 +1,9 @@
 # LIBERO-MAX Paper Plan
 
-Status: Track A v1.0.0 physical test sets frozen. Track B has a deterministic
-96-pair Core manifest and response-aware goal-update/safe-stop scorers. Model
-runs and Track C remain empirical work.
+Status: Track A Physical Core and Track B Intent Core evaluations are complete
+for Cosmos Policy Predict2-2B and pi0.5-LIBERO. The query-interval and explicit
+notification ablations are also complete. Track C remains outside v1 because a
+model-agnostic abstention interface is not yet available.
 
 The five-case pilot centers on three intuitive stressors. The v1 paper main
 track expands to six: illumination, camera shift, target relocation,
@@ -21,8 +22,8 @@ largest gap between static task competence and mid-execution responsiveness?
 
 | Track | Families | Correctness signal | Current status |
 | --- | --- | --- | --- |
-| A. Physical adaptation | `OBS`, `GEO`, `CLUTTER`, `OBSTACLE` | original LIBERO goal completion, paired against no-change control | v1.0.0 Core/Full frozen; policy evaluation pending |
-| B. Intent revision | `INTENT` | alternate goal predicate or frozen ten-step safe-stop contract | 96-pair Core manifest and Cosmos language-query hook implemented; real preflight and model runs pending |
+| A. Physical adaptation | `OBS`, `GEO`, `CLUTTER`, `OBSTACLE` | original LIBERO goal completion, paired against no-change control | 1,335/1,335 Core pairs complete for both models; 100% trigger coverage |
+| B. Intent revision | `INTENT` | alternate goal predicate or frozen ten-step safe-stop contract | 96/96 Core pairs complete for both models; 100% trigger coverage |
 | C. Feasibility awareness | `FEAS` | safe abstention plus explicit infeasibility report | taxonomy only; action/text protocol and scorer missing |
 
 Track A is the first empirical paper milestone. Track B and C must not reuse
@@ -36,8 +37,8 @@ ordinary LIBERO task success as their correctness label.
    feasibility changes with response-mode-aware scoring.
 3. A diagnostic decomposition into preserved success, recovery, regression,
    and persistent failure, with coverage and category-level uncertainty.
-4. A cross-model study of frozen VLA policies, observation-history variants,
-   explicit replanning, online adaptation, and an oracle change-aware reference.
+4. A cross-model study of two frozen VLA policies plus controlled
+   query-interval and evaluator-provided event-notification diagnostics.
 
 ## Experimental design
 
@@ -62,8 +63,8 @@ ordinary LIBERO task success as their correctness label.
 2. Breakdown by change family, severity, and timing.
 3. Control-correct subset regression and recovery analysis.
 4. Response latency and safety measurement coverage.
-5. Ablations: observation history, closed-loop query interval, explicit change
-   notification, and online adaptation.
+5. Ablations: closed-loop query interval and explicit change notification on
+   one frozen, balanced 180-pair subset.
 
 ## Claim gates
 
@@ -81,12 +82,12 @@ ordinary LIBERO task success as their correctness label.
    **Done.**
 3. Exclude failed task--change--draw configurations, re-preflight 1,335/1,335,
    and freeze matched Core/Full v1.0.0. **Done.**
-4. Run Core, then Full, to decouple policy/intervention
-   randomness.
-5. Evaluate Cosmos Policy Predict2-2B and pi0.5-LIBERO on the same frozen cases,
-   then add the oracle-notified diagnostic.
-6. Preflight and evaluate the 96-pair intent Core without reusing the original
-   LIBERO success predicate for the changed arm.
+4. Evaluate Physical Core with Cosmos Policy Predict2-2B and pi0.5-LIBERO.
+   **Done: 1,335/1,335 pairs per model.**
+5. Evaluate a balanced 180-pair Cosmos subset at q16 and q5, then add the
+   event-notified q16 diagnostic. **Done.**
+6. Evaluate the 96-pair Intent Core without reusing the original LIBERO success
+   predicate for the changed arm. **Done: 96/96 pairs per model.**
 
 The current task-0 mechanics and 18 cm trigger calibration are recorded in
 [`PILOT_CALIBRATION.md`](PILOT_CALIBRATION.md).

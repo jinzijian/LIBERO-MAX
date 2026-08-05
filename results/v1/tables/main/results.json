@@ -1,0 +1,126 @@
+{
+  "main": [
+    {
+      "control_accuracy": 0.987266,
+      "intervention_accuracy": 0.780524,
+      "mcnemar_p": 2.592445290135945e-72,
+      "model": "Cosmos2-Physical",
+      "paired_delta": -0.206742,
+      "paired_delta_95ci": [
+        -0.229213,
+        -0.18427
+      ],
+      "planned_pairs": 1335,
+      "recoveries": 9,
+      "regressions": 285,
+      "track": "physical_completion",
+      "trigger_coverage": 1.0,
+      "valid_pairs": 1335
+    },
+    {
+      "control_accuracy": 0.965543,
+      "intervention_accuracy": 0.826217,
+      "mcnemar_p": 4.795549348663333e-37,
+      "model": "pi0.5-Physical",
+      "paired_delta": -0.139326,
+      "paired_delta_95ci": [
+        -0.1603,
+        -0.119101
+      ],
+      "planned_pairs": 1335,
+      "recoveries": 27,
+      "regressions": 213,
+      "track": "physical_completion",
+      "trigger_coverage": 1.0,
+      "valid_pairs": 1335
+    },
+    {
+      "control_accuracy": 1.0,
+      "intervention_accuracy": 0.135417,
+      "mcnemar_p": 2.0679515313825692e-25,
+      "model": "Cosmos2-Intent",
+      "paired_delta": -0.864583,
+      "paired_delta_95ci": [
+        -0.927083,
+        -0.791667
+      ],
+      "planned_pairs": 96,
+      "recoveries": 0,
+      "regressions": 83,
+      "track": "intent_response",
+      "trigger_coverage": 1.0,
+      "valid_pairs": 96
+    },
+    {
+      "control_accuracy": 0.96875,
+      "intervention_accuracy": 0.15625,
+      "mcnemar_p": 6.617444900424222e-24,
+      "model": "pi0.5-Intent",
+      "paired_delta": -0.8125,
+      "paired_delta_95ci": [
+        -0.885417,
+        -0.729167
+      ],
+      "planned_pairs": 96,
+      "recoveries": 0,
+      "regressions": 78,
+      "track": "intent_response",
+      "trigger_coverage": 1.0,
+      "valid_pairs": 96
+    }
+  ],
+  "model_comparisons": [
+    {
+      "common_pairs": 1335,
+      "control_left_only_success": 45,
+      "control_mcnemar_p": 0.00026427866182729843,
+      "control_right_minus_left": -0.021722846441947566,
+      "control_right_minus_left_95ci": [
+        -0.03295880149812734,
+        -0.010486891385767791
+      ],
+      "control_right_only_success": 16,
+      "left": "Cosmos2-Physical",
+      "left_only_success": 84,
+      "mcnemar_p": 6.699982423290152e-05,
+      "right": "pi0.5-Physical",
+      "right_minus_left": 0.045692883895131084,
+      "right_minus_left_95ci": [
+        0.02397003745318352,
+        0.06816479400749063
+      ],
+      "right_only_success": 145,
+      "robustness_right_minus_left": 0.06741573033707865,
+      "robustness_right_minus_left_95ci": [
+        0.044194756554307116,
+        0.09138576779026217
+      ]
+    },
+    {
+      "common_pairs": 96,
+      "control_left_only_success": 3,
+      "control_mcnemar_p": 0.25,
+      "control_right_minus_left": -0.03125,
+      "control_right_minus_left_95ci": [
+        -0.07291666666666667,
+        0.0
+      ],
+      "control_right_only_success": 0,
+      "left": "Cosmos2-Intent",
+      "left_only_success": 2,
+      "mcnemar_p": 0.6875,
+      "right": "pi0.5-Intent",
+      "right_minus_left": 0.020833333333333332,
+      "right_minus_left_95ci": [
+        -0.03125,
+        0.07291666666666667
+      ],
+      "right_only_success": 4,
+      "robustness_right_minus_left": 0.052083333333333336,
+      "robustness_right_minus_left_95ci": [
+        -0.010416666666666666,
+        0.11458333333333333
+      ]
+    }
+  ]
+}

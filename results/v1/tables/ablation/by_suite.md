@@ -1,0 +1,14 @@
+| Model | Suite | n | Control | Change | Delta |
+| --- | --- | ---: | ---: | ---: | ---: |
+| Cosmos-q16 | libero_10 | 49 | 95.9 | 75.5 | -20.4 |
+| Cosmos-q16 | libero_goal | 40 | 97.5 | 62.5 | -35.0 |
+| Cosmos-q16 | libero_object | 56 | 100.0 | 78.6 | -21.4 |
+| Cosmos-q16 | libero_spatial | 35 | 97.1 | 68.6 | -28.6 |
+| Cosmos-q5 | libero_10 | 49 | 98.0 | 75.5 | -22.4 |
+| Cosmos-q5 | libero_goal | 40 | 100.0 | 65.0 | -35.0 |
+| Cosmos-q5 | libero_object | 56 | 100.0 | 82.1 | -17.9 |
+| Cosmos-q5 | libero_spatial | 35 | 100.0 | 74.3 | -25.7 |
+| Cosmos-notified-q16 | libero_10 | 49 | 95.9 | 63.3 | -32.7 |
+| Cosmos-notified-q16 | libero_goal | 40 | 100.0 | 50.0 | -50.0 |
+| Cosmos-notified-q16 | libero_object | 56 | 100.0 | 78.6 | -21.4 |
+| Cosmos-notified-q16 | libero_spatial | 35 | 100.0 | 68.6 | -31.4 |
