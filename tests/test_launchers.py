@@ -53,6 +53,14 @@ class CosmosLauncherTest(unittest.TestCase):
             runner,
         )
 
+    def test_persistent_launcher_pins_one_physical_gpu_per_worker(self) -> None:
+        launcher = (
+            ROOT / "scripts/run_cosmos_persistent_benchmark.py"
+        ).read_text(encoding="utf-8")
+        self.assertIn('"CUDA_VISIBLE_DEVICES": gpu', launcher)
+        self.assertIn('"MUJOCO_EGL_DEVICE_ID": gpu', launcher)
+        self.assertIn('"--num-shards"', launcher)
+
 
 if __name__ == "__main__":
     unittest.main()
