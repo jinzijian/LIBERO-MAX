@@ -16,9 +16,14 @@ using one prevalidated relocation direction per task and resolving every value
 into an immutable manifest. The
 protocol separates preserved capability, intervention-side recovery,
 change-induced regression, and persistent failure, while recording the delay
-between physical change and the next policy query. We evaluate [MODEL ROSTER]
-on [FROZEN V1 MANIFEST SIZE] matched pairs. [RESULT SENTENCES ONLY AFTER FULL
-COVERAGE.] LIBERO-MAX exposes the gap between static task competence and the
+between physical change and the next policy query. We evaluate Cosmos Policy
+Predict2-2B and pi0.5-LIBERO on 1,335 Physical Core pairs and 96 Intent Core
+pairs per model. Physical success falls from 98.7% to 78.1% for Cosmos and
+from 96.6% to 82.6% for pi0.5; pi0.5 has a 6.7-point smaller paired robustness
+gap (95% CI 4.4--9.1). Both policies fail every target-update case and almost
+every cancellation. A generic event notification does not close the gap: on
+a balanced 180-pair subset it reduces Cosmos success from 72.2% to 66.1%.
+LIBERO-MAX exposes a substantial gap between static task competence and the
 ability to respond when the world changes during execution.
 
 ## 1. Introduction
@@ -31,7 +36,9 @@ only solve the original task; it must notice that its assumptions are stale
 and condition subsequent behavior on the new world state.
 
 Existing manipulation evaluations largely measure success under a fixed
-episode configuration or perturb the initial state before execution [CITES].
+episode configuration or perturb the initial state before execution
+([LIBERO-PRO](https://arxiv.org/abs/2510.03827),
+[LIBERO-Plus](https://openaccess.thecvf.com/content/CVPR2026/html/Fei_LIBERO-Plus_A_Progressive_Robustness_Benchmark_for_Visual-Language-Action_Models_CVPR_2026_paper.html)).
 Those settings cannot answer a distinct question: **what happens when a policy
 has already committed to a trajectory and an external change invalidates its
 current perception or plan?** An ordinary intervention success rate is also
@@ -78,8 +85,9 @@ Our contributions are:
 - reporting that decomposes paired outcomes and includes coverage, uncertainty,
   pre-change action equality, post-change action response, and open-loop
   exposure;
-- [AFTER EXPERIMENTS] a cross-model analysis identifying which changes and
-  execution regimes produce the largest adaptation gaps.
+- a cross-model analysis showing that target relocation and obstacle insertion
+  dominate the physical adaptation gap, while target updates and cancellation
+  expose a still larger intent-response failure.
 
 ## 2. Related Work
 
@@ -294,24 +302,74 @@ as a policy failure.
 
 | Model | Control acc. | Change acc. | Delta | Regressions | Recoveries | McNemar p |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: |
-| [pending] |  |  |  |  |  |  |
+| Cosmos Policy Predict2-2B | 98.7 | 78.1 | -20.7 [-22.9, -18.4] | 285 | 9 | 2.59e-72 |
+| pi0.5-LIBERO | 96.6 | 82.6 | -13.9 [-16.0, -11.9] | 213 | 27 | 4.80e-37 |
+
+Both runs contain 1,335/1,335 valid pairs, no missing or terminal-invalid
+cases, and 100% trigger coverage. On intervention success, pi0.5 exceeds
+Cosmos by 4.6 points (95% paired-bootstrap CI [2.4, 6.8]; exact McNemar
+p=6.70e-5). Because their control accuracies differ, we also
+compare each model's intervention-minus-control outcome per pair. By this
+difference-in-differences measure, pi0.5 has a 6.7-point smaller robustness gap
+(95% CI [4.4, 9.1]).
 
 ### 7.2 By intervention axis
 
 | Model | Light | Camera | Target move | Receptacle move | Burst-5 | Obstacle |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: |
-| [pending] |  |  |  |  |  |  |
+| Cosmos Policy Predict2-2B | 98.1 | 96.9 | 38.2 | 66.7 | 93.9 | 41.4 |
+| pi0.5-LIBERO | 96.7 | 94.4 | 52.7 | 92.3 | 90.9 | 47.7 |
 
-### 7.3 Timing and closed-loop exposure
+Lighting, camera, and five-object clutter preserve more than 90% success for
+both policies. The main failures are geometric replanning and obstruction.
+Severity is meaningful within an intervention type: Cosmos drops from 63.4%
+at 6 cm target relocation to 12.9% at 12 cm, and from 92.3% to 41.0% for the
+same receptacle tiers. pi0.5 drops from 69.9% to 35.5% for target relocation
+and from 96.2% to 88.5% for receptacle relocation. High-severity obstacle
+success is 33.3% for Cosmos and 27.8% for pi0.5.
 
-[Five-step query-interval and event-notification ablations on the frozen
-180-pair subset; trigger coverage, open-loop exposure, and post-change action
-response.]
+### 7.3 Intent revision
 
-### 7.4 Failure analysis
+| Model | Control | Revised outcome | Target update | Receptacle update | Cancel safely |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| Cosmos Policy Predict2-2B | 100.0 | 13.5 | 0.0 | 61.1 | 4.2 |
+| pi0.5-LIBERO | 96.9 | 15.6 | 0.0 | 83.3 | 0.0 |
 
-[Separate failure to detect, stale open-loop execution, target confusion,
-failed replanning, simulator-invalid cases, and base-task failures.]
+Each intent run has 96/96 valid pairs and 100% trigger coverage. The models do
+not differ significantly overall (pi0.5 minus Cosmos 2.1 points, 95% CI
+[-3.1, 7.3], p=0.6875). Both fail all 30 target-update cases. Cosmos safely
+stops in 2/48 cancellation cases, while pi0.5 stops in 0/48; the measured
+cancellation violation rates are therefore 95.8% and 100.0%.
+
+### 7.4 Timing and closed-loop exposure
+
+Cosmos observes the event after a mean 7.89 executed steps (median 9) under its
+16-step commitment, versus 2.00 steps (median 2) for pi0.5 at a five-step
+replanning interval. The first post-event action chunk differs in every
+physical and intent pair for both models. This shows behavioral sensitivity,
+not correctness: the intent outcomes remain poor despite a 100% action-change
+rate.
+
+On the balanced 180-pair subset, the q16 Cosmos baseline obtains 72.2%
+intervention success. Appending the generic message “The environment changed.
+Reassess the scene and continue the task.” lowers success to 66.1%, a paired
+-6.1 points (95% CI [-10.6, -1.7]; p=0.0127). The corresponding control
+reruns differ by only +1.1 points (p=0.5), so ordinary cross-run drift does
+not explain the intervention degradation. The five-step Cosmos result is
+[Q5_RESULT_AFTER_180_OF_180].
+
+### 7.5 Failure analysis
+
+The complete outcome tables distinguish change-induced failure from base-task
+failure. Cosmos has 1,033 preserved successes, 285 regressions, 9 recoveries,
+and 8 persistent failures; pi0.5 has 1,076, 213, 27, and 19, respectively.
+Illumination and camera changes rarely cause regressions, whereas high-severity
+relocation and inserted obstacles do, even though every placement passed
+physical preflight. The result therefore points to stale reach/placement plans
+and collision-aware replanning as larger bottlenecks than global appearance
+shift in this benchmark. The intent track reveals a separate limitation:
+changing the task language changes the next action chunk, but usually does not
+produce the revised outcome or a safe stop.
 
 ## 8. Limitations
 
@@ -325,4 +383,13 @@ abstention interface is available.
 
 ## 9. Conclusion
 
-[Write only after the frozen evaluation is complete.]
+LIBERO-MAX turns mid-execution world changes into deterministic matched-pair
+measurements. Strong static LIBERO performance does not imply robust online
+response: both evaluated policies lose significant success under feasible
+changes, particularly target relocation and obstacle insertion, and largely
+fail instruction replacement and cancellation. pi0.5 is more robust than
+Cosmos on the physical track, but neither model solves intent revision. A
+generic event notification can even reduce success, showing that change
+awareness alone is not a substitute for grounded replanning. These results
+motivate policies and execution interfaces trained explicitly for revising a
+committed plan after the world or user intent changes.
