@@ -16,7 +16,7 @@ OUTPUT_ROOT="$2"
 export MUJOCO_GL=egl
 export PYOPENGL_PLATFORM=egl
 export TORCH_FORCE_NO_WEIGHTS_ONLY_LOAD=1
-export LIBERO_CONFIG_PATH="${LIBERO_CONFIG_PATH:-$DEPS_DIR/libero-plus-config/config.yaml}"
+export LIBERO_CONFIG_PATH="${LIBERO_CONFIG_PATH:-$DEPS_DIR/libero-plus-config}"
 export PYTHONPATH="$DEPS_DIR/robosuite-1.4.0:$DEPS_DIR/libero-plus-python-overlay:$DEPS_DIR/cosmos-policy/.venv/lib/python3.10/site-packages:$DEPS_DIR/.venv-libero/lib/python3.10/site-packages:$DEPS_DIR/LIBERO-plus:$DEPS_DIR/cosmos-policy:$PROJECT_DIR/src${PYTHONPATH:+:$PYTHONPATH}"
 
 IFS=',' read -r -a gpu_ids <<< "$GPUS_CSV"

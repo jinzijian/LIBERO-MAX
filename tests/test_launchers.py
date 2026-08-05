@@ -71,6 +71,8 @@ class CosmosLauncherTest(unittest.TestCase):
         ).read_text(encoding="utf-8")
         self.assertIn("libero-plus-python-overlay", launcher)
         self.assertIn("LIBERO-plus", launcher)
+        self.assertIn("$DEPS_DIR/libero-plus-config}", launcher)
+        self.assertNotIn("libero-plus-config/config.yaml", launcher)
         self.assertIn('MUJOCO_EGL_DEVICE_ID="$gpu"', launcher)
         self.assertIn('--num-shards "${#gpu_ids[@]}"', launcher)
 
