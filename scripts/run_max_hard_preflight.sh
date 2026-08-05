@@ -10,8 +10,9 @@ PROJECT_DIR="${PROJECT_DIR:-/vepfs/zijian/LIBERO-MAX}"
 DEPS_DIR="${DEPS_DIR:-/vepfs/zijian/alter-wam-deps}"
 PYTHON="${PYTHON:-$DEPS_DIR/cosmos-policy/.venv/bin/python}"
 GPUS_CSV="${GPUS:-0,1,2,3,4,5,6,7}"
-MANIFEST="$1"
-OUTPUT_ROOT="$2"
+MANIFEST="$(realpath "$1")"
+mkdir -p "$2"
+OUTPUT_ROOT="$(realpath "$2")"
 
 export MUJOCO_GL=egl
 export PYOPENGL_PLATFORM=egl
