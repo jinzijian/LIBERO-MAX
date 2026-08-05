@@ -2,6 +2,7 @@
 """Run a manifest of matched Cosmos control/intervention cases."""
 
 import argparse
+import copy
 import json
 import os
 import subprocess
@@ -24,6 +25,7 @@ def _run_case(
     output_root: Path,
     launcher: Path,
     resume: bool,
+    query_interval: int,
 ) -> Tuple[str, bool, str]:
     case_dir = output_root / "cases" / case["case_id"]
     done_path = case_dir / "DONE"
@@ -47,6 +49,7 @@ def _run_case(
             "TASK_INDEX": str(case["task_index"]),
             "INIT_STATE_INDEX": str(case["init_state_index"]),
             "SEED": str(case["policy_seed"]),
+            "QUERY_INTERVAL": str(query_interval),
         }
     )
     log_path = case_dir / "launcher.log"
@@ -78,11 +81,15 @@ def _run_gpu_queue(
     output_root: Path,
     launcher: Path,
     resume: bool,
+    query_interval: int,
 ) -> List[Tuple[str, bool, str]]:
     """Run one sequential queue so a physical GPU is never oversubscribed."""
 
     return [
-        _run_case(case, gpu, output_root, launcher, resume) for case in cases
+        _run_case(
+            case, gpu, output_root, launcher, resume, query_interval
+        )
+        for case in cases
     ]
 
 
@@ -100,18 +107,28 @@ def main() -> int:
         help="independent sequential queues assigned to each physical GPU",
     )
     parser.add_argument(
+        "--query-interval",
+        type=int,
+        help="override the manifest policy-query interval for this run",
+    )
+    parser.add_argument(
         "--launcher",
         type=Path,
         default=Path(__file__).resolve().parent / "run_cosmos_paired_smoke.sh",
     )
     parser.add_argument("--resume", action="store_true")
     args = parser.parse_args()
-    manifest = load_manifest(args.manifest)
+    manifest = copy.deepcopy(load_manifest(args.manifest))
     gpus = [item.strip() for item in args.gpus.split(",") if item.strip()]
     if not gpus:
         parser.error("--gpus must contain at least one GPU ID")
     if args.workers_per_gpu < 1:
         parser.error("--workers-per-gpu must be positive")
+    if args.query_interval is not None:
+        if args.query_interval < 1:
+            parser.error("--query-interval must be positive")
+        manifest["protocol"]["query_interval"] = args.query_interval
+    query_interval = int(manifest["protocol"]["query_interval"])
     args.output_root.mkdir(parents=True, exist_ok=True)
     _write_json(args.output_root / "manifest.json", manifest)
 
@@ -132,6 +149,7 @@ def main() -> int:
                 args.output_root,
                 args.launcher,
                 args.resume,
+                query_interval,
             ): (slot, gpu)
             for slot, (gpu, cases) in enumerate(queues)
             if cases

@@ -17,6 +17,7 @@ SUITE="${SUITE:-libero_object}"
 TASK_INDEX="${TASK_INDEX:-0}"
 SEED="${SEED:-195}"
 INIT_STATE_INDEX="${INIT_STATE_INDEX:-0}"
+QUERY_INTERVAL="${QUERY_INTERVAL:-16}"
 
 cosmos_site_packages="$COSMOS_POLICY_DIR/.venv/lib/python3.10/site-packages"
 mkdir -p "$OUTPUT_ROOT"
@@ -60,7 +61,7 @@ for arm in control intervention; do
       --t5_text_embeddings_path "$T5_EMBEDDINGS_PATH" \
       --trained_with_image_aug True \
       --chunk_size 16 \
-      --num_open_loop_steps 16 \
+      --num_open_loop_steps "$QUERY_INTERVAL" \
       --task_suite_name "$SUITE" \
       --num_trials_per_task 1 \
       --local_log_dir "$arm_dir/eval" \

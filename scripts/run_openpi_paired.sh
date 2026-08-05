@@ -15,7 +15,7 @@ SUITE="${SUITE:?set SUITE}"
 TASK_INDEX="${TASK_INDEX:?set TASK_INDEX}"
 INIT_STATE_INDEX="${INIT_STATE_INDEX:?set INIT_STATE_INDEX}"
 SEED="${SEED:?set SEED}"
-REPLAN_STEPS="${REPLAN_STEPS:-5}"
+REPLAN_STEPS="${REPLAN_STEPS:-${QUERY_INTERVAL:-5}}"
 
 site_packages="$COSMOS_DEPS/cosmos-policy/.venv/lib/python3.10/site-packages"
 legacy_site_packages="$COSMOS_DEPS/.venv-libero/lib/python3.10/site-packages"

@@ -19,6 +19,16 @@ class CosmosLauncherTest(unittest.TestCase):
             launcher,
         )
 
+    def test_query_interval_is_forwarded_to_model_and_openpi_client(self) -> None:
+        cosmos = (ROOT / "scripts/run_cosmos_paired_smoke.sh").read_text(
+            encoding="utf-8"
+        )
+        openpi = (ROOT / "scripts/run_openpi_paired.sh").read_text(
+            encoding="utf-8"
+        )
+        self.assertIn('--num_open_loop_steps "$QUERY_INTERVAL"', cosmos)
+        self.assertIn('${QUERY_INTERVAL:-5}', openpi)
+
     def test_preflight_enables_trusted_libero_state_loading_before_imports(self) -> None:
         preflight = (
             ROOT / "scripts/preflight_manifest_interventions.py"
