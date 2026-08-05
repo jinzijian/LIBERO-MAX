@@ -1,7 +1,7 @@
 import copy
 import unittest
 
-from libero_max.release import audit_v1_release
+from libero_max.release import _audit_hard_preflight, audit_v1_release
 from libero_max.v1 import build_v1_manifest
 
 
@@ -62,6 +62,22 @@ class ReleaseAuditTest(unittest.TestCase):
         self.assertIn(
             "preflight scenario coverage does not exactly match Core",
             audit_v1_release(catalog, core, full, preflight),
+        )
+
+    def test_hard_preflight_requires_exact_manifest_coverage(self):
+        manifest = {
+            "benchmark_id": "libero-max-hard-core",
+            "cases": [{"scenario": {"scenario_id": "hard-1"}}],
+        }
+        preflight = {
+            "benchmark_id": "libero-max-hard-core",
+            "complete": True,
+            "planned": 1,
+            "cases": [{"scenario_id": "hard-2", "passed": True}],
+        }
+        self.assertIn(
+            "Core preflight coverage does not exactly match manifest",
+            _audit_hard_preflight("Core", manifest, preflight),
         )
 
 
