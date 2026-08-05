@@ -115,15 +115,23 @@ class HardManifestTest(unittest.TestCase):
         self.assertEqual(counts, {event: 175 for event in CHANGE_TYPE_ORDER})
         self.assertEqual(scarce_distractors, 4)
 
-    def test_obstacle_uses_a_fixed_target_relative_placement(self):
+    def test_obstacle_uses_a_fixed_target_support_placement(self):
         case = _build_case(
             _task("Objects Layout", 4, 9), "obstacle_insertion", draw_id=0
         )
         change = case["scenario"]["change"]
-        self.assertEqual(change["placement_rule"], "target_approach_ring")
+        self.assertEqual(
+            change["placement_rule"], "target_support_approach_ring"
+        )
         self.assertEqual(change["relative_to"], "target")
         self.assertTrue(change["preserve_initial_z"])
         self.assertNotIn("path_target", change)
+
+    def test_obstacle_requires_a_distractor_on_the_target_support(self):
+        task = _task("Objects Layout", 4, 9)
+        for entity in task["distractor_objects"]:
+            task["initial_placements"][entity]["support_entity"] = "shelf"
+        self.assertNotIn("obstacle_insertion", eligible_change_types(task))
 
     def test_full_falls_back_to_observation_after_a_physical_failure(self):
         tasks = [

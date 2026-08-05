@@ -52,7 +52,7 @@ sample hidden randomness.
 | Target relocation | fixed direction, 6 cm or 12 cm | same planar support |
 | Receptacle relocation | fixed direction, 6 cm or 12 cm | same planar support |
 | Distractor burst | 5 or up to 8 seeded distractors | target and goal retained |
-| Obstacle insertion | seeded object on a fixed target-approach ring | alternate path retained |
+| Obstacle insertion | same-support object on a fixed target-approach ring | alternate path retained |
 
 The two relocation directions are deterministic per task, never randomly
 resampled per rollout. Candidate directions must pass real-MuJoCo stability,

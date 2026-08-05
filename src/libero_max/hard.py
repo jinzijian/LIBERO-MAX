@@ -57,6 +57,21 @@ def _supported_distractors(task: Dict[str, Any]) -> List[str]:
     )
 
 
+def _supported_obstacles(task: Dict[str, Any]) -> List[str]:
+    """Return distractors that share the target's planar support."""
+
+    placements = task.get("initial_placements", {})
+    trigger = task.get("trigger_entity")
+    trigger_support = placements.get(trigger, {}).get("support_entity")
+    if not trigger_support:
+        return []
+    return sorted(
+        entity
+        for entity in task.get("distractor_objects", [])
+        if placements.get(entity, {}).get("support_entity") == trigger_support
+    )
+
+
 def eligible_change_types(task: Dict[str, Any]) -> List[str]:
     if not task.get("trigger_entity"):
         return []
@@ -68,7 +83,7 @@ def eligible_change_types(task: Dict[str, Any]) -> List[str]:
     supported_distractors = _supported_distractors(task)
     if len(supported_distractors) >= 5:
         eligible.append("distractor_burst")
-    if supported_distractors:
+    if _supported_obstacles(task):
         eligible.append("obstacle_insertion")
     return [name for name in CHANGE_TYPE_ORDER if name in eligible]
 
@@ -189,7 +204,8 @@ def _sample_change(
             "distractor_count": count,
         }
     if change_type == "obstacle_insertion":
-        obstacle = distractors[0]
+        obstacles = _supported_obstacles(task)
+        obstacle = obstacles[draw_id % len(obstacles)]
         setup = [
             {
                 "operation": "remove_object",
@@ -203,7 +219,7 @@ def _sample_change(
             "relative_to": task["trigger_entity"],
             "offset_m": ([0.14, 0.0, 0.0], [0.0, -0.14, 0.0])[draw_id],
             "preserve_initial_z": True,
-            "placement_rule": "target_approach_ring",
+            "placement_rule": "target_support_approach_ring",
             "support_entity": _support_for(task, obstacle),
         }
     raise AssertionError("unhandled change type: %s" % change_type)
