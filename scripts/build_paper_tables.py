@@ -366,8 +366,15 @@ def main() -> None:
                 - int(left_records[key]["intervention_correct"])
                 for key in common
             ]
+            control_differences = [
+                int(right_records[key]["control_correct"])
+                - int(left_records[key]["control_correct"])
+                for key in common
+            ]
             left_only = sum(value == -1 for value in differences)
             right_only = sum(value == 1 for value in differences)
+            control_left_only = sum(value == -1 for value in control_differences)
+            control_right_only = sum(value == 1 for value in control_differences)
             comparisons.append(
                 {
                     "left": left["name"],
@@ -380,6 +387,19 @@ def main() -> None:
                     ),
                     "right_minus_left_95ci": _paired_delta_ci(differences),
                     "mcnemar_p": _mcnemar(left_only, right_only),
+                    "control_left_only_success": control_left_only,
+                    "control_right_only_success": control_right_only,
+                    "control_right_minus_left": (
+                        None
+                        if not control_differences
+                        else sum(control_differences) / len(control_differences)
+                    ),
+                    "control_right_minus_left_95ci": _paired_delta_ci(
+                        control_differences
+                    ),
+                    "control_mcnemar_p": _mcnemar(
+                        control_left_only, control_right_only
+                    ),
                 }
             )
     comparison_lines = [
@@ -398,6 +418,23 @@ def main() -> None:
         )
     (args.output_dir / "model_comparison.md").write_text(
         "\n".join(comparison_lines) + "\n", encoding="utf-8"
+    )
+    control_comparison_lines = [
+        "| Comparison | Common pairs | Control right - left (95% CI) | Left-only | Right-only | McNemar p |",
+        "| --- | ---: | ---: | ---: | ---: | ---: |",
+    ]
+    for row in comparisons:
+        p_value = row["control_mcnemar_p"]
+        control_comparison_lines.append(
+            "| {left} vs {right} | {common_pairs} | {delta} {ci} | {control_left_only_success} | {control_right_only_success} | {p} |".format(
+                **row,
+                delta=_percent(row["control_right_minus_left"]),
+                ci=_interval(row["control_right_minus_left_95ci"]),
+                p="--" if p_value is None else "%.4g" % p_value,
+            )
+        )
+    (args.output_dir / "control_repeatability.md").write_text(
+        "\n".join(control_comparison_lines) + "\n", encoding="utf-8"
     )
     (args.output_dir / "results.json").write_text(
         json.dumps(
