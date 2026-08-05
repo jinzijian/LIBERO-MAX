@@ -119,6 +119,23 @@ The batch runner fixes task, initial-state index, policy seed, and scenario per
 case; each GPU runs one matched pair at a time. Aggregation fails on missing or
 mismatched pairs rather than silently reporting partial metrics.
 
+## MAX-Hard on LIBERO-Plus
+
+The next benchmark profile composes all 10,030 installed LIBERO-Plus tasks with
+one of eight mid-execution events: lighting, camera pose/FOV, visual theme,
+sensor corruption, target relocation, receptacle relocation, distractor burst,
+or obstacle insertion. Its candidate Core contains 1,400 matched pairs using
+an exact 7 Plus categories x 5 difficulty levels x 40 design; candidate Full
+contains one matched pair for every Plus task. Core is balanced at 175 pairs
+per dynamic event and is an exact Full subset.
+
+The candidate is being promoted only through resolved real-MuJoCo preflight;
+failed physical placements are replaced within the same Core stratum rather
+than counted as model failures. Complete policy rollouts are required before
+claiming that MAX-Hard is empirically harder than Plus. See
+[`docs/MAX_HARD_DESIGN.md`](docs/MAX_HARD_DESIGN.md) for the construction,
+randomness, feasibility, and reporting contract.
+
 ## Repository layout
 
 ```text
