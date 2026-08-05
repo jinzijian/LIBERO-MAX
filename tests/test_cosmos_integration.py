@@ -96,6 +96,34 @@ class CosmosIntegrationTest(unittest.TestCase):
                 env.step([0])
             self.assertEqual(len(backend.changes), 1)
 
+    def test_physical_event_can_append_an_oracle_notification(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            backend = FakeBackend()
+            env = CosmosInterventionEnv(
+                env=FakeEnv(),
+                task_description="fake task",
+                scenario=SCENARIO,
+                arm="intervention",
+                trace_path=Path(tmp) / "trace.jsonl",
+                original_task_index=0,
+                backend=backend,
+                primary_image_key=None,
+                policy_notification="The environment changed. Reassess and continue.",
+            )
+            env.configure_episode("libero_object", 195, 16, 280)
+            env.reset()
+            env.set_init_state([1, 2, 3])
+            for _ in range(26):
+                env.step([0])
+            self.assertEqual(
+                env.runtime.current_instruction,
+                "fake task The environment changed. Reassess and continue.",
+            )
+            self.assertEqual(
+                env.events[0]["policy_notification"],
+                "The environment changed. Reassess and continue.",
+            )
+
     def test_control_and_intervention_record_matching_initial_state(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)

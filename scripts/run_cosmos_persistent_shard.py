@@ -45,6 +45,7 @@ def main() -> int:
     parser.add_argument("--shard-index", type=int, required=True)
     parser.add_argument("--num-shards", type=int, required=True)
     parser.add_argument("--query-interval", type=int)
+    parser.add_argument("--policy-notification", default="")
     parser.add_argument("--max-cases", type=int)
     parser.add_argument("--resume", action="store_true")
     parser.add_argument(
@@ -169,6 +170,7 @@ def main() -> int:
                     trace_path=trace_path,
                     original_task_index=case["task_index"],
                     init_state_index=case["init_state_index"],
+                    policy_notification=args.policy_notification or None,
                 )
                 wrapped.configure_episode(
                     task_suite_name=suite_name,

@@ -51,6 +51,7 @@ def main() -> int:
     parser.add_argument("--replan-steps", type=int, default=5)
     parser.add_argument("--trace", type=Path, required=True)
     parser.add_argument("--control-trace", type=Path)
+    parser.add_argument("--policy-notification")
     args = parser.parse_args()
     if args.replan_steps < 1:
         parser.error("--replan-steps must be positive")
@@ -96,6 +97,7 @@ def main() -> int:
         trace_path=args.trace,
         original_task_index=args.task_index,
         init_state_index=args.init_state_index,
+        policy_notification=args.policy_notification,
     )
     wrapped.configure_episode(
         task_suite_name=args.suite,

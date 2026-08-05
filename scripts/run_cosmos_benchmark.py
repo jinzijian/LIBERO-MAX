@@ -26,6 +26,7 @@ def _run_case(
     launcher: Path,
     resume: bool,
     query_interval: int,
+    policy_notification: str,
 ) -> Tuple[str, bool, str]:
     case_dir = output_root / "cases" / case["case_id"]
     done_path = case_dir / "DONE"
@@ -50,6 +51,7 @@ def _run_case(
             "INIT_STATE_INDEX": str(case["init_state_index"]),
             "SEED": str(case["policy_seed"]),
             "QUERY_INTERVAL": str(query_interval),
+            "POLICY_NOTIFICATION": policy_notification,
         }
     )
     log_path = case_dir / "launcher.log"
@@ -82,12 +84,19 @@ def _run_gpu_queue(
     launcher: Path,
     resume: bool,
     query_interval: int,
+    policy_notification: str,
 ) -> List[Tuple[str, bool, str]]:
     """Run one sequential queue so a physical GPU is never oversubscribed."""
 
     return [
         _run_case(
-            case, gpu, output_root, launcher, resume, query_interval
+            case,
+            gpu,
+            output_root,
+            launcher,
+            resume,
+            query_interval,
+            policy_notification,
         )
         for case in cases
     ]
@@ -110,6 +119,11 @@ def main() -> int:
         "--query-interval",
         type=int,
         help="override the manifest policy-query interval for this run",
+    )
+    parser.add_argument(
+        "--policy-notification",
+        default="",
+        help="append this evaluator-provided message after a physical event",
     )
     parser.add_argument(
         "--launcher",
@@ -150,6 +164,7 @@ def main() -> int:
                 args.launcher,
                 args.resume,
                 query_interval,
+                args.policy_notification,
             ): (slot, gpu)
             for slot, (gpu, cases) in enumerate(queues)
             if cases

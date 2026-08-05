@@ -16,6 +16,7 @@ TASK_INDEX="${TASK_INDEX:?set TASK_INDEX}"
 INIT_STATE_INDEX="${INIT_STATE_INDEX:?set INIT_STATE_INDEX}"
 SEED="${SEED:?set SEED}"
 REPLAN_STEPS="${REPLAN_STEPS:-${QUERY_INTERVAL:-5}}"
+POLICY_NOTIFICATION="${POLICY_NOTIFICATION:-}"
 
 site_packages="$COSMOS_DEPS/cosmos-policy/.venv/lib/python3.10/site-packages"
 legacy_site_packages="$COSMOS_DEPS/.venv-libero/lib/python3.10/site-packages"
@@ -27,6 +28,10 @@ for arm in control intervention; do
   control_trace_args=()
   if [[ "$arm" == intervention ]]; then
     control_trace_args=(--control-trace "$OUTPUT_ROOT/control/trace.jsonl")
+  fi
+  notification_args=()
+  if [[ -n "$POLICY_NOTIFICATION" ]]; then
+    notification_args=(--policy-notification "$POLICY_NOTIFICATION")
   fi
   mkdir -p "$arm_dir"
   : > "$arm_dir/trace.jsonl"
@@ -46,6 +51,7 @@ for arm in control intervention; do
     --replan-steps "$REPLAN_STEPS" \
     --trace "$arm_dir/trace.jsonl" \
     "${control_trace_args[@]}" \
+    "${notification_args[@]}" \
     > "$arm_dir/console.log" 2>&1
 done
 

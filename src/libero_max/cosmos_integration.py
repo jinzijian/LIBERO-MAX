@@ -52,6 +52,7 @@ class CosmosInterventionEnv:
         backend: Any = None,
         warmup_steps: int = 10,
         primary_image_key: Optional[str] = "agentview_image",
+        policy_notification: Optional[str] = None,
     ):
         if arm not in {"control", "intervention"}:
             raise CosmosIntegrationError("arm must be control or intervention")
@@ -71,6 +72,9 @@ class CosmosInterventionEnv:
         self.runtime = InterventionRuntime(scenario, backend)
         self.warmup_steps = warmup_steps
         self.primary_image_key = primary_image_key
+        if policy_notification is not None and not policy_notification.strip():
+            raise CosmosIntegrationError("policy notification must be non-empty")
+        self.policy_notification = policy_notification
         self.query_interval = None
         self.max_policy_steps = None
         self.policy_seed = None
@@ -180,6 +184,13 @@ class CosmosInterventionEnv:
             if event is not None:
                 if self.scenario["change"]["operation"] not in INTENT_OPERATIONS:
                     observation = self.backend.refresh_observation()
+                    if self.policy_notification is not None:
+                        self.runtime.current_instruction = "%s %s" % (
+                            self.task_description.rstrip(" ."),
+                            self.policy_notification.strip(),
+                        )
+                        event["instruction_after"] = self.runtime.current_instruction
+                        event["policy_notification"] = self.policy_notification
                 after_image = self._capture_primary_image(observation)
                 event["cosmos_query_boundary_step"] = policy_step
                 event["trigger_distance_m"] = proximity_distance
@@ -393,6 +404,7 @@ class CosmosInterventionEnv:
             "policy_queries": self.policy_queries,
             "executed_actions": self.executed_actions,
             "final_instruction": self.runtime.current_instruction,
+            "policy_notification": self.policy_notification,
             "response_diagnostics": response,
         }
         self.trace_path.parent.mkdir(parents=True, exist_ok=True)
@@ -409,6 +421,7 @@ def install_cosmos_hooks(
     original_task_index: int,
     init_state_index: int = 0,
     control_trace_path: Optional[Path] = None,
+    policy_notification: Optional[str] = None,
 ) -> None:
     """Patch the already-imported Cosmos evaluator without editing upstream."""
 
@@ -459,6 +472,7 @@ def install_cosmos_hooks(
                 trace_path=trace_path,
                 original_task_index=original_task_index,
                 init_state_index=init_state_index,
+                policy_notification=policy_notification,
             ),
             task_description,
         )

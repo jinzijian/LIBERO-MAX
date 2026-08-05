@@ -48,6 +48,7 @@ def main() -> None:
     )
     control_trace_raw = os.environ.get("LIBERO_MAX_CONTROL_TRACE_PATH")
     control_trace_path = Path(control_trace_raw) if control_trace_raw else None
+    policy_notification = os.environ.get("POLICY_NOTIFICATION") or None
     scenarios = load_scenarios([scenario_path])
     errors = validate_scenario_collection(scenarios)
     if errors:
@@ -66,6 +67,7 @@ def main() -> None:
         original_task_index=task_index,
         init_state_index=init_state_index,
         control_trace_path=control_trace_path,
+        policy_notification=policy_notification,
     )
     run_libero_eval.eval_libero()
 
