@@ -141,6 +141,7 @@ class CosmosIntegrationTest(unittest.TestCase):
 
     def test_intervention_replays_control_queries_before_event(self):
         captured = []
+        model_queries = []
         module = SimpleNamespace()
 
         def original_run_episode(cfg, env, *args, **kwargs):
@@ -154,7 +155,11 @@ class CosmosIntegrationTest(unittest.TestCase):
         module.run_episode = original_run_episode
         module.load_initial_states = lambda *args, **kwargs: (["s0"], None)
         module.TASK_MAX_STEPS = {"libero_object": 280}
-        module.get_action = lambda *args, **kwargs: {"actions": [[1.0, 2.0]]}
+        def original_get_action(*args, **kwargs):
+            model_queries.append(True)
+            return {"actions": [[1.0, 2.0]]}
+
+        module.get_action = original_get_action
         cfg = SimpleNamespace(
             task_suite_name="libero_object",
             seed=195,
@@ -186,6 +191,7 @@ class CosmosIntegrationTest(unittest.TestCase):
             row = json.loads((root / "intervention.jsonl").read_text())
         self.assertEqual(captured[0][0].tolist(), [9.0, 8.0])
         self.assertEqual(row["policy_queries"][0]["source"], "control_replay")
+        self.assertEqual(model_queries, [])
 
     def test_setup_is_applied_to_control_and_recorded(self):
         scenario = copy.deepcopy(SCENARIO)

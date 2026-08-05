@@ -493,14 +493,22 @@ def install_cosmos_hooks(
             elif "task_label_or_embedding" in kwargs:
                 kwargs = dict(kwargs)
                 kwargs["task_label_or_embedding"] = instruction
-        result = original_get_action(*args, **kwargs)
-        source = "model"
-        if (
+        replay = (
             env is not None
             and env.arm == "intervention"
             and not env.runtime.applied
             and control_queries
-        ):
+        )
+        cfg = args[0] if args else kwargs.get("cfg")
+        replay_supported = replay and not any(
+            bool(getattr(cfg, field, False))
+            for field in (
+                "ar_future_prediction",
+                "ar_value_prediction",
+                "ar_qvalue_prediction",
+            )
+        )
+        if replay_supported:
             import numpy as np
 
             policy_step = max(0, env.total_env_steps - env.warmup_steps)
@@ -508,12 +516,23 @@ def install_cosmos_hooks(
                 raise CosmosIntegrationError(
                     "control trace is missing pre-event query step %d" % policy_step
                 )
-            result = dict(result)
-            result["actions"] = [
-                np.asarray(action, dtype=np.float32)
-                for action in control_queries[policy_step]
-            ]
+            # The paired arm must execute the recorded control chunk exactly.
+            # Avoid a redundant model query whose actions would be discarded.
+            result = {
+                "actions": [
+                    np.asarray(action, dtype=np.float32)
+                    for action in control_queries[policy_step]
+                ],
+                "future_image_predictions": {
+                    "future_image": None,
+                    "future_wrist_image": None,
+                },
+                "value_prediction": 0.0,
+            }
             source = "control_replay"
+        else:
+            result = original_get_action(*args, **kwargs)
+            source = "model"
         if env is not None:
             env.record_policy_query(
                 result["actions"], instruction=instruction, source=source
