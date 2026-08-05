@@ -4,7 +4,7 @@ import hashlib
 import math
 import random
 from collections import Counter, defaultdict
-from typing import Any, Dict, Iterable, List, Optional, Sequence, Tuple
+from typing import Any, Dict, Iterable, List, Optional, Sequence, Set, Tuple
 
 from .calibration import CANONICAL_DIRECTIONS
 from .manifest import validate_manifest
@@ -274,7 +274,10 @@ def _build_case(
     }
 
 
-def _core_assignments(tasks: Sequence[Dict[str, Any]]) -> Dict[Tuple[str, int], Tuple[str, int]]:
+def _core_assignments(
+    tasks: Sequence[Dict[str, Any]],
+    rejected: Set[Tuple[str, int, str]] = frozenset(),
+) -> Dict[Tuple[str, int], Tuple[str, int]]:
     strata: Dict[Tuple[str, int], List[Dict[str, Any]]] = defaultdict(list)
     for task in tasks:
         key = (task.get("plus_category"), task.get("plus_difficulty_level"))
@@ -304,6 +307,7 @@ def _core_assignments(tasks: Sequence[Dict[str, Any]]) -> Dict[Tuple[str, int], 
                 for task in strata[stratum]
                 if _task_key(task) not in selected
                 and change_type in eligible_change_types(task)
+                and (*_task_key(task), change_type) not in rejected
             ]
             candidates.sort(
                 key=lambda task: _stable_seed(
@@ -327,6 +331,7 @@ def _core_assignments(tasks: Sequence[Dict[str, Any]]) -> Dict[Tuple[str, int], 
 def _full_assignments(
     tasks: Sequence[Dict[str, Any]],
     core: Dict[Tuple[str, int], Tuple[str, int]],
+    rejected: Set[Tuple[str, int, str]] = frozenset(),
 ) -> Dict[Tuple[str, int], Tuple[str, Optional[int]]]:
     assignments: Dict[Tuple[str, int], Tuple[str, Optional[int]]] = dict(core)
     counts = Counter(change_type for change_type, _ in assignments.values())
@@ -335,7 +340,11 @@ def _full_assignments(
         key=lambda task: _stable_seed((SAMPLER_VERSION, "full", *_task_key(task)))
     )
     for task in remaining:
-        eligible = eligible_change_types(task)
+        eligible = [
+            event
+            for event in eligible_change_types(task)
+            if (*_task_key(task), event) not in rejected
+        ]
         if not eligible:
             raise HardBuildError("task %s has no dynamic event" % (_task_key(task),))
         minimum = min(counts[event] for event in eligible)
@@ -378,14 +387,18 @@ def _manifest(profile: str, cases: List[Dict[str, Any]]) -> Dict[str, Any]:
     return manifest
 
 
-def build_hard_manifests(catalog: Dict[str, Any]) -> Tuple[Dict[str, Any], Dict[str, Any]]:
+def build_hard_manifests(
+    catalog: Dict[str, Any],
+    rejected_configurations: Iterable[Tuple[str, int, str]] = (),
+) -> Tuple[Dict[str, Any], Dict[str, Any]]:
     tasks = catalog.get("tasks")
     if not isinstance(tasks, list) or len(tasks) != 10030:
         raise HardBuildError("Hard Full requires the exact 10030-task Plus catalog")
     if len({_task_key(task) for task in tasks}) != len(tasks):
         raise HardBuildError("catalog contains duplicate suite/task keys")
-    core_assignments = _core_assignments(tasks)
-    full_assignments = _full_assignments(tasks, core_assignments)
+    rejected = set(rejected_configurations)
+    core_assignments = _core_assignments(tasks, rejected)
+    full_assignments = _full_assignments(tasks, core_assignments, rejected)
     full_cases = []
     core_cases = []
     for task in tasks:

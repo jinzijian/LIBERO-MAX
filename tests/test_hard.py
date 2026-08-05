@@ -68,6 +68,22 @@ class HardManifestTest(unittest.TestCase):
                     {event: 5 for event in CHANGE_TYPE_ORDER},
                 )
 
+    def test_rejected_task_event_is_not_selected(self):
+        tasks = []
+        index = 0
+        for category in PLUS_CATEGORIES:
+            for difficulty in PLUS_DIFFICULTIES:
+                for _ in range(48):
+                    tasks.append(_task(category, difficulty, index))
+                    index += 1
+        baseline = _core_assignments(tasks)
+        task_key, event_draw = next(iter(baseline.items()))
+        repaired = _core_assignments(
+            tasks, {(task_key[0], task_key[1], event_draw[0])}
+        )
+        self.assertNotEqual(repaired.get(task_key), event_draw)
+        self.assertEqual(len(repaired), 1400)
+
 
 if __name__ == "__main__":
     unittest.main()
