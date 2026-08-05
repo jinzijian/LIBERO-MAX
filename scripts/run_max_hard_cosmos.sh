@@ -16,6 +16,7 @@ mkdir -p "$2"
 OUTPUT_ROOT="$(realpath "$2")"
 
 export LIBERO_CONFIG_PATH="${LIBERO_CONFIG_PATH:-$DEPS_DIR/libero-plus-config}"
+export HF_HOME="${HF_HOME:-$DEPS_DIR/hf-cache-cosmos}"
 export TORCH_FORCE_NO_WEIGHTS_ONLY_LOAD=1
 export PYTHONPATH="$DEPS_DIR/robosuite-1.4.0:$DEPS_DIR/libero-plus-python-overlay:$DEPS_DIR/cosmos-policy/.venv/lib/python3.10/site-packages:$DEPS_DIR/.venv-libero/lib/python3.10/site-packages:$DEPS_DIR/LIBERO-plus:$DEPS_DIR/cosmos-policy:$PROJECT_DIR/src${PYTHONPATH:+:$PYTHONPATH}"
 

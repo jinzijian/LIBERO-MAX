@@ -82,6 +82,7 @@ class CosmosLauncherTest(unittest.TestCase):
         ).read_text(encoding="utf-8")
         self.assertIn("libero-plus-python-overlay", launcher)
         self.assertIn("libero_plus_t5_embeddings.pkl", launcher)
+        self.assertIn("hf-cache-cosmos", launcher)
         self.assertIn("run_cosmos_persistent_benchmark.py", launcher)
         self.assertIn('--gpus "$GPUS"', launcher)
 
