@@ -26,7 +26,14 @@ if (( ${#gpu_ids[@]} == 0 )); then
 fi
 
 mkdir -p "$OUTPUT_ROOT"
-cp "$MANIFEST" "$OUTPUT_ROOT/manifest.json"
+RUN_MANIFEST="$OUTPUT_ROOT/manifest.json"
+"$CLIENT_PYTHON" - "$MANIFEST" "$RUN_MANIFEST" "$QUERY_INTERVAL" <<'PY'
+import json, pathlib, sys
+source, output, query_interval = pathlib.Path(sys.argv[1]), pathlib.Path(sys.argv[2]), int(sys.argv[3])
+manifest = json.loads(source.read_text(encoding="utf-8"))
+manifest["protocol"]["query_interval"] = query_interval
+output.write_text(json.dumps(manifest, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+PY
 server_pids=()
 worker_pids=()
 cleanup() {
@@ -65,7 +72,7 @@ done
 for (( shard=0; shard<${#gpu_ids[@]}; shard++ )); do
   gpu="${gpu_ids[$shard]}"
   command=(
-    "$CLIENT_PYTHON" scripts/run_openpi_persistent_shard.py "$MANIFEST"
+    "$CLIENT_PYTHON" scripts/run_openpi_persistent_shard.py "$RUN_MANIFEST"
     --output-root "$OUTPUT_ROOT"
     --shard-index "$shard"
     --num-shards "${#gpu_ids[@]}"

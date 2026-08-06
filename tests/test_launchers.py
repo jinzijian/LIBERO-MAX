@@ -100,6 +100,8 @@ class CosmosLauncherTest(unittest.TestCase):
         self.assertIn('MUJOCO_EGL_DEVICE_ID="$GPU_ID"', paired)
         self.assertIn("serve_openpi_deterministic.py", persistent)
         self.assertIn('CUDA_VISIBLE_DEVICES="$gpu"', persistent)
+        self.assertIn('manifest["protocol"]["query_interval"] = query_interval', persistent)
+        self.assertIn('run_openpi_persistent_shard.py "$RUN_MANIFEST"', persistent)
         self.assertIn("paired_summary.json", worker)
 
 
