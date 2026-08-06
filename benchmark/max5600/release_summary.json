@@ -1,0 +1,18 @@
+{
+  "benchmark_id": "libero-max-5600",
+  "benchmark_version": "2.0.0",
+  "change_types": 8,
+  "development_core_pairs": 1400,
+  "display_name": "LIBERO-MAX-5600",
+  "intent_matched_pairs": 96,
+  "intent_rollouts_per_model": 192,
+  "matched_pairs": 5600,
+  "pairs_per_category": 800,
+  "pairs_per_change_type": 700,
+  "physical_preflight_passed": 5600,
+  "plus_categories": 7,
+  "rejected_attempts": 1221,
+  "retained_development_core_pairs": 1399,
+  "rollouts_per_model": 11200,
+  "source_benchmark_commit": "4976dc3"
+}
