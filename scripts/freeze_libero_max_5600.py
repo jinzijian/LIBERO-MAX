@@ -7,6 +7,7 @@ import hashlib
 import json
 from pathlib import Path
 
+from libero_max.manifest import validate_manifest
 from libero_max.release import audit_max5600_release
 
 
@@ -23,6 +24,7 @@ def main() -> int:
     parser.add_argument("--manifest", type=Path, required=True)
     parser.add_argument("--frozen-core", type=Path, required=True)
     parser.add_argument("--physical-preflight", type=Path, required=True)
+    parser.add_argument("--intent", type=Path, required=True)
     parser.add_argument("--rejection-report", type=Path, action="append", default=[])
     parser.add_argument("--output-dir", type=Path, required=True)
     args = parser.parse_args()
@@ -31,7 +33,13 @@ def main() -> int:
     manifest = json.loads(args.manifest.read_text(encoding="utf-8"))
     frozen_core = json.loads(args.frozen_core.read_text(encoding="utf-8"))
     preflight = json.loads(args.physical_preflight.read_text(encoding="utf-8"))
+    intent = json.loads(args.intent.read_text(encoding="utf-8"))
     errors = audit_max5600_release(catalog, manifest, frozen_core, preflight)
+    errors.extend("Intent manifest: %s" % error for error in validate_manifest(intent))
+    if intent.get("protocol", {}).get("scoring_track") != "intent_response":
+        errors.append("Intent manifest must use the intent_response track")
+    if len(intent.get("cases", [])) != 96:
+        errors.append("Intent manifest must contain exactly 96 pairs")
     if errors:
         raise ValueError("LIBERO-MAX-5600 release audit failed: " + "; ".join(errors))
 
@@ -49,6 +57,9 @@ def main() -> int:
     ]
     selected_catalog["benchmark_id"] = frozen_manifest["benchmark_id"]
     selected_catalog["benchmark_version"] = RELEASE_VERSION
+    frozen_intent = copy.deepcopy(intent)
+    frozen_intent["benchmark_id"] = "libero-max-intent-96"
+    frozen_intent["benchmark_version"] = RELEASE_VERSION
 
     rejection_sources = []
     rejected_attempts = 0
@@ -76,6 +87,8 @@ def main() -> int:
         "display_name": "LIBERO-MAX-5600",
         "matched_pairs": 5600,
         "rollouts_per_model": 11200,
+        "intent_matched_pairs": 96,
+        "intent_rollouts_per_model": 192,
         "plus_categories": 7,
         "pairs_per_category": 800,
         "change_types": 8,
@@ -90,6 +103,7 @@ def main() -> int:
     files = {
         "task_catalog.json": _json_bytes(selected_catalog),
         "libero_max_5600.json": _json_bytes(frozen_manifest),
+        "intent_96.json": _json_bytes(frozen_intent),
         "physical_preflight.json": _json_bytes(preflight),
         "rejection_summary.json": _json_bytes(rejection_summary),
         "release_summary.json": _json_bytes(summary),
