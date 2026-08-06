@@ -725,10 +725,6 @@ def _balanced_category_assignments(
             (SAMPLER_VERSION, "max5600", category, *_task_key(task))
         )
     )
-    failed_task_keys = {
-        (suite, task_index) for suite, task_index, _ in rejected
-    }
-
     graph = []
 
     def node() -> int:
@@ -768,8 +764,6 @@ def _balanced_category_assignments(
             for event in eligible_change_types(task)
             if (*key, event) not in rejected
         ]
-        if key in failed_task_keys:
-            eligible = [event for event in eligible if event in CHANGE_TYPE_ORDER[:4]]
         task_buckets = [
             (event, draw) for event in eligible for draw in (0, 1)
         ]
