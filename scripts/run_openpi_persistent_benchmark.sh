@@ -47,6 +47,7 @@ cd "$PROJECT_DIR"
 for gpu in "${gpu_ids[@]}"; do
   port="$((PORT_BASE + gpu))"
   CUDA_VISIBLE_DEVICES="$gpu" \
+  XLA_PYTHON_CLIENT_PREALLOCATE="${XLA_PYTHON_CLIENT_PREALLOCATE:-false}" \
     "$OPENPI_PYTHON" scripts/serve_openpi_deterministic.py \
       --port "$port" \
       --checkpoint "$CHECKPOINT" \

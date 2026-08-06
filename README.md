@@ -185,7 +185,10 @@ LIBERO-MAX/
 └── tests/
 ```
 
-The project now has an executable Cosmos physical-change pilot plus a frozen
+## Legacy v1 results
+
+The project also retains the original six-type v1 release for reproducibility.
+It has an executable Cosmos physical-change pilot plus a frozen
 six-type v1 physical test-set release. Core contains 1,335 matched pairs / 2,670
 episodes; Full contains 4,005 matched pairs / 8,010 episodes and crosses three
 policy seeds with every retained intervention configuration. All 1,335 unique
