@@ -13,6 +13,13 @@ def main() -> int:
     parser.add_argument("manifest", type=Path)
     parser.add_argument("passed_preflight", type=Path)
     parser.add_argument("--output", type=Path, required=True)
+    parser.add_argument(
+        "--force-change-draw",
+        action="append",
+        default=[],
+        metavar="CHANGE_TYPE:DRAW_ID",
+        help="include a change/draw even if a legacy row passed",
+    )
     args = parser.parse_args()
     manifest = load_manifest(args.manifest)
     report = json.loads(args.passed_preflight.read_text(encoding="utf-8"))
@@ -23,10 +30,24 @@ def main() -> int:
         for case in report.get("cases", [])
         if case.get("passed")
     }
+    forced = set()
+    for value in args.force_change_draw:
+        try:
+            change_type, draw_id = value.rsplit(":", 1)
+            forced.add((change_type, int(draw_id)))
+        except ValueError:
+            parser.error("--force-change-draw must use CHANGE_TYPE:DRAW_ID")
     delta = dict(manifest)
     delta["protocol"] = dict(manifest["protocol"], profile="preflight_delta")
     delta["cases"] = [
-        case for case in manifest["cases"] if case["case_id"] not in passed
+        case
+        for case in manifest["cases"]
+        if case["case_id"] not in passed
+        or (
+            case["scenario"].get("change_type"),
+            case["scenario"].get("randomization", {}).get("draw_id"),
+        )
+        in forced
     ]
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text(
