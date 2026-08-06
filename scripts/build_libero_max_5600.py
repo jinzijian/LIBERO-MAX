@@ -32,6 +32,9 @@ def main() -> int:
     parser.add_argument(
         "--expand-rejection-change-type", action="append", default=[]
     )
+    parser.add_argument(
+        "--reject-frozen-preflight", type=Path, action="append", default=[]
+    )
     args = parser.parse_args()
 
     catalog = json.loads(args.catalog.read_text(encoding="utf-8"))
@@ -41,11 +44,20 @@ def main() -> int:
     rejected = expand_rejected_by_physical_scene(
         catalog["tasks"], rejected, args.expand_rejection_change_type
     )
-    manifest = build_max5600_manifest(catalog, frozen_core, rejected)
+    rejected_frozen_case_ids = {
+        case["case_id"]
+        for path in args.reject_frozen_preflight
+        for case in json.loads(path.read_text(encoding="utf-8")).get("cases", [])
+        if not case.get("passed")
+    }
+    manifest = build_max5600_manifest(
+        catalog, frozen_core, rejected, rejected_frozen_case_ids
+    )
     summary = {
         **hard_manifest_summary(manifest),
         "directly_rejected_task_event_configurations": direct_rejections,
         "rejected_task_event_configurations": len(rejected),
+        "rejected_development_core_cases": len(rejected_frozen_case_ids),
         "frozen_core_is_exact_subset": {
             case["case_id"] for case in frozen_core["cases"]
         }.issubset({case["case_id"] for case in manifest["cases"]}),

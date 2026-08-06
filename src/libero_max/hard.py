@@ -685,7 +685,7 @@ def _balanced_category_assignments(
     frozen_here = {
         key: assignment
         for key, assignment in frozen.items()
-        if key in tasks_by_key and (*key, assignment[0]) not in rejected
+        if key in tasks_by_key
     }
     if len(frozen_here) > category_total:
         raise HardBuildError("frozen Core exceeds a MAX-5600 category quota")
@@ -800,8 +800,19 @@ def _max5600_assignments(
     tasks: Sequence[Dict[str, Any]],
     frozen_core: Dict[str, Any],
     rejected: Set[Tuple[str, int, str]],
+    rejected_frozen_case_ids: Set[str] = frozenset(),
 ) -> Tuple[Dict[Tuple[str, int], Tuple[str, int]], Dict[str, Dict[int, int]]]:
     frozen = _frozen_core_assignments(frozen_core, tasks)
+    rejected_frozen_keys = {
+        (case["task_suite_name"], case["task_index"])
+        for case in frozen_core["cases"]
+        if case["case_id"] in rejected_frozen_case_ids
+    }
+    frozen = {
+        key: assignment
+        for key, assignment in frozen.items()
+        if key not in rejected_frozen_keys
+    }
     assignments = {}
     difficulty_quotas = {}
     for category in PLUS_CATEGORIES:
@@ -866,6 +877,7 @@ def build_max5600_manifest(
     catalog: Dict[str, Any],
     frozen_core: Dict[str, Any],
     rejected_configurations: Iterable[Tuple[str, int, str]] = (),
+    rejected_frozen_case_ids: Iterable[str] = (),
 ) -> Dict[str, Any]:
     """Build the single official 5,600-pair LIBERO-MAX benchmark."""
 
@@ -876,7 +888,7 @@ def build_max5600_manifest(
         raise HardBuildError("catalog contains duplicate suite/task keys")
     rejected = set(rejected_configurations)
     assignments, _ = _max5600_assignments(
-        tasks, frozen_core, rejected
+        tasks, frozen_core, rejected, set(rejected_frozen_case_ids)
     )
     tasks_by_key = {_task_key(task): task for task in tasks}
     cases = [

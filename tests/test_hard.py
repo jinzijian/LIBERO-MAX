@@ -222,29 +222,5 @@ class HardManifestTest(unittest.TestCase):
         )
         self.assertEqual(sum(difficulty_quotas.values()), 16)
 
-    def test_rejected_frozen_assignment_is_replaced(self):
-        tasks = []
-        for difficulty in PLUS_DIFFICULTIES:
-            for offset in range(5):
-                tasks.append(
-                    _task(
-                        PLUS_CATEGORIES[0],
-                        difficulty,
-                        difficulty * 10 + offset,
-                    )
-                )
-        frozen_key = ("libero_spatial", 10)
-        assignments, _ = _balanced_category_assignments(
-            tasks,
-            PLUS_CATEGORIES[0],
-            {frozen_key: ("distractor_burst", 1)},
-            {(*frozen_key, "distractor_burst")},
-            per_event_draw=1,
-        )
-        self.assertNotEqual(
-            assignments.get(frozen_key), ("distractor_burst", 1)
-        )
-
-
 if __name__ == "__main__":
     unittest.main()
