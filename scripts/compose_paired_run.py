@@ -2,6 +2,7 @@
 """Compose one official paired run from disjoint completed result roots."""
 
 import argparse
+import hashlib
 import json
 import os
 from pathlib import Path
@@ -9,7 +10,23 @@ from pathlib import Path
 from libero_max.manifest import load_manifest
 
 
-def _is_terminal_case(case_dir: Path) -> bool:
+def _scenario_sha256(scenario) -> str:
+    payload = json.dumps(
+        scenario, separators=(",", ":"), sort_keys=True
+    ).encode("utf-8")
+    return hashlib.sha256(payload).hexdigest()
+
+
+def _is_terminal_case(case_dir: Path, scenario) -> bool:
+    scenario_path = case_dir / "scenario.json"
+    if not scenario_path.exists():
+        return False
+    try:
+        recorded = json.loads(scenario_path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return False
+    if _scenario_sha256(recorded) != _scenario_sha256(scenario):
+        return False
     if (case_dir / "paired_summary.json").exists():
         return True
     return all(
@@ -36,7 +53,14 @@ def main() -> int:
     for case in manifest["cases"]:
         case_id = case["case_id"]
         sources = [root / "cases" / case_id for root in args.source_roots]
-        source = next((path for path in sources if _is_terminal_case(path)), None)
+        source = next(
+            (
+                path
+                for path in sources
+                if _is_terminal_case(path, case["scenario"])
+            ),
+            None,
+        )
         if source is None:
             missing.append(case_id)
             continue
