@@ -267,7 +267,9 @@ def _sample_change(
     distractors = _supported_distractors(task)
     rng.shuffle(distractors)
     if change_type == "distractor_burst":
-        count = min(len(distractors), (5, 8)[draw_id])
+        # Both frozen draws add exactly five objects. Randomness changes object
+        # identity and placement, not the clutter cardinality.
+        count = 5
         selected = distractors[:count]
         setup = [
             {

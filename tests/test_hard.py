@@ -131,6 +131,14 @@ class HardManifestTest(unittest.TestCase):
         self.assertTrue(change["preserve_initial_z"])
         self.assertNotIn("path_target", change)
 
+    def test_both_distractor_draws_insert_exactly_five_objects(self):
+        task = _task("Objects Layout", 4, 9)
+        for draw_id in (0, 1):
+            case = _build_case(task, "distractor_burst", draw_id=draw_id)
+            change = case["scenario"]["change"]
+            self.assertEqual(change["distractor_count"], 5)
+            self.assertEqual(len(change["placements"]), 5)
+
     def test_obstacle_requires_a_distractor_on_the_target_support(self):
         task = _task("Objects Layout", 4, 9)
         for entity in task["distractor_objects"]:

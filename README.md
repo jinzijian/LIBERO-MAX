@@ -119,34 +119,46 @@ The batch runner fixes task, initial-state index, policy seed, and scenario per
 case; each GPU runs one matched pair at a time. Aggregation fails on missing or
 mismatched pairs rather than silently reporting partial metrics.
 
-## MAX-Hard on LIBERO-Plus
+## LIBERO-MAX-5600 on LIBERO-Plus
 
-The next benchmark profile composes all 10,030 installed LIBERO-Plus tasks with
-one of eight mid-execution events: lighting, camera pose/FOV, visual theme,
-sensor corruption, target relocation, receptacle relocation, distractor burst,
-or obstacle insertion. Its candidate Core contains 1,400 matched pairs using
-an exact 7 Plus categories x 5 difficulty levels x 40 design; candidate Full
-contains one matched pair for every Plus task. Core is balanced at 175 pairs
-per dynamic event and is an exact Full subset.
+The single official physical benchmark is **LIBERO-MAX-5600**: 5,600 matched
+control/intervention pairs, or 11,200 rollouts per model. It is a deterministic
+balanced subset of the 10,030 LIBERO-Plus tasks:
 
-The candidate is being promoted only through resolved real-MuJoCo preflight;
-failed physical placements are replaced within the same Core stratum rather
-than counted as model failures. Complete policy rollouts are required before
-claiming that MAX-Hard is empirically harder than Plus. See
-[`docs/MAX_HARD_DESIGN.md`](docs/MAX_HARD_DESIGN.md) for the construction,
-randomness, feasibility, and reporting contract.
+- 7 Plus generalization categories x 800 pairs;
+- 8 mid-execution changes x 700 pairs;
+- 2 frozen intervention draws x 350 pairs per change;
+- exactly 50 pairs in every category/change/draw cell.
+
+The eight changes are lighting, camera pose/FOV, visual theme, sensor
+corruption, target relocation, receptacle relocation, a five-object distractor
+burst, and obstacle insertion. Relocation directions and clutter placements
+are frozen in the manifest rather than sampled again at evaluation time. The
+1,400-case development Core is an exact subset of MAX-5600, but is not a
+second public benchmark profile.
+
+Every released case must pass real-MuJoCo post-intervention geometry, support,
+collision, and visibility checks. Failed candidate placements are replaced
+within the same balanced cell; they are never counted as policy failures. The
+separate 96-pair Intent track covers instruction target/receptacle updates and
+task cancellation. See [`docs/MAX_HARD_DESIGN.md`](docs/MAX_HARD_DESIGN.md)
+for the construction, frozen randomness, feasibility, and reporting contract.
 
 On the configured LIBERO-Plus host, run a frozen manifest preflight and Cosmos
 paired evaluation with one persistent worker per physical GPU:
 
 ```bash
 GPUS=0,1,2,3,4,5,6,7 bash scripts/run_max_hard_preflight.sh \
-  artifacts/max_hard/core.final.json \
-  artifacts/max_hard/core_preflight_final
+  benchmark/max5600/libero_max_5600.json \
+  artifacts/max5600/preflight_recheck
 
 GPUS=0,1,2,3,4,5,6,7 bash scripts/run_max_hard_cosmos.sh \
-  artifacts/max_hard/core.final.json \
-  artifacts/max_hard/cosmos_core
+  benchmark/max5600/libero_max_5600.json \
+  artifacts/max5600/cosmos_policy
+
+GPUS=0,1,2,3,4,5,6,7 bash scripts/run_openpi_persistent_benchmark.sh \
+  benchmark/max5600/libero_max_5600.json \
+  artifacts/max5600/pi05_libero
 ```
 
 ## Repository layout

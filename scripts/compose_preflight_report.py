@@ -2,6 +2,7 @@
 """Compose complete manifest coverage from reusable preflight reports."""
 
 import argparse
+import hashlib
 import json
 from pathlib import Path
 
@@ -10,14 +11,36 @@ from libero_max.manifest import load_manifest
 
 def compose_preflight(manifest, reports):
     manifest_ids = {case["case_id"] for case in manifest.get("cases", [])}
+    expected_hashes = {
+        case["case_id"]: hashlib.sha256(
+            json.dumps(
+                case["scenario"], separators=(",", ":"), sort_keys=True
+            ).encode("utf-8")
+        ).hexdigest()
+        for case in manifest.get("cases", [])
+    }
     rows = {}
+    row_priorities = {}
     for report in reports:
         for case in report.get("cases", []):
             case_id = case.get("case_id")
             if case_id in manifest_ids:
+                scenario_hash = case.get("scenario_sha256")
+                if scenario_hash is not None and scenario_hash != expected_hashes[case_id]:
+                    continue
+                priority = int(scenario_hash is not None)
                 previous = rows.get(case_id)
-                if previous is None or case.get("passed") or not previous.get("passed"):
+                previous_priority = row_priorities.get(case_id, -1)
+                if (
+                    previous is None
+                    or priority > previous_priority
+                    or (
+                        priority == previous_priority
+                        and (case.get("passed") or not previous.get("passed"))
+                    )
+                ):
                     rows[case_id] = case
+                    row_priorities[case_id] = priority
     selected = sorted(rows.values(), key=lambda case: case["scenario_id"])
     passed = sum(bool(case.get("passed")) for case in selected)
     missing = sorted(manifest_ids - set(rows))

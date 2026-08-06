@@ -2,6 +2,7 @@
 """Apply every manifest intervention in a real LIBERO env without a policy."""
 
 import argparse
+import hashlib
 import json
 import os
 from pathlib import Path
@@ -29,6 +30,13 @@ from libero_max.preflight import (
     settle_metrics,
 )
 from libero_max.runtime import InterventionRuntime, TriggerContext
+
+
+def _scenario_sha256(case: Dict[str, Any]) -> str:
+    payload = json.dumps(
+        case["scenario"], separators=(",", ":"), sort_keys=True
+    ).encode("utf-8")
+    return hashlib.sha256(payload).hexdigest()
 
 
 def _pixel_mad(before: Any, after: Any) -> float:
@@ -210,6 +218,7 @@ def _run_case(
         return {
             "case_id": case["case_id"],
             "scenario_id": case["scenario"]["scenario_id"],
+            "scenario_sha256": _scenario_sha256(case),
             "change_type": case["scenario"].get("change_type"),
             "intervention_draw_id": case["scenario"].get(
                 "randomization", {}
@@ -304,6 +313,7 @@ def main() -> int:
                 {
                     "case_id": case["case_id"],
                     "scenario_id": case["scenario"]["scenario_id"],
+                    "scenario_sha256": _scenario_sha256(case),
                     "change_type": case["scenario"].get("change_type"),
                     "intervention_draw_id": case["scenario"].get(
                         "randomization", {}
