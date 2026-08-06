@@ -832,7 +832,6 @@ def _manifest(
     *,
     benchmark_id: Optional[str] = None,
     selection_contract: Optional[str] = None,
-    protocol_metadata: Optional[Dict[str, Any]] = None,
 ) -> Dict[str, Any]:
     manifest = {
         "benchmark_id": benchmark_id or "libero-max-hard-%s" % profile,
@@ -855,8 +854,6 @@ def _manifest(
             cases, key=lambda case: (case["task_suite_name"], case["task_index"])
         ),
     }
-    if protocol_metadata:
-        manifest["protocol"].update(protocol_metadata)
     errors = validate_manifest(manifest)
     if errors:
         raise HardBuildError("generated %s manifest is invalid: %s" % (profile, "; ".join(errors)))
@@ -876,7 +873,7 @@ def build_max5600_manifest(
     if len({_task_key(task) for task in tasks}) != len(tasks):
         raise HardBuildError("catalog contains duplicate suite/task keys")
     rejected = set(rejected_configurations)
-    assignments, difficulty_quotas = _max5600_assignments(
+    assignments, _ = _max5600_assignments(
         tasks, frozen_core, rejected
     )
     tasks_by_key = {_task_key(task): task for task in tasks}
@@ -892,12 +889,6 @@ def build_max5600_manifest(
             "7 Plus categories x 800; 8 changes x 700; "
             "2 deterministic draws x 350 per change"
         ),
-        protocol_metadata={
-            "official_name": "LIBERO-MAX",
-            "official_pairs": 5600,
-            "frozen_core_pairs": 1400,
-            "difficulty_quotas_by_category": difficulty_quotas,
-        },
     )
 
 
