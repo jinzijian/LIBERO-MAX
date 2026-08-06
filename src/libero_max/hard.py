@@ -685,7 +685,7 @@ def _balanced_category_assignments(
     frozen_here = {
         key: assignment
         for key, assignment in frozen.items()
-        if key in tasks_by_key
+        if key in tasks_by_key and (*key, assignment[0]) not in rejected
     }
     if len(frozen_here) > category_total:
         raise HardBuildError("frozen Core exceeds a MAX-5600 category quota")

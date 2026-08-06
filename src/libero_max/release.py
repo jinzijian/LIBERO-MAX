@@ -192,8 +192,8 @@ def audit_max5600_release(
     if len(set(case_ids)) != len(cases):
         errors.append("official manifest contains duplicate case IDs")
     core_ids = {case.get("case_id") for case in frozen_core.get("cases", [])}
-    if len(core_ids) != 1400 or not core_ids.issubset(set(case_ids)):
-        errors.append("the frozen 1,400-case Core must be an exact subset")
+    if len(core_ids) != 1400:
+        errors.append("development Core provenance must contain 1,400 cases")
 
     category_counts = Counter(case.get("substrate_category") for case in cases)
     if len(category_counts) != 7 or set(category_counts.values()) != {800}:

@@ -94,7 +94,12 @@ def main() -> int:
         "change_types": 8,
         "pairs_per_change_type": 700,
         "physical_preflight_passed": preflight["passed"],
-        "frozen_core_pairs": len(frozen_core["cases"]),
+        "development_core_pairs": len(frozen_core["cases"]),
+        "retained_development_core_pairs": len(
+            {case["case_id"] for case in frozen_core["cases"]}.intersection(
+                case["case_id"] for case in frozen_manifest["cases"]
+            )
+        ),
         "source_benchmark_commit": frozen_manifest["protocol"][
             "source_benchmark_commit"
         ],

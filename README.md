@@ -134,8 +134,9 @@ The eight changes are lighting, camera pose/FOV, visual theme, sensor
 corruption, target relocation, receptacle relocation, a five-object distractor
 burst, and obstacle insertion. Relocation directions and clutter placements
 are frozen in the manifest rather than sampled again at evaluation time. The
-1,400-case development Core is an exact subset of MAX-5600, but is not a
-second public benchmark profile.
+1,400-case development Core seeds the selection but is not a second public
+benchmark profile. Any Core candidate that fails the final intervention
+contract is replaced under the same balance constraints.
 
 Every released case must pass real-MuJoCo post-intervention geometry, support,
 collision, and visibility checks. Failed candidate placements are replaced
