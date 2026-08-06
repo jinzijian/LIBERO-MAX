@@ -49,13 +49,36 @@ class MergePreflightDeltaTest(unittest.TestCase):
         self.assertEqual(merged["passed"], 2)
         self.assertEqual(merged["failures"], {})
 
-    def test_requires_exact_failed_case_replacement(self):
-        with self.assertRaisesRegex(ValueError, "every failed base case"):
+    def test_requires_exact_non_reusable_case_replacement(self):
+        with self.assertRaisesRegex(ValueError, "every non-reusable manifest case"):
             MODULE.merge_repaired_delta(
                 self.manifest,
                 self.base,
                 {"benchmark_id": "benchmark", "cases": []},
             )
+
+    def test_supports_reassigned_case_ids_in_repaired_manifest(self):
+        manifest = {
+            "benchmark_id": "benchmark",
+            "cases": [
+                {"case_id": "a-p195"},
+                {"case_id": "c-p195"},
+            ],
+        }
+        merged = MODULE.merge_repaired_delta(
+            manifest,
+            self.base,
+            {
+                "benchmark_id": "benchmark",
+                "shards": 2,
+                "cases": [_row("c-p195", True)],
+            },
+        )
+        self.assertTrue(merged["complete"])
+        self.assertEqual(
+            {case["case_id"] for case in merged["cases"]},
+            {"a-p195", "c-p195"},
+        )
 
 
 if __name__ == "__main__":

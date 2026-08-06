@@ -17,17 +17,17 @@ def merge_repaired_delta(manifest, base, delta):
 
     manifest_ids = {case["case_id"] for case in manifest.get("cases", [])}
     base_by_id = {case["case_id"]: case for case in base.get("cases", [])}
-    if set(base_by_id) != manifest_ids:
-        raise ValueError("base preflight coverage does not match manifest")
-
-    failed_ids = {
-        case_id for case_id, case in base_by_id.items() if not case.get("passed")
+    reusable_ids = {
+        case_id
+        for case_id in manifest_ids.intersection(base_by_id)
+        if base_by_id[case_id].get("passed")
     }
+    required_delta_ids = manifest_ids - reusable_ids
     delta_by_id = {case["case_id"]: case for case in delta.get("cases", [])}
-    if set(delta_by_id) != failed_ids:
-        raise ValueError("delta preflight must replace every failed base case exactly")
+    if set(delta_by_id) != required_delta_ids:
+        raise ValueError("delta preflight must cover every non-reusable manifest case")
 
-    repaired = dict(base_by_id)
+    repaired = {case_id: base_by_id[case_id] for case_id in reusable_ids}
     repaired.update(delta_by_id)
     cases = sorted(repaired.values(), key=lambda case: case["scenario_id"])
     failures = {
