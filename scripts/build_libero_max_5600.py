@@ -44,11 +44,12 @@ def main() -> int:
     rejected = expand_rejected_by_physical_scene(
         catalog["tasks"], rejected, args.expand_rejection_change_type
     )
+    frozen_case_ids = {case["case_id"] for case in frozen_core["cases"]}
     rejected_frozen_case_ids = {
         case["case_id"]
         for path in args.reject_frozen_preflight
         for case in json.loads(path.read_text(encoding="utf-8")).get("cases", [])
-        if not case.get("passed")
+        if not case.get("passed") and case.get("case_id") in frozen_case_ids
     }
     manifest = build_max5600_manifest(
         catalog, frozen_core, rejected, rejected_frozen_case_ids
