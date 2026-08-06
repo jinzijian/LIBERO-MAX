@@ -150,3 +150,83 @@ def audit_hard_release(
     errors.extend(_audit_hard_preflight("Core", core, core_preflight))
     errors.extend(_audit_hard_preflight("Full", full, full_preflight))
     return errors
+
+
+def audit_max5600_release(
+    catalog: Dict[str, Any],
+    manifest: Dict[str, Any],
+    frozen_core: Dict[str, Any],
+    preflight: Dict[str, Any],
+    *,
+    expected_pairs: int = 5600,
+) -> List[str]:
+    """Audit the single official balanced LIBERO-MAX-5600 release."""
+
+    errors = [
+        "official manifest: %s" % error for error in validate_manifest(manifest)
+    ]
+    cases = manifest.get("cases", [])
+    if manifest.get("benchmark_id") != "libero-max-5600":
+        errors.append("official benchmark_id must be libero-max-5600")
+    if len(cases) != expected_pairs:
+        errors.append("official manifest must contain exactly %d pairs" % expected_pairs)
+    if manifest.get("protocol", {}).get("query_interval") != 16:
+        errors.append("official paired protocol must use query_interval 16")
+
+    catalog_tasks = catalog.get("tasks", [])
+    catalog_keys = [
+        (task.get("task_suite_name"), task.get("task_index"))
+        for task in catalog_tasks
+    ]
+    if len(catalog_tasks) != 10030 or len(set(catalog_keys)) != 10030:
+        errors.append("source catalog must contain 10,030 unique Plus tasks")
+    case_keys = [
+        (case.get("task_suite_name"), case.get("task_index")) for case in cases
+    ]
+    if len(set(case_keys)) != len(cases):
+        errors.append("official manifest contains duplicate source tasks")
+    if not set(case_keys).issubset(set(catalog_keys)):
+        errors.append("official manifest contains tasks outside the source catalog")
+
+    case_ids = [case.get("case_id") for case in cases]
+    if len(set(case_ids)) != len(cases):
+        errors.append("official manifest contains duplicate case IDs")
+    core_ids = {case.get("case_id") for case in frozen_core.get("cases", [])}
+    if len(core_ids) != 1400 or not core_ids.issubset(set(case_ids)):
+        errors.append("the frozen 1,400-case Core must be an exact subset")
+
+    category_counts = Counter(case.get("substrate_category") for case in cases)
+    if len(category_counts) != 7 or set(category_counts.values()) != {800}:
+        errors.append("official manifest must contain 800 cases per Plus category")
+    event_counts = Counter(
+        case.get("scenario", {}).get("change_type") for case in cases
+    )
+    if len(event_counts) != 8 or set(event_counts.values()) != {700}:
+        errors.append("official manifest must contain 700 cases per change type")
+    event_draw_counts = Counter(
+        (
+            case.get("scenario", {}).get("change_type"),
+            case.get("scenario", {}).get("randomization", {}).get("draw_id"),
+        )
+        for case in cases
+    )
+    if len(event_draw_counts) != 16 or set(event_draw_counts.values()) != {350}:
+        errors.append("official manifest must contain 350 cases per change/draw")
+    category_event_draw_counts = Counter(
+        (
+            case.get("substrate_category"),
+            case.get("scenario", {}).get("change_type"),
+            case.get("scenario", {}).get("randomization", {}).get("draw_id"),
+        )
+        for case in cases
+    )
+    if (
+        len(category_event_draw_counts) != 7 * 8 * 2
+        or set(category_event_draw_counts.values()) != {50}
+    ):
+        errors.append("every category/change/draw cell must contain 50 cases")
+
+    errors.extend(_audit_hard_preflight("Official", manifest, preflight))
+    if preflight.get("passed") != expected_pairs:
+        errors.append("official preflight must pass all %d cases" % expected_pairs)
+    return errors

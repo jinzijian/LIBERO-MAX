@@ -86,6 +86,22 @@ class CosmosLauncherTest(unittest.TestCase):
         self.assertIn("run_cosmos_persistent_benchmark.py", launcher)
         self.assertIn('--gpus "$GPUS"', launcher)
 
+    def test_openpi_launchers_use_plus_assets_and_persistent_servers(self) -> None:
+        paired = (ROOT / "scripts/run_openpi_paired.sh").read_text(encoding="utf-8")
+        persistent = (
+            ROOT / "scripts/run_openpi_persistent_benchmark.sh"
+        ).read_text(encoding="utf-8")
+        worker = (
+            ROOT / "scripts/run_openpi_persistent_shard.py"
+        ).read_text(encoding="utf-8")
+        self.assertIn("libero-plus-python-overlay", paired)
+        self.assertIn("LIBERO-plus", paired)
+        self.assertIn("$COSMOS_DEPS/libero-plus-config}", paired)
+        self.assertIn('MUJOCO_EGL_DEVICE_ID="$GPU_ID"', paired)
+        self.assertIn("serve_openpi_deterministic.py", persistent)
+        self.assertIn('CUDA_VISIBLE_DEVICES="$gpu"', persistent)
+        self.assertIn("paired_summary.json", worker)
+
 
 if __name__ == "__main__":
     unittest.main()

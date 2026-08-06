@@ -20,7 +20,7 @@ POLICY_NOTIFICATION="${POLICY_NOTIFICATION:-}"
 
 site_packages="$COSMOS_DEPS/cosmos-policy/.venv/lib/python3.10/site-packages"
 legacy_site_packages="$COSMOS_DEPS/.venv-libero/lib/python3.10/site-packages"
-pythonpath="$PROJECT_DIR/src:$OPENPI_DIR/packages/openpi-client/src:$OPENPI_CLIENT_OVERLAY:$COSMOS_DEPS/robosuite-1.4.0:$site_packages:$legacy_site_packages:$COSMOS_DEPS/LIBERO:$COSMOS_DEPS/cosmos-policy"
+pythonpath="$PROJECT_DIR/src:$OPENPI_DIR/packages/openpi-client/src:$OPENPI_CLIENT_OVERLAY:$COSMOS_DEPS/robosuite-1.4.0:$COSMOS_DEPS/libero-plus-python-overlay:$site_packages:$legacy_site_packages:$COSMOS_DEPS/LIBERO-plus:$COSMOS_DEPS/cosmos-policy"
 
 mkdir -p "$OUTPUT_ROOT"
 for arm in control intervention; do
@@ -38,7 +38,8 @@ for arm in control intervention; do
   MUJOCO_GL=egl \
   PYOPENGL_PLATFORM=egl \
   TORCH_FORCE_NO_WEIGHTS_ONLY_LOAD=1 \
-  LIBERO_CONFIG_PATH="$COSMOS_DEPS/libero-config" \
+  MUJOCO_EGL_DEVICE_ID="$GPU_ID" \
+  LIBERO_CONFIG_PATH="${LIBERO_CONFIG_PATH:-$COSMOS_DEPS/libero-plus-config}" \
   PYTHONPATH="$pythonpath" \
   "$CLIENT_PYTHON" "$PROJECT_DIR/scripts/run_openpi_libero_max.py" \
     --scenario "$SCENARIO_FILE" \
