@@ -5,6 +5,7 @@ from libero_max.hard import (
     PLUS_CATEGORIES,
     PLUS_DIFFICULTIES,
     _build_case,
+    _balanced_category_assignments,
     _core_assignments,
     _full_assignments,
     _frozen_core_assignments,
@@ -183,6 +184,35 @@ class HardManifestTest(unittest.TestCase):
         self.assertEqual(
             _frozen_core_assignments(frozen, tasks), assignments
         )
+
+    def test_balanced_category_assignment_fills_every_event_and_draw(self):
+        tasks = []
+        for difficulty in PLUS_DIFFICULTIES:
+            for offset in range(4):
+                tasks.append(
+                    _task(
+                        PLUS_CATEGORIES[0],
+                        difficulty,
+                        difficulty * 10 + offset,
+                    )
+                )
+        assignments, difficulty_quotas = _balanced_category_assignments(
+            tasks,
+            PLUS_CATEGORIES[0],
+            {},
+            set(),
+            per_event_draw=1,
+        )
+        self.assertEqual(len(assignments), 16)
+        self.assertEqual(
+            {assignment: list(assignments.values()).count(assignment) for assignment in assignments.values()},
+            {
+                (event, draw): 1
+                for event in CHANGE_TYPE_ORDER
+                for draw in (0, 1)
+            },
+        )
+        self.assertEqual(sum(difficulty_quotas.values()), 16)
 
 
 if __name__ == "__main__":

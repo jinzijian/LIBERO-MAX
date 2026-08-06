@@ -34,10 +34,65 @@ CHANGE_TYPE_ORDER = (
 )
 CORE_PER_STRATUM = 40
 CORE_PER_EVENT_PER_STRATUM = CORE_PER_STRATUM // len(CHANGE_TYPE_ORDER)
+MAX5600_PER_CATEGORY = 800
+MAX5600_PER_EVENT_DRAW_CATEGORY = 50
 
 
 class HardBuildError(ValueError):
     """Raised when a Plus catalog cannot satisfy the Hard design contract."""
+
+
+class _FlowEdge:
+    def __init__(self, target: int, reverse: int, capacity: int):
+        self.target = target
+        self.reverse = reverse
+        self.capacity = capacity
+
+
+def _add_flow_edge(graph, source: int, target: int, capacity: int) -> _FlowEdge:
+    forward = _FlowEdge(target, len(graph[target]), capacity)
+    reverse = _FlowEdge(source, len(graph[source]), 0)
+    graph[source].append(forward)
+    graph[target].append(reverse)
+    return forward
+
+
+def _max_flow(graph, source: int, sink: int) -> int:
+    """Compute deterministic integral max flow with Dinic's algorithm."""
+
+    total = 0
+    while True:
+        levels = [-1] * len(graph)
+        levels[source] = 0
+        queue = [source]
+        for node in queue:
+            for edge in graph[node]:
+                if edge.capacity and levels[edge.target] < 0:
+                    levels[edge.target] = levels[node] + 1
+                    queue.append(edge.target)
+        if levels[sink] < 0:
+            return total
+        offsets = [0] * len(graph)
+
+        def send(node: int, amount: int) -> int:
+            if node == sink:
+                return amount
+            while offsets[node] < len(graph[node]):
+                edge = graph[node][offsets[node]]
+                if edge.capacity and levels[edge.target] == levels[node] + 1:
+                    pushed = send(edge.target, min(amount, edge.capacity))
+                    if pushed:
+                        edge.capacity -= pushed
+                        graph[edge.target][edge.reverse].capacity += pushed
+                        return pushed
+                offsets[node] += 1
+            return 0
+
+        while True:
+            pushed = send(source, 10**9)
+            if not pushed:
+                break
+            total += pushed
 
 
 def _stable_seed(parts: Iterable[Any]) -> int:
@@ -573,9 +628,220 @@ def _full_assignments(
     return assignments
 
 
-def _manifest(profile: str, cases: List[Dict[str, Any]]) -> Dict[str, Any]:
+def _balanced_difficulty_quotas(
+    tasks: Sequence[Dict[str, Any]], total: int
+) -> Dict[int, int]:
+    """Allocate a near-uniform difficulty quota without exceeding the catalog."""
+
+    capacity = Counter(
+        task.get("plus_difficulty_level")
+        for task in tasks
+        if task.get("plus_difficulty_level") in PLUS_DIFFICULTIES
+    )
+    base, remainder = divmod(total, len(PLUS_DIFFICULTIES))
+    quotas = {
+        difficulty: min(
+            capacity[difficulty],
+            base + int(index < remainder),
+        )
+        for index, difficulty in enumerate(PLUS_DIFFICULTIES)
+    }
+    while sum(quotas.values()) < total:
+        candidates = [
+            difficulty
+            for difficulty in PLUS_DIFFICULTIES
+            if quotas[difficulty] < capacity[difficulty]
+        ]
+        if not candidates:
+            raise HardBuildError("category cannot supply its MAX-5600 quota")
+        difficulty = min(
+            candidates,
+            key=lambda value: (quotas[value], PLUS_DIFFICULTIES.index(value)),
+        )
+        quotas[difficulty] += 1
+    return quotas
+
+
+def _balanced_category_assignments(
+    tasks: Sequence[Dict[str, Any]],
+    category: str,
+    frozen: Dict[Tuple[str, int], Tuple[str, int]],
+    rejected: Set[Tuple[str, int, str]],
+    per_event_draw: int = MAX5600_PER_EVENT_DRAW_CATEGORY,
+) -> Tuple[Dict[Tuple[str, int], Tuple[str, int]], Dict[int, int]]:
+    """Fill one category using exact event/draw and bounded difficulty quotas."""
+
+    category_tasks = [
+        task
+        for task in tasks
+        if task.get("plus_category") == category
+        and task.get("plus_difficulty_level") in PLUS_DIFFICULTIES
+    ]
+    category_total = len(CHANGE_TYPE_ORDER) * 2 * per_event_draw
+    difficulty_quotas = _balanced_difficulty_quotas(category_tasks, category_total)
+    tasks_by_key = {_task_key(task): task for task in category_tasks}
+    frozen_here = {
+        key: assignment
+        for key, assignment in frozen.items()
+        if key in tasks_by_key
+    }
+    if len(frozen_here) > category_total:
+        raise HardBuildError("frozen Core exceeds a MAX-5600 category quota")
+
+    frozen_by_difficulty = Counter(
+        tasks_by_key[key]["plus_difficulty_level"] for key in frozen_here
+    )
+    remaining_by_difficulty = {
+        difficulty: difficulty_quotas[difficulty]
+        - frozen_by_difficulty[difficulty]
+        for difficulty in PLUS_DIFFICULTIES
+    }
+    if any(value < 0 for value in remaining_by_difficulty.values()):
+        raise HardBuildError("frozen Core exceeds a MAX-5600 difficulty quota")
+
+    frozen_by_bucket = Counter(frozen_here.values())
+    buckets = [
+        (event, draw)
+        for event in CHANGE_TYPE_ORDER
+        for draw in (0, 1)
+    ]
+    remaining_by_bucket = {
+        bucket: per_event_draw - frozen_by_bucket[bucket]
+        for bucket in buckets
+    }
+    if any(value < 0 for value in remaining_by_bucket.values()):
+        raise HardBuildError("frozen Core exceeds a MAX-5600 event/draw quota")
+    required = category_total - len(frozen_here)
+    if sum(remaining_by_difficulty.values()) != required or sum(
+        remaining_by_bucket.values()
+    ) != required:
+        raise AssertionError("MAX-5600 residual quotas disagree")
+
+    candidates = [
+        task for task in category_tasks if _task_key(task) not in frozen_here
+    ]
+    candidates.sort(
+        key=lambda task: _stable_seed(
+            (SAMPLER_VERSION, "max5600", category, *_task_key(task))
+        )
+    )
+    failed_task_keys = {
+        (suite, task_index) for suite, task_index, _ in rejected
+    }
+
+    graph = []
+
+    def node() -> int:
+        graph.append([])
+        return len(graph) - 1
+
+    source = node()
+    difficulty_nodes = {difficulty: node() for difficulty in PLUS_DIFFICULTIES}
+    task_nodes = {_task_key(task): node() for task in candidates}
+    bucket_nodes = {bucket: node() for bucket in buckets}
+    sink = node()
+    for difficulty in PLUS_DIFFICULTIES:
+        _add_flow_edge(
+            graph,
+            source,
+            difficulty_nodes[difficulty],
+            remaining_by_difficulty[difficulty],
+        )
+    for task in candidates:
+        key = _task_key(task)
+        _add_flow_edge(
+            graph,
+            difficulty_nodes[task["plus_difficulty_level"]],
+            task_nodes[key],
+            1,
+        )
+    for bucket in buckets:
+        _add_flow_edge(
+            graph, bucket_nodes[bucket], sink, remaining_by_bucket[bucket]
+        )
+
+    assignment_edges = {}
+    for task in candidates:
+        key = _task_key(task)
+        eligible = [
+            event
+            for event in eligible_change_types(task)
+            if (*key, event) not in rejected
+        ]
+        if key in failed_task_keys:
+            eligible = [event for event in eligible if event in CHANGE_TYPE_ORDER[:4]]
+        task_buckets = [
+            (event, draw) for event in eligible for draw in (0, 1)
+        ]
+        task_buckets.sort(
+            key=lambda bucket: _stable_seed(
+                (SAMPLER_VERSION, "max5600-edge", category, *key, *bucket)
+            )
+        )
+        for bucket in task_buckets:
+            edge = _add_flow_edge(
+                graph, task_nodes[key], bucket_nodes[bucket], 1
+            )
+            assignment_edges[(key, bucket)] = edge
+
+    achieved = _max_flow(graph, source, sink)
+    if achieved != required:
+        raise HardBuildError(
+            "%s MAX-5600 matching reached %d/%d" % (category, achieved, required)
+        )
+    selected = dict(frozen_here)
+    for (key, bucket), edge in assignment_edges.items():
+        if edge.capacity == 0:
+            if key in selected:
+                raise AssertionError("MAX-5600 selected a task twice")
+            selected[key] = bucket
+    if len(selected) != category_total:
+        raise AssertionError("MAX-5600 category cardinality is incorrect")
+    return selected, difficulty_quotas
+
+
+def _max5600_assignments(
+    tasks: Sequence[Dict[str, Any]],
+    frozen_core: Dict[str, Any],
+    rejected: Set[Tuple[str, int, str]],
+) -> Tuple[Dict[Tuple[str, int], Tuple[str, int]], Dict[str, Dict[int, int]]]:
+    frozen = _frozen_core_assignments(frozen_core, tasks)
+    assignments = {}
+    difficulty_quotas = {}
+    for category in PLUS_CATEGORIES:
+        selected, quotas = _balanced_category_assignments(
+            tasks, category, frozen, rejected
+        )
+        assignments.update(selected)
+        difficulty_quotas[category] = quotas
+    if len(assignments) != 5600:
+        raise AssertionError("MAX-5600 must contain exactly 5,600 assignments")
+    category_counts = Counter(
+        next(task for task in tasks if _task_key(task) == key)["plus_category"]
+        for key in assignments
+    )
+    event_draw_counts = Counter(assignments.values())
+    if any(category_counts[category] != 800 for category in PLUS_CATEGORIES):
+        raise AssertionError("MAX-5600 category quotas are not balanced")
+    if any(
+        event_draw_counts[(event, draw)] != 350
+        for event in CHANGE_TYPE_ORDER
+        for draw in (0, 1)
+    ):
+        raise AssertionError("MAX-5600 event/draw quotas are not balanced")
+    return assignments, difficulty_quotas
+
+
+def _manifest(
+    profile: str,
+    cases: List[Dict[str, Any]],
+    *,
+    benchmark_id: Optional[str] = None,
+    selection_contract: Optional[str] = None,
+    protocol_metadata: Optional[Dict[str, Any]] = None,
+) -> Dict[str, Any]:
     manifest = {
-        "benchmark_id": "libero-max-hard-%s" % profile,
+        "benchmark_id": benchmark_id or "libero-max-hard-%s" % profile,
         "benchmark_version": "2.0.0-candidate",
         "protocol": {
             "arms": ["control", "intervention"],
@@ -584,7 +850,8 @@ def _manifest(profile: str, cases: List[Dict[str, Any]]) -> Dict[str, Any]:
             "substrate": "LIBERO-Plus",
             "profile": profile,
             "source_benchmark_commit": "4976dc3",
-            "selection_contract": (
+            "selection_contract": selection_contract
+            or (
                 "7 categories x 5 difficulty levels x 40 tasks"
                 if profile == "core"
                 else "all 10030 LIBERO-Plus tasks"
@@ -594,10 +861,50 @@ def _manifest(profile: str, cases: List[Dict[str, Any]]) -> Dict[str, Any]:
             cases, key=lambda case: (case["task_suite_name"], case["task_index"])
         ),
     }
+    if protocol_metadata:
+        manifest["protocol"].update(protocol_metadata)
     errors = validate_manifest(manifest)
     if errors:
         raise HardBuildError("generated %s manifest is invalid: %s" % (profile, "; ".join(errors)))
     return manifest
+
+
+def build_max5600_manifest(
+    catalog: Dict[str, Any],
+    frozen_core: Dict[str, Any],
+    rejected_configurations: Iterable[Tuple[str, int, str]] = (),
+) -> Dict[str, Any]:
+    """Build the single official 5,600-pair LIBERO-MAX benchmark."""
+
+    tasks = catalog.get("tasks")
+    if not isinstance(tasks, list) or len(tasks) != 10030:
+        raise HardBuildError("MAX-5600 requires the exact 10030-task Plus catalog")
+    if len({_task_key(task) for task in tasks}) != len(tasks):
+        raise HardBuildError("catalog contains duplicate suite/task keys")
+    rejected = set(rejected_configurations)
+    assignments, difficulty_quotas = _max5600_assignments(
+        tasks, frozen_core, rejected
+    )
+    tasks_by_key = {_task_key(task): task for task in tasks}
+    cases = [
+        _build_case(tasks_by_key[key], event, draw)
+        for key, (event, draw) in assignments.items()
+    ]
+    return _manifest(
+        "official",
+        cases,
+        benchmark_id="libero-max-5600",
+        selection_contract=(
+            "7 Plus categories x 800; 8 changes x 700; "
+            "2 deterministic draws x 350 per change"
+        ),
+        protocol_metadata={
+            "official_name": "LIBERO-MAX",
+            "official_pairs": 5600,
+            "frozen_core_pairs": 1400,
+            "difficulty_quotas_by_category": difficulty_quotas,
+        },
+    )
 
 
 def _frozen_core_assignments(
