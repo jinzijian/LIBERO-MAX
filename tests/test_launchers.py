@@ -85,6 +85,8 @@ class CosmosLauncherTest(unittest.TestCase):
         self.assertIn("hf-cache-cosmos", launcher)
         self.assertIn("run_cosmos_persistent_benchmark.py", launcher)
         self.assertIn('--gpus "$GPUS"', launcher)
+        self.assertIn('--shard-indices "$SHARD_INDICES"', launcher)
+        self.assertIn('--num-shards "$NUM_SHARDS"', launcher)
 
     def test_openpi_launchers_use_plus_assets_and_persistent_servers(self) -> None:
         paired = (ROOT / "scripts/run_openpi_paired.sh").read_text(encoding="utf-8")

@@ -16,6 +16,8 @@ def main() -> int:
     parser.add_argument("manifest", type=Path)
     parser.add_argument("--output-root", type=Path, required=True)
     parser.add_argument("--gpus", default="0")
+    parser.add_argument("--shard-indices")
+    parser.add_argument("--num-shards", type=int)
     parser.add_argument("--t5-embeddings", type=Path, required=True)
     parser.add_argument("--query-interval", type=int)
     parser.add_argument("--max-cases-per-shard", type=int)
@@ -25,6 +27,24 @@ def main() -> int:
     gpus = [item.strip() for item in args.gpus.split(",") if item.strip()]
     if not gpus:
         parser.error("--gpus must contain at least one GPU")
+    shard_indices = (
+        list(range(len(gpus)))
+        if args.shard_indices is None
+        else [
+            int(item.strip())
+            for item in args.shard_indices.split(",")
+            if item.strip()
+        ]
+    )
+    num_shards = args.num_shards or len(gpus)
+    if len(shard_indices) != len(gpus):
+        parser.error("--shard-indices must contain one index per GPU")
+    if (
+        num_shards < 1
+        or len(set(shard_indices)) != len(shard_indices)
+        or any(index < 0 or index >= num_shards for index in shard_indices)
+    ):
+        parser.error("invalid logical shard configuration")
     if args.query_interval is not None and args.query_interval < 1:
         parser.error("--query-interval must be positive")
     if args.max_cases_per_shard is not None and args.max_cases_per_shard < 1:
@@ -45,6 +65,8 @@ def main() -> int:
         "t5_embeddings_bytes": args.t5_embeddings.stat().st_size,
         "physical_gpus": gpus,
         "workers": len(gpus),
+        "logical_shard_indices": shard_indices,
+        "logical_num_shards": num_shards,
         "query_interval": (
             args.query_interval
             if args.query_interval is not None
@@ -64,7 +86,7 @@ def main() -> int:
     runner = Path(__file__).resolve().parent / "run_cosmos_persistent_shard.py"
     processes = []
     log_handles = []
-    for shard_index, gpu in enumerate(gpus):
+    for shard_index, gpu in zip(shard_indices, gpus):
         command = [
             sys.executable,
             str(runner),
@@ -74,7 +96,7 @@ def main() -> int:
             "--shard-index",
             str(shard_index),
             "--num-shards",
-            str(len(gpus)),
+            str(num_shards),
             "--t5-embeddings",
             str(args.t5_embeddings.resolve()),
         ]
@@ -96,7 +118,9 @@ def main() -> int:
                 "TORCH_FORCE_NO_WEIGHTS_ONLY_LOAD": "1",
             }
         )
-        log_path = args.output_root / ("worker-gpu%s.log" % gpu)
+        log_path = args.output_root / (
+            "worker-shard%d-gpu%s.log" % (shard_index, gpu)
+        )
         log_handle = log_path.open("a" if args.resume else "w", encoding="utf-8")
         log_handles.append(log_handle)
         processes.append(
@@ -117,7 +141,8 @@ def main() -> int:
     finally:
         for handle in log_handles:
             handle.close()
-    status_path = args.output_root / "worker_status.json"
+    shard_tag = "-".join(str(index) for index in shard_indices)
+    status_path = args.output_root / ("worker_status_%s.json" % shard_tag)
     status_path.write_text(
         json.dumps(statuses, indent=2, sort_keys=True) + "\n", encoding="utf-8"
     )

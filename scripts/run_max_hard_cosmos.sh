@@ -31,6 +31,12 @@ command=(
 if [[ -n "${MAX_CASES_PER_SHARD:-}" ]]; then
   command+=(--max-cases-per-shard "$MAX_CASES_PER_SHARD")
 fi
+if [[ -n "${SHARD_INDICES:-}" ]]; then
+  command+=(--shard-indices "$SHARD_INDICES")
+fi
+if [[ -n "${NUM_SHARDS:-}" ]]; then
+  command+=(--num-shards "$NUM_SHARDS")
+fi
 if [[ "${RESUME:-0}" == "1" ]]; then
   command+=(--resume)
 fi
