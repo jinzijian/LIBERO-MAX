@@ -18,6 +18,7 @@ QUERY_INTERVAL="${QUERY_INTERVAL:-5}"
 MANIFEST="$(realpath "$1")"
 mkdir -p "$2"
 OUTPUT_ROOT="$(realpath "$2")"
+export PYTHONPATH="$PROJECT_DIR/src${PYTHONPATH:+:$PYTHONPATH}"
 
 IFS=',' read -r -a gpu_ids <<< "$GPUS_CSV"
 if (( ${#gpu_ids[@]} == 0 )); then
