@@ -43,7 +43,12 @@ or user rather than being caused solely by the robot's own execution error.
   initial state whenever possible.
 - Record the intervention time and retain both pre-change and post-change
   trajectories.
-- Report complete paired coverage, not only aggregate success rates.
+- Retain every frozen benchmark case even when a policy fails before reaching
+  the intervention trigger; report it as a pre-intervention policy failure.
+- Report full-denominator end-to-end success, trigger coverage, and
+  trigger-conditioned adaptation separately.
+- Treat simulator, dependency, and missing-trace errors as infrastructure
+  gaps that block finalization, not as model failures.
 - Separate gains, preserved successes, preserved failures, and regressions.
 - Score safe stopping and correct refusal explicitly for cancelled or
   infeasible tasks.
@@ -116,8 +121,10 @@ PYTHONPATH=src python3 scripts/aggregate_cosmos_benchmark.py \
 ```
 
 The batch runner fixes task, initial-state index, policy seed, and scenario per
-case; each GPU runs one matched pair at a time. Aggregation fails on missing or
-mismatched pairs rather than silently reporting partial metrics.
+case; each GPU runs one matched pair at a time. Aggregation retains terminal
+`trigger_unreached` cases in end-to-end scoring, while missing traces,
+simulator errors, and mismatched pairs block finalization rather than being
+silently converted into model failures.
 
 ## LIBERO-MAX-5600 on LIBERO-Plus
 
@@ -137,6 +144,27 @@ are frozen in the manifest rather than sampled again at evaluation time. The
 1,400-case development Core seeds the selection but is not a second public
 benchmark profile. Any Core candidate that fails the final intervention
 contract is replaced under the same balance constraints.
+
+### Scoring and trigger coverage
+
+The 5,600-case manifest is model-independent. A case is never removed because
+a particular policy fails to approach the trigger entity. Such an episode is
+retained as `trigger_unreached` / `pre_intervention_failure`: it contributes a
+failure to the full end-to-end denominator but is not treated as evidence
+about post-change adaptation.
+
+Every physical-track result therefore reports three distinct views:
+
+| View | Denominator | Meaning |
+| --- | ---: | --- |
+| End-to-end control/change | All 5,600 planned cases | Overall policy capability, including failures before intervention |
+| Trigger coverage | Triggered cases / 5,600 | How often the policy reached a state in which adaptation could be tested |
+| Trigger-conditioned adaptation | Valid triggered pairs only | Behavior change after an intervention actually occurred |
+
+Infrastructure failures remain missing until repaired. They are neither
+dropped from the benchmark nor charged to the policy. Consequently,
+planned-denominator accuracies are withheld until every control and
+intervention arm has a terminal outcome.
 
 Every released case must pass real-MuJoCo post-intervention geometry, support,
 collision, and visibility checks. Failed candidate placements are replaced
@@ -161,6 +189,24 @@ GPUS=0,1,2,3,4,5,6,7 bash scripts/run_openpi_persistent_benchmark.sh \
   benchmark/max5600/libero_max_5600.json \
   artifacts/max5600/pi05_libero
 ```
+
+### Current evaluation status
+
+As of 2026-08-07, the first Cosmos Policy and pi0.5 workers have reached a
+terminal state for all 5,600 planned cases, but the evidence-gated release is
+not final because infrastructure repairs remain:
+
+| Model | Measured pairs | Trigger-unreached | Infrastructure gaps | Measured control | Measured change |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| Cosmos Policy Predict2-2B | 5,599 / 5,600 | 258 | 1 | 4,592 / 5,599 (82.01%) | 3,532 / 5,599 (63.08%) |
+| pi0.5-LIBERO | 5,463 / 5,600 | 108 | 137 | 4,692 / 5,463 (85.89%) | 3,883 / 5,463 (71.08%) |
+
+These are coverage-aware progress statistics, not final model rankings.
+Cosmos currently uses a 16-step query interval while pi0.5 uses 5 steps, and
+the incomplete infrastructure coverage must be repaired before a headline
+comparison. FastWAM-LIBERO and LingBot-VA-LIBERO-LONG checkpoints have been
+downloaded and checksum-verified; their shared-environment adapters and
+paired rollouts are still pending.
 
 ## Repository layout
 
