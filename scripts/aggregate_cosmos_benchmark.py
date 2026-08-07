@@ -25,6 +25,86 @@ def _load_trace(path: Path) -> Dict[str, Any]:
     return rows[0]
 
 
+def _capture_outcome(
+    outcomes: Dict[str, bool], case_id: str, value: Any
+) -> None:
+    if isinstance(value, bool):
+        outcomes[case_id] = value
+
+
+def _outcome_rate(outcomes: Dict[str, bool], planned: int) -> Dict[str, Any]:
+    measured = len(outcomes)
+    successes = sum(outcomes.values())
+    return {
+        "planned": planned,
+        "measured": measured,
+        "missing": planned - measured,
+        "successes": successes,
+        "failures": measured - successes,
+        "accuracy_on_measured": successes / measured if measured else None,
+        "accuracy_on_planned": successes / planned if measured == planned else None,
+    }
+
+
+def summarize_end_to_end_outcomes(
+    planned: int,
+    control_outcomes: Dict[str, bool],
+    intervention_outcomes: Dict[str, bool],
+) -> Dict[str, Any]:
+    """Summarize all terminal outcomes, including trigger-unreached cases.
+
+    Trigger-conditioned adaptation metrics remain useful diagnostics, but they
+    must not silently remove policies that fail before reaching a trigger. The
+    all-case rates are only published when every planned arm has an outcome;
+    infrastructure gaps remain missing rather than being charged to a model.
+    """
+
+    paired_ids = sorted(set(control_outcomes) & set(intervention_outcomes))
+    outcome_table = {
+        "preserved_capability": 0,
+        "intervention_side_gain": 0,
+        "regression_under_change": 0,
+        "persistent_failure": 0,
+    }
+    for case_id in paired_ids:
+        control = control_outcomes[case_id]
+        intervention = intervention_outcomes[case_id]
+        if control and intervention:
+            outcome_table["preserved_capability"] += 1
+        elif not control and intervention:
+            outcome_table["intervention_side_gain"] += 1
+        elif control and not intervention:
+            outcome_table["regression_under_change"] += 1
+        else:
+            outcome_table["persistent_failure"] += 1
+
+    control = _outcome_rate(control_outcomes, planned)
+    intervention = _outcome_rate(intervention_outcomes, planned)
+    paired_complete = len(paired_ids) == planned
+    return {
+        "control": control,
+        "intervention": intervention,
+        "paired_measured": len(paired_ids),
+        "paired_missing": planned - len(paired_ids),
+        "outcome_table": outcome_table,
+        "paired_robustness_delta_on_measured": (
+            (
+                sum(intervention_outcomes[case_id] for case_id in paired_ids)
+                - sum(control_outcomes[case_id] for case_id in paired_ids)
+            )
+            / len(paired_ids)
+            if paired_ids
+            else None
+        ),
+        "paired_robustness_delta_on_planned": (
+            intervention["accuracy_on_planned"] - control["accuracy_on_planned"]
+            if paired_complete
+            else None
+        ),
+        "complete": paired_complete,
+    }
+
+
 def _validate_case(case: Dict[str, Any], summary: Dict[str, Any]) -> List[str]:
     errors: List[str] = []
     if not summary.get("matched"):
@@ -68,6 +148,8 @@ def main() -> int:
     missing: List[str] = []
     invalid: Dict[str, List[str]] = {}
     terminal_invalid: Dict[str, List[str]] = {}
+    control_outcomes: Dict[str, bool] = {}
+    intervention_outcomes: Dict[str, bool] = {}
     for case in manifest["cases"]:
         case_id = case["case_id"]
         summary_path = args.root / "cases" / case_id / "paired_summary.json"
@@ -80,6 +162,14 @@ def main() -> int:
                 try:
                     intervention = _load_trace(intervention_trace)
                     control = _load_trace(control_trace)
+                    _capture_outcome(
+                        control_outcomes, case_id, control.get("success")
+                    )
+                    _capture_outcome(
+                        intervention_outcomes,
+                        case_id,
+                        intervention.get("success"),
+                    )
                     reasons = []
                     if intervention.get("intervention_event_count") == 0:
                         reasons.append("trigger_unreached")
@@ -95,6 +185,14 @@ def main() -> int:
             continue
         try:
             paired = _load_json(summary_path)
+            _capture_outcome(
+                control_outcomes, case_id, paired.get("control_success")
+            )
+            _capture_outcome(
+                intervention_outcomes,
+                case_id,
+                paired.get("intervention_success"),
+            )
             errors = _validate_case(case, paired)
         except (OSError, json.JSONDecodeError) as exc:
             errors = ["failed to load summary: %s" % exc]
@@ -182,6 +280,20 @@ def main() -> int:
         encoding="utf-8",
     )
     metrics = summarize_results(records) if records else None
+    end_to_end_metrics = summarize_end_to_end_outcomes(
+        len(manifest["cases"]), control_outcomes, intervention_outcomes
+    )
+    blocking_terminal_invalid = {
+        case_id: reasons
+        for case_id, reasons in terminal_invalid.items()
+        if set(reasons) != {"trigger_unreached"}
+    }
+    execution_complete = (
+        not missing
+        and not invalid
+        and not blocking_terminal_invalid
+        and end_to_end_metrics["complete"]
+    )
     coverage = {
         "planned": len(manifest["cases"]),
         "completed": len(records),
@@ -191,8 +303,15 @@ def main() -> int:
         "trigger_unreached": sum(
             "trigger_unreached" in reasons for reasons in terminal_invalid.values()
         ),
-        "execution_complete": not missing and not invalid,
-        "complete": (
+        "retained_untriggered": sorted(
+            case_id
+            for case_id, reasons in terminal_invalid.items()
+            if set(reasons) == {"trigger_unreached"}
+        ),
+        "blocking_terminal_invalid": blocking_terminal_invalid,
+        "execution_complete": execution_complete,
+        "complete": execution_complete,
+        "conditional_complete": (
             not missing
             and not invalid
             and not terminal_invalid
@@ -204,6 +323,7 @@ def main() -> int:
         "benchmark_version": manifest["benchmark_version"],
         "protocol": manifest["protocol"],
         "coverage": coverage,
+        "end_to_end_metrics": end_to_end_metrics,
         "metrics": None if metrics is None else {
             "overall": metrics["overall"],
             "by_change_family": metrics["by_change_family"],
@@ -217,6 +337,15 @@ def main() -> int:
             "by_dynamic_phase": metrics.get("by_dynamic_phase", {}),
         },
         "measurement_notes": {
+            "end_to_end_scoring": (
+                "all 5,600 frozen cases remain in the denominator; "
+                "trigger-unreached episodes are retained as pre-intervention "
+                "policy failures, while infrastructure errors remain missing"
+            ),
+            "conditional_adaptation": (
+                "metrics.* is conditioned on a valid intervention event and "
+                "must be reported with trigger coverage"
+            ),
             "adaptation_latency": (
                 "event-to-first-updated-instruction-query steps"
                 if manifest["protocol"]["scoring_track"] == "intent_response"

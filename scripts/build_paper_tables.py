@@ -110,9 +110,12 @@ def main() -> None:
         summary = run["summary"]
         coverage = summary["coverage"]
         metrics = summary["metrics"]["overall"]
+        end_to_end = summary.get("end_to_end_metrics")
+        if end_to_end is None:
+            raise ValueError("%s lacks all-case end-to-end metrics" % run["name"])
         planned = coverage["planned"]
         valid = coverage["completed"]
-        triggered = planned - int(coverage.get("trigger_unreached", 0))
+        triggered = valid
         main_rows.append(
             {
                 "model": run["name"],
@@ -120,31 +123,41 @@ def main() -> None:
                 "valid_pairs": valid,
                 "planned_pairs": planned,
                 "trigger_coverage": triggered / planned,
-                "control_accuracy": metrics["control_accuracy"],
-                "intervention_accuracy": metrics["scenario_aware_outcome_accuracy"],
-                "paired_delta": metrics["paired_robustness_delta"],
+                "control_accuracy": end_to_end["control"]["accuracy_on_planned"],
+                "intervention_accuracy": end_to_end["intervention"][
+                    "accuracy_on_planned"
+                ],
+                "paired_delta": end_to_end[
+                    "paired_robustness_delta_on_planned"
+                ],
+                "conditional_paired_delta": metrics["paired_robustness_delta"],
                 "paired_delta_95ci": metrics[
                     "paired_robustness_delta_95ci_bootstrap"
                 ],
-                "regressions": metrics["outcome_table"]["regression_under_change"],
-                "recoveries": metrics["outcome_table"]["intervention_side_gain"],
+                "regressions": end_to_end["outcome_table"][
+                    "regression_under_change"
+                ],
+                "recoveries": end_to_end["outcome_table"][
+                    "intervention_side_gain"
+                ],
                 "mcnemar_p": metrics["mcnemar_exact_two_sided_p"],
             }
         )
 
     lines = [
-        "| Model | Track | Valid / planned | Trigger | Control | Change | Delta (95% CI) | Regressions | Recoveries | McNemar p |",
-        "| --- | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |",
+        "| Model | Track | Triggered / planned | Trigger | Full control | Full change | Full delta | Triggered-only delta (95% CI) | Regressions | Recoveries | McNemar p |",
+        "| --- | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |",
     ]
     for row in main_rows:
         p_value = row["mcnemar_p"]
         lines.append(
-            "| {model} | {track} | {valid_pairs}/{planned_pairs} | {trigger} | {control} | {change} | {delta} {ci} | {regressions} | {recoveries} | {p} |".format(
+            "| {model} | {track} | {valid_pairs}/{planned_pairs} | {trigger} | {control} | {change} | {delta} | {conditional_delta} {ci} | {regressions} | {recoveries} | {p} |".format(
                 **row,
                 trigger=_percent(row["trigger_coverage"]),
                 control=_percent(row["control_accuracy"]),
                 change=_percent(row["intervention_accuracy"]),
                 delta=_percent(row["paired_delta"]),
+                conditional_delta=_percent(row["conditional_paired_delta"]),
                 ci=_interval(row["paired_delta_95ci"]),
                 p="--" if p_value is None else "%.4g" % p_value,
             )
