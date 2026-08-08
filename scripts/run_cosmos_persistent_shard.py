@@ -15,6 +15,7 @@ if not hasattr(np, "float_"):
     np.float_ = np.float64
 
 from libero_max.cosmos_integration import CosmosInterventionEnv, retain_action_prefix
+from libero_max.env_factory import create_libero_env_with_retry
 from libero_max.manifest import load_manifest
 from libero_max.substrate import load_case_task
 from libero_max.pro_runtime import wrap_case_env
@@ -167,8 +168,12 @@ def main() -> int:
                 arm_dir.mkdir(parents=True, exist_ok=True)
                 trace_path = arm_dir / "trace.jsonl"
                 trace_path.write_text("", encoding="utf-8")
-                env, task_description = get_libero_env(
-                    task, cfg.model_family, resolution=cfg.env_img_res
+                env, task_description = create_libero_env_with_retry(
+                    lambda: get_libero_env(
+                        task, cfg.model_family, resolution=cfg.env_img_res
+                    ),
+                    policy_seed=cfg.seed,
+                    reseed=set_seed_everywhere,
                 )
                 env = wrap_case_env(env, case)
                 env.seed(cfg.seed)
