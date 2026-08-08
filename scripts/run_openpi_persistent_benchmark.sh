@@ -10,6 +10,7 @@ PROJECT_DIR="${PROJECT_DIR:-/vepfs/zijian/LIBERO-MAX}"
 DEPS_DIR="${DEPS_DIR:-/vepfs/zijian/alter-wam-deps}"
 OPENPI_DIR="${OPENPI_DIR:-$DEPS_DIR/openpi}"
 OPENPI_PYTHON="${OPENPI_PYTHON:-$OPENPI_DIR/.venv/bin/python}"
+OPENPI_SITE_PACKAGES="$("$OPENPI_PYTHON" -c 'import site; print(site.getsitepackages()[0])')"
 CLIENT_PYTHON="${CLIENT_PYTHON:-$DEPS_DIR/cosmos-policy/.venv/bin/python}"
 CHECKPOINT="${CHECKPOINT:-$DEPS_DIR/openpi-assets/pi05_libero}"
 GPUS_CSV="${GPUS:-0,1,2,3,4,5,6,7}"
@@ -95,7 +96,7 @@ for gpu in "${gpu_ids[@]}"; do
   port="$((PORT_BASE + gpu))"
   CUDA_VISIBLE_DEVICES="$gpu" \
   XLA_PYTHON_CLIENT_PREALLOCATE="${XLA_PYTHON_CLIENT_PREALLOCATE:-false}" \
-  PYTHONPATH="$OPENPI_DIR/src:$OPENPI_DIR/packages/openpi-client/src${PYTHONPATH:+:$PYTHONPATH}" \
+  PYTHONPATH="$OPENPI_SITE_PACKAGES:$OPENPI_DIR/src:$OPENPI_DIR/packages/openpi-client/src${PYTHONPATH:+:$PYTHONPATH}" \
     "$OPENPI_PYTHON" scripts/serve_openpi_deterministic.py \
       --port "$port" \
       --checkpoint "$CHECKPOINT" \

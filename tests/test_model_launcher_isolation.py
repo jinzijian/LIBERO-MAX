@@ -22,6 +22,15 @@ class ModelLauncherIsolationTest(unittest.TestCase):
         self.assertIn("libero-pro-python-overlay", source)
         self.assertIn("robosuite-1.4.0", source)
 
+    def test_openpi_server_prefers_its_own_venv(self):
+        source = (ROOT / "scripts" / "run_openpi_persistent_benchmark.sh").read_text(
+            encoding="utf-8"
+        )
+        self.assertIn("OPENPI_SITE_PACKAGES", source)
+        active = source.index('PYTHONPATH="$OPENPI_SITE_PACKAGES:')
+        inherited = source.index("${PYTHONPATH:+:$PYTHONPATH}", active)
+        self.assertLess(active, inherited)
+
 
 if __name__ == "__main__":
     unittest.main()
