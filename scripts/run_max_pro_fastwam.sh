@@ -10,6 +10,7 @@ PROJECT_DIR="${PROJECT_DIR:-/vepfs/zijian/LIBERO-MAX}"
 DEPS_DIR="${DEPS_DIR:-/vepfs/zijian/alter-wam-deps}"
 FASTWAM_ROOT="${FASTWAM_ROOT:-$DEPS_DIR/FastWAM}"
 PYTHON="${PYTHON:-$FASTWAM_ROOT/.venv/bin/python}"
+ACTIVE_SITE_PACKAGES="$("$PYTHON" -c 'import site; print(site.getsitepackages()[0])')"
 LIBERO_IMPL_DIR="${LIBERO_PRO_DIR:-$DEPS_DIR/LIBERO-PRO}"
 LIBERO_OVERLAY="${LIBERO_PRO_OVERLAY:-$DEPS_DIR/libero-pro-python-overlay}"
 CHECKPOINT="${FASTWAM_CHECKPOINT:-$DEPS_DIR/model-assets/fastwam-libero/libero_uncond_2cam224.pt}"
@@ -22,7 +23,7 @@ export HF_HOME="${HF_HOME:-$DEPS_DIR/hf-cache-fastwam}"
 export TORCH_FORCE_NO_WEIGHTS_ONLY_LOAD=1
 export DIFFSYNTH_MODEL_BASE_PATH="$BASE_ASSETS"
 export DIFFSYNTH_DOWNLOAD_SOURCE=huggingface
-export PYTHONPATH="$DEPS_DIR/robosuite-1.4.0:$LIBERO_OVERLAY:$DEPS_DIR/.venv-libero/lib/python3.10/site-packages:$LIBERO_IMPL_DIR:$FASTWAM_ROOT:$FASTWAM_ROOT/experiments/libero:$PROJECT_DIR/src${PYTHONPATH:+:$PYTHONPATH}"
+export PYTHONPATH="$ACTIVE_SITE_PACKAGES:$DEPS_DIR/robosuite-1.4.0:$LIBERO_OVERLAY:$DEPS_DIR/.venv-libero/lib/python3.10/site-packages:$LIBERO_IMPL_DIR:$FASTWAM_ROOT:$FASTWAM_ROOT/experiments/libero:$PROJECT_DIR/src${PYTHONPATH:+:$PYTHONPATH}"
 
 command=(
   "$PYTHON" "$PROJECT_DIR/scripts/run_fastwam_persistent_benchmark.py"
