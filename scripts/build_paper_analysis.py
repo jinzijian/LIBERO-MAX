@@ -17,6 +17,11 @@ def _percent(value: float, signed: bool = False) -> str:
     return pattern % (100.0 * value)
 
 
+def _points(value: float, signed: bool = True) -> str:
+    pattern = "%+.1f points" if signed else "%.1f points"
+    return pattern % (100.0 * value)
+
+
 def _interval(value: List[float], signed: bool = True) -> str:
     if signed:
         return "[%+.1f, %+.1f] points" % (100.0 * value[0], 100.0 * value[1])
@@ -38,7 +43,7 @@ def _main_result_lines(rows: List[Dict[str, Any]]) -> List[str]:
                 control_ci=_interval(row["control_accuracy_95ci"], signed=False),
                 change=_percent(row["intervention_accuracy"]),
                 change_ci=_interval(row["intervention_accuracy_95ci"], signed=False),
-                delta=_percent(row["paired_delta"], signed=True),
+                delta=_points(row["paired_delta"]),
                 delta_ci=_interval(row["paired_delta_95ci_full"]),
                 trigger=_percent(row["trigger_coverage"]),
                 response=_percent(row["response_coverage"]),
@@ -62,18 +67,17 @@ def _track_lines(rows: List[Dict[str, Any]]) -> List[str]:
         pro = by_name[pro_name]
         lines.append(
             "- **%s:** PRO-Hard changed success is %s versus %s on Base "
-            "(%s points, descriptive); the paired robustness delta is %s on "
+            "(%s, descriptive); the paired robustness delta is %s on "
             "PRO-Hard versus %s on Base."
             % (
                 label,
                 _percent(pro["intervention_accuracy"]),
                 _percent(base["intervention_accuracy"]),
-                _percent(
+                _points(
                     pro["intervention_accuracy"] - base["intervention_accuracy"],
-                    signed=True,
                 ),
-                _percent(pro["paired_delta"], signed=True),
-                _percent(base["paired_delta"], signed=True),
+                _points(pro["paired_delta"]),
+                _points(base["paired_delta"]),
             )
         )
     return lines
@@ -100,7 +104,7 @@ def _event_lines(table: Dict[str, Any]) -> List[str]:
                 hardest["change_type"],
                 _percent(hardest["intervention_accuracy"]),
                 largest_gap["change_type"],
-                _percent(largest_gap["paired_delta"], signed=True),
+                _points(largest_gap["paired_delta"]),
             )
         )
     return lines
@@ -125,7 +129,7 @@ def _draw_lines(table: Dict[str, Any]) -> List[str]:
             "- **%s:** the largest absolute changed-success difference between "
             "the two frozen draws is %s for `%s`; this is a descriptive "
             "randomization-sensitivity diagnostic, not a significance test."
-            % (model, _percent(spread), change_type)
+            % (model, _points(spread, signed=False), change_type)
         )
     return lines
 
@@ -159,7 +163,7 @@ def _comparison_lines(table: Dict[str, Any]) -> List[str]:
                 % (
                     row["left"],
                     row["right"],
-                    _percent(row["right_minus_left"], signed=True),
+                    _points(row["right_minus_left"]),
                     _interval(row["right_minus_left_95ci"]),
                     row["mcnemar_p_holm"],
                 )
