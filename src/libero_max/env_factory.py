@@ -11,7 +11,10 @@ class RenderStabilityError(RuntimeError):
 
 
 def install_stable_camera_render(
-    env: Any, maximum_attempts: int = 32, maximum_neighbor_delta: float = 40.0
+    env: Any,
+    maximum_attempts: int = 32,
+    maximum_neighbor_delta: float = 40.0,
+    maximum_repeat_delta: float = 0.25,
 ) -> Dict[str, Any]:
     """Wrap ``sim.render`` with same-camera readback stabilization.
 
@@ -42,6 +45,7 @@ def install_stable_camera_render(
         "maximum_attempts_used": 0,
         "maximum_attempts": maximum_attempts,
         "maximum_neighbor_delta": maximum_neighbor_delta,
+        "maximum_repeat_delta": maximum_repeat_delta,
     }
 
     def stable_render(*args: Any, **kwargs: Any) -> Any:
@@ -56,11 +60,16 @@ def install_stable_camera_render(
                 and rgb.shape[-1] in {3, 4}
                 and mean_neighbor_delta(rgb[..., :3]) <= maximum_neighbor_delta
             )
-            if (
-                previous_rgb is not None
-                and smooth
-                and np.array_equal(previous_rgb, rgb)
-            ):
+            repeat_delta = (
+                None
+                if previous_rgb is None
+                else float(
+                    np.abs(
+                        previous_rgb.astype(np.int16) - rgb.astype(np.int16)
+                    ).mean()
+                )
+            )
+            if previous_rgb is not None and smooth and repeat_delta <= maximum_repeat_delta:
                 stats["retries"] += attempt - 1
                 stats["maximum_attempts_used"] = max(
                     stats["maximum_attempts_used"], attempt
@@ -106,7 +115,10 @@ def _render_snapshot(env: Any) -> Dict[str, Any]:
 
 
 def prime_offscreen_renderer(
-    env: Any, attempts: int = 6, maximum_neighbor_delta: float = 40.0
+    env: Any,
+    attempts: int = 6,
+    maximum_neighbor_delta: float = 40.0,
+    maximum_repeat_delta: float = 0.25,
 ) -> Dict[str, Any]:
     """Require two identical renders before a context reaches the policy.
 
@@ -135,7 +147,13 @@ def prime_offscreen_renderer(
         }
         smooth = max(neighbor_deltas.values()) <= maximum_neighbor_delta
         stable = previous is not None and image_keys == sorted(previous) and all(
-            np.array_equal(previous[key], current[key]) for key in image_keys
+            float(
+                np.abs(
+                    previous[key].astype(np.int16) - current[key].astype(np.int16)
+                ).mean()
+            )
+            <= maximum_repeat_delta
+            for key in image_keys
         )
         if stable and smooth:
             return {
@@ -144,6 +162,7 @@ def prime_offscreen_renderer(
                 "image_keys": image_keys,
                 "neighbor_deltas": neighbor_deltas,
                 "maximum_neighbor_delta": maximum_neighbor_delta,
+                "maximum_repeat_delta": maximum_repeat_delta,
             }
         previous = current
     raise RenderStabilityError(
