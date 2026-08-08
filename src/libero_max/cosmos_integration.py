@@ -150,6 +150,14 @@ class CosmosInterventionEnv:
                     or attempt == self.reset_attempts
                 ):
                     raise
+                # LIBERO's placement initializer can restart from the same
+                # exhausted random stream. Vary only the disposable reset
+                # sampler; the frozen state and policy seed are restored as
+                # soon as reset succeeds.
+                if self.policy_seed is not None and hasattr(self._env, "seed"):
+                    self._env.seed(self.policy_seed + attempt)
+        if self.policy_seed is not None and hasattr(self._env, "seed"):
+            self._env.seed(self.policy_seed)
         self.episode_index += 1
         self.total_env_steps = 0
         self.init_state_sha256 = None

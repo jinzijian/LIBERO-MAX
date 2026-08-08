@@ -143,6 +143,16 @@ def _slug(value: str) -> str:
     return re.sub(r"[^a-z0-9]+", "-", value.lower()).strip("-")
 
 
+def _short_category(value: str) -> str:
+    normalized = value.removeprefix("LIBERO-PRO/").replace("_", " ")
+    aliases = {
+        "initial pose position angle": "initial pose",
+        "camera view angle": "camera view",
+        "visual noise glare": "noise and glare",
+    }
+    return "PRO: " + aliases.get(normalized, normalized)
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("manifest", type=Path)
@@ -177,8 +187,11 @@ def main() -> None:
         change_type = case["scenario"]["change_type"]
         label = CHANGE_LABELS.get(change_type, change_type)
         category = case.get("substrate_category", "Base")
-        before = _captioned(rendered["before"], "Before", "%s | %s" % (category, label))
-        after = _captioned(rendered["after"], "After", "%s | %s" % (category, label))
+        category_label = _short_category(category)
+        before = _captioned(
+            rendered["before"], "Before · %s" % label, category_label
+        )
+        after = _captioned(rendered["after"], "After · %s" % label, category_label)
         slug = _slug(change_type)
         gif_path = args.output_dir / (slug + ".gif")
         before.save(
