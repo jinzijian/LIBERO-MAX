@@ -4,6 +4,8 @@ import tempfile
 import unittest
 from pathlib import Path
 
+from scripts.package_paper_results import REQUIRED_MEDIA
+
 
 ROOT = Path(__file__).parents[1]
 SCRIPT = ROOT / "scripts" / "package_paper_results.py"
@@ -38,6 +40,8 @@ class PackagePaperResultsTest(unittest.TestCase):
             (review / "human_review_queue.csv").write_text("case_id\n")
             (figure / "overall_success.png").write_bytes(b"PNG")
             (appendix / "MAX8000_RESULTS.md").write_text("appendix")
+            for name in REQUIRED_MEDIA:
+                (media_source / name).write_bytes(b"validated-media")
             (media_source / "preview.gif").write_bytes(b"GIF89a")
             (media_source / "preview.trace.jsonl").write_text("large trace\n")
 
@@ -62,6 +66,8 @@ class PackagePaperResultsTest(unittest.TestCase):
             self.assertTrue((output / "tables/main/main_results.tex").exists())
             self.assertTrue((output / "paper/MAX8000_RESULTS.md").exists())
             self.assertTrue((media / "preview.gif").exists())
+            self.assertTrue((media / "SHA256SUMS").exists())
+            self.assertIn("preview.gif", (media / "SHA256SUMS").read_text())
             self.assertFalse((media / "preview.trace.jsonl").exists())
 
     def test_refuses_complete_bundle_with_missing_run_provenance(self):

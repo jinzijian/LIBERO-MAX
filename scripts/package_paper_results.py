@@ -9,6 +9,30 @@ from pathlib import Path
 from typing import Iterable
 
 
+REQUIRED_MEDIA = {
+    "camera-shift-after.png",
+    "camera-shift.gif",
+    "cosmos-rollout-replay.gif",
+    "cosmos-rollout-replay.json",
+    "distractor-burst-after.png",
+    "distractor-burst.gif",
+    "illumination-switch-after.png",
+    "illumination-switch.gif",
+    "intervention-overview.png",
+    "media_manifest.json",
+    "obstacle-insertion-after.png",
+    "obstacle-insertion.gif",
+    "receptacle-relocation-after.png",
+    "receptacle-relocation.gif",
+    "sensor-noise-onset-after.png",
+    "sensor-noise-onset.gif",
+    "target-relocation-after.png",
+    "target-relocation.gif",
+    "visual-theme-switch-after.png",
+    "visual-theme-switch.gif",
+}
+
+
 def _copy(source: Path, destination: Path) -> None:
     if not source.is_file():
         return
@@ -82,9 +106,27 @@ def main() -> None:
             _copy_required(run_root / name, args.output_dir / relative / name)
 
     if args.media_output_dir:
-        for source in sorted((args.paper_root / "media").glob("*")):
+        media_source_dir = args.paper_root / "media"
+        missing_media = sorted(
+            name for name in REQUIRED_MEDIA if not (media_source_dir / name).is_file()
+        )
+        if missing_media:
+            raise FileNotFoundError(
+                "required paper media are missing: %s" % ", ".join(missing_media)
+            )
+        args.media_output_dir.mkdir(parents=True, exist_ok=True)
+        media_release_files = []
+        for source in sorted(media_source_dir.glob("*")):
             if source.suffix in {".gif", ".json", ".png"}:
-                _copy(source, args.media_output_dir / source.name)
+                destination = args.media_output_dir / source.name
+                _copy(source, destination)
+                media_release_files.append(destination)
+        (args.media_output_dir / "SHA256SUMS").write_text(
+            "".join(
+                "%s  %s\n" % (_sha256(path), path.name) for path in media_release_files
+            ),
+            encoding="utf-8",
+        )
 
     release_files = [
         path
@@ -105,6 +147,9 @@ def main() -> None:
                 "release_files": len(release_files),
                 "media_output_dir": (
                     str(args.media_output_dir) if args.media_output_dir else None
+                ),
+                "media_release_files": (
+                    len(media_release_files) if args.media_output_dir else 0
                 ),
             },
             indent=2,
