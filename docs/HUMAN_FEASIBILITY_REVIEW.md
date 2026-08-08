@@ -33,5 +33,7 @@ whether the simulator remained valid, and whether the original goal completed.
 
 The generated CSV contains blank attempt, success, label, reviewer, and notes
 columns for the review team. A successful model control is retained as
-counterevidence when prioritizing cases, while a successful human intervention
-rollout is the direct positive feasibility check.
+counterevidence to base-task infeasibility; a successful model intervention is
+stronger counterevidence because it completes the exact changed episode.
+Neither replaces the direct positive check from a successful human
+intervention rollout.
