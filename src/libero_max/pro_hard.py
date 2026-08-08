@@ -300,6 +300,142 @@ def rejected_configurations_from_reports(
     return rejected
 
 
+def _case_candidate_key(case: Dict[str, Any]) -> Tuple[str, str, int, int, str, int]:
+    return (
+        case["substrate_variant"]["category"],
+        case["task_suite_name"],
+        case["task_index"],
+        case["init_state_index"],
+        case["scenario"]["change_type"],
+        case["scenario"]["randomization"]["draw_id"],
+    )
+
+
+def repair_pro_hard_manifest(
+    catalog: Dict[str, Any],
+    manifest: Dict[str, Any],
+    failed_case_ids: Iterable[str],
+    rejected_configurations: Iterable[Tuple[str, str, int, int, str, int]],
+) -> Dict[str, Any]:
+    """Replace failed cases in-cell while preserving every passing case ID."""
+
+    failed = set(failed_case_ids)
+    current_ids = {case["case_id"] for case in manifest.get("cases", [])}
+    unknown = failed - current_ids
+    if unknown:
+        raise HardBuildError(
+            "repair failures are outside the current manifest: %s"
+            % ", ".join(sorted(unknown)[:10])
+        )
+    tasks = catalog.get("tasks")
+    if not isinstance(tasks, list):
+        raise HardBuildError("PRO catalog tasks must be an array")
+    tasks_by_category = defaultdict(list)
+    for task in tasks:
+        tasks_by_category[task["pro_category"]].append(task)
+
+    retained = [case for case in manifest["cases"] if case["case_id"] not in failed]
+    rejected = set(rejected_configurations)
+    rejected.update(
+        _case_candidate_key(case)
+        for case in manifest["cases"]
+        if case["case_id"] in failed
+    )
+    used_execution_keys = {_case_candidate_key(case) for case in retained}
+    usage: Counter = Counter(
+        (
+            case["substrate_variant"]["category"],
+            case["task_suite_name"],
+            case["task_index"],
+        )
+        for case in retained
+    )
+    by_cell = Counter(
+        (
+            case["substrate_variant"]["category"],
+            case["scenario"]["change_type"],
+            case["scenario"]["randomization"]["draw_id"],
+        )
+        for case in retained
+    )
+    additions = []
+    for category in PRO_CATEGORIES:
+        for event in CHANGE_TYPE_ORDER:
+            for draw_id in (0, 1):
+                cell = (category, event, draw_id)
+                needed = PRO_CASES_PER_CELL - by_cell[cell]
+                if needed < 0:
+                    raise HardBuildError("repair cell contains more than 15 cases")
+                selected_keys = set()
+                for _ in range(needed):
+                    ranked = []
+                    for task in tasks_by_category[category]:
+                        if event not in eligible_change_types(task):
+                            continue
+                        task_key = _pro_task_key(task)
+                        for init_state_index in range(PRO_INIT_STATE_POOL):
+                            execution_key = _candidate_key(
+                                task, init_state_index, event, draw_id
+                            )
+                            if (
+                                execution_key in rejected
+                                or execution_key in used_execution_keys
+                                or execution_key in selected_keys
+                            ):
+                                continue
+                            ranked.append(
+                                (
+                                    usage[task_key],
+                                    _stable_seed(
+                                        (
+                                            PRO_SAMPLER_VERSION,
+                                            "repair",
+                                            category,
+                                            event,
+                                            draw_id,
+                                            *task_key,
+                                            init_state_index,
+                                        )
+                                    ),
+                                    task,
+                                    init_state_index,
+                                    execution_key,
+                                )
+                            )
+                    if not ranked:
+                        raise HardBuildError(
+                            "%s/%s/d%d cannot repair its failed cases"
+                            % (category, event, draw_id)
+                        )
+                    _, _, task, init_state_index, execution_key = min(
+                        ranked, key=lambda row: row[:2]
+                    )
+                    additions.append(
+                        _build_pro_case(task, init_state_index, event, draw_id)
+                    )
+                    selected_keys.add(execution_key)
+                    used_execution_keys.add(execution_key)
+                    usage[_pro_task_key(task)] += 1
+    repaired = dict(manifest)
+    repaired["cases"] = sorted(retained + additions, key=lambda case: case["case_id"])
+    errors = validate_manifest(repaired)
+    if errors:
+        raise HardBuildError("repaired PRO manifest is invalid: %s" % "; ".join(errors))
+    counts = Counter(
+        (
+            case["substrate_variant"]["category"],
+            case["scenario"]["change_type"],
+            case["scenario"]["randomization"]["draw_id"],
+        )
+        for case in repaired["cases"]
+    )
+    if len(repaired["cases"]) != PRO_HARD_PAIRS or set(counts.values()) != {
+        PRO_CASES_PER_CELL
+    }:
+        raise HardBuildError("repaired PRO manifest changed its frozen cell quotas")
+    return repaired
+
+
 def combine_max8000_manifests(
     base_manifest: Dict[str, Any], pro_manifest: Dict[str, Any]
 ) -> Dict[str, Any]:

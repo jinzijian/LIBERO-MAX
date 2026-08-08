@@ -8,6 +8,7 @@ from libero_max.pro_hard import (
     build_pro_hard_manifest,
     pro_hard_summary,
     rejected_configurations_from_reports,
+    repair_pro_hard_manifest,
 )
 from libero_max.release import audit_pro_hard_release
 
@@ -192,6 +193,42 @@ class ProHardManifestTest(unittest.TestCase):
         self.assertNotIn(first_failed["case_id"], final_ids)
         self.assertNotIn(second_failed_id, final_ids)
         self.assertEqual(len(both), 2)
+
+    def test_repair_preserves_every_passing_case_and_cell_quota(self):
+        failed = {case["case_id"] for case in self.manifest["cases"][:7]}
+        rejected = {
+            (
+                case["substrate_variant"]["category"],
+                case["task_suite_name"],
+                case["task_index"],
+                case["init_state_index"],
+                case["scenario"]["change_type"],
+                case["scenario"]["randomization"]["draw_id"],
+            )
+            for case in self.manifest["cases"]
+            if case["case_id"] in failed
+        }
+        repaired = repair_pro_hard_manifest(
+            _catalog(), self.manifest, failed, rejected
+        )
+        old_passing = {
+            case["case_id"]
+            for case in self.manifest["cases"]
+            if case["case_id"] not in failed
+        }
+        repaired_ids = {case["case_id"] for case in repaired["cases"]}
+        self.assertTrue(old_passing.issubset(repaired_ids))
+        self.assertFalse(failed & repaired_ids)
+        self.assertEqual(len(repaired_ids), 2400)
+        counts = Counter(
+            (
+                case["substrate_variant"]["category"],
+                case["scenario"]["change_type"],
+                case["scenario"]["randomization"]["draw_id"],
+            )
+            for case in repaired["cases"]
+        )
+        self.assertEqual(set(counts.values()), {15})
 
 
 if __name__ == "__main__":
