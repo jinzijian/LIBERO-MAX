@@ -7,6 +7,7 @@ from libero_max.pro_hard import (
     PRO_HARD_PAIRS,
     build_pro_hard_manifest,
     pro_hard_summary,
+    rejected_configurations_from_reports,
 )
 from libero_max.release import audit_pro_hard_release
 
@@ -164,6 +165,33 @@ class ProHardManifestTest(unittest.TestCase):
                 )
             )
         )
+
+    def test_chronological_reports_can_reject_a_replacement_case(self):
+        original = self.manifest
+        first_failed = original["cases"][0]
+        first_report = {
+            "cases": [{"case_id": first_failed["case_id"], "passed": False}]
+        }
+        first_rejections = rejected_configurations_from_reports(
+            _catalog(), [first_report]
+        )
+        repaired = build_pro_hard_manifest(_catalog(), first_rejections)
+        replacement_ids = {
+            case["case_id"] for case in repaired["cases"]
+        } - {case["case_id"] for case in original["cases"]}
+        self.assertTrue(replacement_ids)
+        second_failed_id = sorted(replacement_ids)[0]
+        second_report = {
+            "cases": [{"case_id": second_failed_id, "passed": False}]
+        }
+        both = rejected_configurations_from_reports(
+            _catalog(), [first_report, second_report]
+        )
+        final = build_pro_hard_manifest(_catalog(), both)
+        final_ids = {case["case_id"] for case in final["cases"]}
+        self.assertNotIn(first_failed["case_id"], final_ids)
+        self.assertNotIn(second_failed_id, final_ids)
+        self.assertEqual(len(both), 2)
 
 
 if __name__ == "__main__":

@@ -9,6 +9,7 @@ from libero_max.pro_hard import (
     build_pro_hard_manifest,
     combine_max8000_manifests,
     pro_hard_summary,
+    rejected_configurations_from_reports,
 )
 
 
@@ -30,26 +31,11 @@ def main() -> int:
     args = parser.parse_args()
     base = json.loads(args.base_manifest.read_text(encoding="utf-8"))
     catalog = json.loads(args.pro_catalog.read_text(encoding="utf-8"))
-    rejected = set()
-    for path in args.reject_preflight:
-        report = json.loads(path.read_text(encoding="utf-8"))
-        cases_by_id = {
-            case["case_id"]: case for case in build_pro_hard_manifest(catalog)["cases"]
-        }
-        for row in report.get("cases", []):
-            if row.get("passed") or row.get("case_id") not in cases_by_id:
-                continue
-            case = cases_by_id[row["case_id"]]
-            rejected.add(
-                (
-                    case["substrate_variant"]["category"],
-                    case["task_suite_name"],
-                    case["task_index"],
-                    case["init_state_index"],
-                    case["scenario"]["change_type"],
-                    case["scenario"]["randomization"]["draw_id"],
-                )
-            )
+    reports = [
+        json.loads(path.read_text(encoding="utf-8"))
+        for path in args.reject_preflight
+    ]
+    rejected = rejected_configurations_from_reports(catalog, reports)
     pro = build_pro_hard_manifest(catalog, rejected)
     combined = combine_max8000_manifests(base, pro)
     summary = {

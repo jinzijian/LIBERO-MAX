@@ -260,6 +260,46 @@ def build_pro_hard_manifest(
     return manifest
 
 
+def rejected_configurations_from_reports(
+    catalog: Dict[str, Any], reports: Iterable[Dict[str, Any]]
+) -> Set[Tuple[str, str, int, int, str, int]]:
+    """Resolve chronological preflight failures, including replacement cases.
+
+    Each report applies to the manifest produced after all earlier reports.
+    Rebuilding at every round is necessary because a failed replacement case
+    does not exist in the original unfiltered manifest.
+    """
+
+    rejected: Set[Tuple[str, str, int, int, str, int]] = set()
+    for report in reports:
+        current = build_pro_hard_manifest(catalog, rejected)
+        cases_by_id = {case["case_id"]: case for case in current["cases"]}
+        unknown = []
+        for row in report.get("cases", []):
+            if row.get("passed"):
+                continue
+            case = cases_by_id.get(row.get("case_id"))
+            if case is None:
+                unknown.append(str(row.get("case_id")))
+                continue
+            rejected.add(
+                (
+                    case["substrate_variant"]["category"],
+                    case["task_suite_name"],
+                    case["task_index"],
+                    case["init_state_index"],
+                    case["scenario"]["change_type"],
+                    case["scenario"]["randomization"]["draw_id"],
+                )
+            )
+        if unknown:
+            raise HardBuildError(
+                "preflight contains failed cases outside its chronological manifest: %s"
+                % ", ".join(sorted(unknown)[:10])
+            )
+    return rejected
+
+
 def combine_max8000_manifests(
     base_manifest: Dict[str, Any], pro_manifest: Dict[str, Any]
 ) -> Dict[str, Any]:
