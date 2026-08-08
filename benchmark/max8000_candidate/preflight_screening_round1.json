@@ -1,0 +1,41 @@
+{
+  "status": "screening_complete_not_release_preflight",
+  "manifest_pairs": 2400,
+  "passed": 2156,
+  "rejected": 244,
+  "rejected_fraction": 0.10166666666666667,
+  "replacement_case_ids": 283,
+  "failed_case_ids_retained": 0,
+  "cell_count_after_replacement": 160,
+  "pairs_per_cell_after_replacement": 15,
+  "failures_by_category": {
+    "camera_view_angle": 21,
+    "initial_pose_position_angle": 20,
+    "object": 21,
+    "object_shape": 23,
+    "object_texture": 19,
+    "position": 17,
+    "semantic": 28,
+    "task": 22,
+    "view_occlusion": 50,
+    "visual_noise_glare": 23
+  },
+  "failures_by_change": {
+    "camera_shift": 4,
+    "distractor_burst": 34,
+    "obstacle_insertion": 105,
+    "receptacle_relocation": 23,
+    "target_relocation": 75,
+    "visual_theme_switch": 3
+  },
+  "validation_errors": {
+    "post-intervention physics validation failed": 231,
+    "post-intervention image failed visibility thresholds": 10,
+    "intervention produced zero pixel change": 10
+  },
+  "notes": [
+    "Error counts overlap when one case violates more than one gate.",
+    "The deterministic sampler changed 283 case ids because usage rebalancing can cascade after 244 explicit rejections.",
+    "Round 2 is the first release-eligible run because it records the compact PRO substrate audit and validates both pre- and post-event visibility."
+  ]
+}

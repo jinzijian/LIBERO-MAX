@@ -16,7 +16,7 @@
   ],
   "pro_categories": 10,
   "pro_hard_pairs": 2400,
-  "rejected_candidate_configurations": 0,
+  "rejected_candidate_configurations": 244,
   "release_gate": "real-MuJoCo preflight required before freeze",
   "rollouts_per_model": 4800,
   "source_revision": "c86fc3b8293185a6f373677018ff3e37f8391602",

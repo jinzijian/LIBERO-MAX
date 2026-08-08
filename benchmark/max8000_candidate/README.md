@@ -7,6 +7,8 @@ This directory contains a deterministic candidate, not a frozen release.
 - `libero_max_pro_hard_2400.json`: balanced PRO-Hard paired manifest;
 - `libero_max_8000.json`: exact Base-5600 + PRO-Hard-2400 union;
 - `release_summary.json`: candidate counts and outstanding release gate.
+- `preflight_screening_round1.json`: first real-MuJoCo rejection matrix and
+  deterministic replacement accounting;
 - `SHA256SUMS`: checksums for the deterministic candidate artifacts.
 
 The candidate is promoted to `benchmark/max8000/` only after all 2,400

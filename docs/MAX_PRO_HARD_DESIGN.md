@@ -2,6 +2,12 @@
 
 Status: candidate pending complete real-MuJoCo preflight
 
+Screening round 1 executed all 2,400 configurations: 2,156 passed and 244
+were rejected by feasibility gates. Deterministic rebuilding removed every
+failed case while preserving all 160 cells at 15 pairs. Because balancing
+usage can cascade, 283 case IDs changed in total. Round 2 reruns the complete
+candidate with the compact substrate audit and pre/post visibility checks.
+
 ## Scientific role
 
 LIBERO-PRO tests generalization when a perturbed world is presented before the
