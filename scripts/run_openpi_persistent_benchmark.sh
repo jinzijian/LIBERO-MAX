@@ -39,6 +39,36 @@ mkdir -p "$2"
 OUTPUT_ROOT="$(realpath "$2")"
 export PYTHONPATH="$PROJECT_DIR/src${PYTHONPATH:+:$PYTHONPATH}"
 
+"$CLIENT_PYTHON" - <<'PY'
+import mujoco
+
+if mujoco.__version__ != "3.2.6":
+    raise SystemExit("OpenPI simulator client requires mujoco==3.2.6")
+if not hasattr(mujoco.MjModel, "mesh_scale"):
+    raise SystemExit("OpenPI simulator client requires MjModel.mesh_scale")
+PY
+
+CLIENT_RUNTIME_JSON="$("$CLIENT_PYTHON" - <<'PY'
+import importlib.metadata
+import json
+import sys
+
+def version(package):
+    try:
+        return importlib.metadata.version(package)
+    except importlib.metadata.PackageNotFoundError:
+        return None
+
+print(json.dumps({
+    "python": sys.executable,
+    "runtime_versions": {
+        package: version(package)
+        for package in ("numpy", "torch", "mujoco", "robosuite")
+    },
+}, sort_keys=True))
+PY
+)"
+
 IFS=',' read -r -a gpu_ids <<< "$GPUS_CSV"
 if (( ${#gpu_ids[@]} == 0 )); then
   echo "GPUS must contain at least one physical GPU id" >&2
@@ -56,7 +86,7 @@ output.write_text(json.dumps(manifest, indent=2, sort_keys=True) + "\n", encodin
 PY
 PYTHONPATH="$OPENPI_SITE_PACKAGES:$OPENPI_DIR/src:$OPENPI_DIR/packages/openpi-client/src${PYTHONPATH:+:$PYTHONPATH}" \
   "$OPENPI_PYTHON" - "$OPENPI_DIR" "$CHECKPOINT" "$OUTPUT_ROOT/run_config.json" \
-  "$GPUS_CSV" "$QUERY_INTERVAL" "$PORT_BASE" <<'PY'
+  "$GPUS_CSV" "$QUERY_INTERVAL" "$PORT_BASE" "$CLIENT_RUNTIME_JSON" <<'PY'
 import importlib.metadata
 import json
 import pathlib
@@ -99,6 +129,7 @@ payload = {
         package: version(package)
         for package in ("openpi-client", "jax", "numpy", "torch", "mujoco")
     },
+    "simulator_client": json.loads(sys.argv[7]),
 }
 output.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8")
 PY
