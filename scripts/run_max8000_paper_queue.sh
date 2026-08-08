@@ -314,13 +314,21 @@ finalize_with_repairs \
   "$FINAL_ROOT/work/lingbot-comparison-800-raw" \
   "$FINAL_ROOT/runs/model_comparison/lingbot" launch_lingbot
 
-mkdir -p "$FINAL_ROOT/tables/main" "$FINAL_ROOT/tables/model_comparison" \
-  "$FINAL_ROOT/tables/intent" "$FINAL_ROOT/human_review"
+mkdir -p "$FINAL_ROOT/tables/main" "$FINAL_ROOT/tables/tracks" \
+  "$FINAL_ROOT/tables/model_comparison" "$FINAL_ROOT/tables/intent" \
+  "$FINAL_ROOT/tables/ablation" "$FINAL_ROOT/human_review"
 "$PYTHON" scripts/build_paper_tables.py \
   --run "Cosmos-Policy-q16=$FINAL_ROOT/runs/cosmos_max8000" \
   --run "pi0.5-LIBERO-q5=$FINAL_ROOT/runs/pi05_max8000_q5" \
   --output-dir "$FINAL_ROOT/tables/main" \
   >"$FINAL_ROOT/logs/build-main-tables.log"
+"$PYTHON" scripts/build_paper_tables.py \
+  --run "Cosmos-Base-q16=$FINAL_ROOT/runs/cosmos_base_5600" \
+  --run "Cosmos-PRO-q16=$FINAL_ROOT/runs/cosmos_pro_2400" \
+  --run "pi0.5-Base-q5=$FINAL_ROOT/runs/pi05_base_5600_q5" \
+  --run "pi0.5-PRO-q5=$FINAL_ROOT/runs/pi05_pro_2400_q5" \
+  --output-dir "$FINAL_ROOT/tables/tracks" \
+  >"$FINAL_ROOT/logs/build-track-tables.log"
 "$PYTHON" scripts/build_paper_tables.py \
   --run "Cosmos-Policy=$FINAL_ROOT/runs/model_comparison/cosmos" \
   --run "pi0.5-LIBERO=$FINAL_ROOT/runs/model_comparison/pi05" \
@@ -333,6 +341,12 @@ mkdir -p "$FINAL_ROOT/tables/main" "$FINAL_ROOT/tables/model_comparison" \
   --run "pi0.5-LIBERO-Intent=results/v1/runs/pi05_intent" \
   --output-dir "$FINAL_ROOT/tables/intent" \
   >"$FINAL_ROOT/logs/build-intent-tables.log"
+"$PYTHON" scripts/build_paper_tables.py \
+  --run "Cosmos-q16=results/v1/runs/cosmos2_q16_subset" \
+  --run "Cosmos-q5=results/v1/runs/cosmos2_q5_subset" \
+  --run "Cosmos-notified-q16=results/v1/runs/cosmos2_notified_q16" \
+  --output-dir "$FINAL_ROOT/tables/ablation" \
+  >"$FINAL_ROOT/logs/build-ablation-tables.log"
 
 "$PYTHON" scripts/build_human_review_queue.py "$COMBINED_MANIFEST" \
   --preflight "$BASE_PREFLIGHT" --preflight "$PRO_PREFLIGHT" \

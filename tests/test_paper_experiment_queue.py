@@ -12,6 +12,8 @@ class PaperExperimentQueueTest(unittest.TestCase):
         self.assertIn("build_infrastructure_repair_manifest.py", source)
         self.assertIn("trigger-unreached", source)
         self.assertIn("build_paper_tables.py", source)
+        self.assertIn("tables/ablation", source)
+        self.assertIn("tables/tracks", source)
         self.assertIn("build_human_review_queue.py", source)
         self.assertIn("render_benchmark_media.py", source)
         self.assertIn("render_rollout_replay.py", source)
