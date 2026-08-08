@@ -11,9 +11,9 @@ from libero_max.manifest import load_manifest
 
 
 def _scenario_sha256(scenario) -> str:
-    payload = json.dumps(
-        scenario, separators=(",", ":"), sort_keys=True
-    ).encode("utf-8")
+    payload = json.dumps(scenario, separators=(",", ":"), sort_keys=True).encode(
+        "utf-8"
+    )
     return hashlib.sha256(payload).hexdigest()
 
 
@@ -29,10 +29,21 @@ def _is_terminal_case(case_dir: Path, scenario) -> bool:
         return False
     if (case_dir / "paired_summary.json").exists():
         return True
-    return all(
-        (case_dir / arm / "trace.jsonl").exists()
-        for arm in ("control", "intervention")
-    )
+    for arm in ("control", "intervention"):
+        trace_path = case_dir / arm / "trace.jsonl"
+        if not trace_path.exists():
+            return False
+        try:
+            rows = [
+                json.loads(line)
+                for line in trace_path.read_text(encoding="utf-8").splitlines()
+                if line.strip()
+            ]
+        except (OSError, json.JSONDecodeError):
+            return False
+        if len(rows) != 1:
+            return False
+    return True
 
 
 def main() -> int:
@@ -54,11 +65,7 @@ def main() -> int:
         case_id = case["case_id"]
         sources = [root / "cases" / case_id for root in args.source_roots]
         source = next(
-            (
-                path
-                for path in sources
-                if _is_terminal_case(path, case["scenario"])
-            ),
+            (path for path in sources if _is_terminal_case(path, case["scenario"])),
             None,
         )
         if source is None:
@@ -74,7 +81,12 @@ def main() -> int:
             raise ValueError("refusing to replace non-symlink %s" % destination)
         os.symlink(source.resolve(), destination, target_is_directory=True)
         linked += 1
-    print(json.dumps({"planned": len(manifest["cases"]), "linked": linked, "missing": missing}, indent=2))
+    print(
+        json.dumps(
+            {"planned": len(manifest["cases"]), "linked": linked, "missing": missing},
+            indent=2,
+        )
+    )
     return 0 if not missing else 1
 
 
