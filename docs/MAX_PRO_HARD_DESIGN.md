@@ -1,12 +1,14 @@
 # MAX-PRO-Hard-2400 design
 
-Status: candidate pending complete real-MuJoCo preflight
+Status: physical preflight complete; runtime publication pending
 
 Screening round 1 executed all 2,400 configurations: 2,156 passed and 244
-were rejected by feasibility gates. Deterministic rebuilding removed every
-failed case while preserving all 160 cells at 15 pairs. Because balancing
-usage can cascade, 283 case IDs changed in total. Round 2 reruns the complete
-candidate with the compact substrate audit and pre/post visibility checks.
+were rejected by feasibility gates. After a complete audited second round,
+deterministic in-cell repair retained every passing case and replaced only
+failed configurations. The process converged after 30 rounds with 1,710
+rejected candidate configurations and a final **2,400/2,400** passing report.
+All 160 cells remain fixed at 15 pairs; no category, event, draw, or severity
+was removed to pass the gate.
 
 ## Scientific role
 
@@ -152,5 +154,7 @@ bash scripts/run_max_pro_preflight.sh \
   artifacts/max8000/pro_preflight
 ```
 
-Only after a complete passing report may
-`scripts/freeze_libero_max_8000.py` create `benchmark/max8000/`.
+The complete passing report is now stored at
+`benchmark/max8000_candidate/pro_physical_preflight.json`. The remaining
+version 3.0.0 freeze blocker is publication or vendoring of the pinned
+PRO-aware runtime.

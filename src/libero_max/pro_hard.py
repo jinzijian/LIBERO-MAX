@@ -358,6 +358,16 @@ def repair_pro_hard_manifest(
         )
         for case in retained
     )
+    passing_task_by_cell = Counter(
+        (
+            case["substrate_variant"]["category"],
+            case["scenario"]["change_type"],
+            case["scenario"]["randomization"]["draw_id"],
+            case["task_suite_name"],
+            case["task_index"],
+        )
+        for case in retained
+    )
     additions = []
     for category in PRO_CATEGORIES:
         for event in CHANGE_TYPE_ORDER:
@@ -385,6 +395,14 @@ def repair_pro_hard_manifest(
                                 continue
                             ranked.append(
                                 (
+                                    0
+                                    if passing_task_by_cell[
+                                        (*cell, task["task_suite_name"], task["task_index"])
+                                    ]
+                                    else 1,
+                                    passing_task_by_cell[
+                                        (*cell, task["task_suite_name"], task["task_index"])
+                                    ],
                                     usage[task_key],
                                     _stable_seed(
                                         (
@@ -407,8 +425,8 @@ def repair_pro_hard_manifest(
                             "%s/%s/d%d cannot repair its failed cases"
                             % (category, event, draw_id)
                         )
-                    _, _, task, init_state_index, execution_key = min(
-                        ranked, key=lambda row: row[:2]
+                    _, _, _, _, task, init_state_index, execution_key = min(
+                        ranked, key=lambda row: row[:4]
                     )
                     additions.append(
                         _build_pro_case(task, init_state_index, event, draw_id)
@@ -416,6 +434,9 @@ def repair_pro_hard_manifest(
                     selected_keys.add(execution_key)
                     used_execution_keys.add(execution_key)
                     usage[_pro_task_key(task)] += 1
+                    passing_task_by_cell[
+                        (*cell, task["task_suite_name"], task["task_index"])
+                    ] += 1
     repaired = dict(manifest)
     repaired["cases"] = sorted(retained + additions, key=lambda case: case["case_id"])
     errors = validate_manifest(repaired)

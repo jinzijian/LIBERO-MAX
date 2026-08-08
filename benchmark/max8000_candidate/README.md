@@ -9,9 +9,12 @@ This directory contains a deterministic candidate, not a frozen release.
 - `release_summary.json`: candidate counts and outstanding release gate.
 - `preflight_screening_round1.json`: first real-MuJoCo rejection matrix and
   deterministic replacement accounting;
+- `pro_rejection_ledger.json`: all 1,710 infeasible candidate configurations;
+- `pro_physical_preflight.json`: complete 2,400/2,400 real-MuJoCo report with
+  per-case PRO component audits and pre/post visibility checks;
 - `SHA256SUMS`: checksums for the deterministic candidate artifacts.
 
-The candidate is promoted to `benchmark/max8000/` only after all 2,400
-PRO-Hard configurations pass real-MuJoCo preflight and the version 3.0.0 freeze
-audit succeeds. The PRO-aware config runtime must also be published or vendored
-before release. See `docs/MAX_PRO_HARD_DESIGN.md`.
+All 2,400 PRO-Hard configurations now pass real-MuJoCo preflight. The candidate
+is promoted to `benchmark/max8000/` only after the PRO-aware config runtime is
+published or vendored and the version 3.0.0 freeze audit succeeds. See
+`docs/MAX_PRO_HARD_DESIGN.md`.

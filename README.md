@@ -153,9 +153,11 @@ is deferred because complete BDDL/init artifacts are absent from the pinned
 revision.
 
 The generated candidate lives in
-[`benchmark/max8000_candidate`](benchmark/max8000_candidate). It must not be
-called a released benchmark until all 2,400 PRO-Hard configurations pass the
-real-MuJoCo preflight and the freeze audit. See
+[`benchmark/max8000_candidate`](benchmark/max8000_candidate). Its real-MuJoCo
+preflight now passes **2,400/2,400** configurations while preserving every
+balanced cell and strong draw. It must not be called a released benchmark
+until the pinned PRO-aware runtime is published or vendored and the freeze
+audit succeeds. See
 [`docs/MAX_PRO_HARD_DESIGN.md`](docs/MAX_PRO_HARD_DESIGN.md).
 
 ## Released MAX-Base-5600 on LIBERO-Plus
