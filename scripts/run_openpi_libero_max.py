@@ -11,6 +11,13 @@ from pathlib import Path
 
 import numpy as np
 
+# LIBERO-Plus's fog augmentation still names the NumPy 1.x scalar alias.
+# The pi0.5 simulator client intentionally runs beside a NumPy 2.x Cosmos
+# environment, so provide the removed compatibility name before LIBERO is
+# imported instead of downgrading the model server runtime.
+if not hasattr(np, "float_"):
+    np.float_ = np.float64
+
 from libero_max.cosmos_integration import CosmosInterventionEnv
 from libero_max.env_factory import create_libero_env_with_retry
 from libero_max.scenario import load_scenarios, validate_scenario_collection

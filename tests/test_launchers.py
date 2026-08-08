@@ -47,6 +47,17 @@ class CosmosLauncherTest(unittest.TestCase):
             preflight.index("from libero.libero"),
         )
 
+    def test_openpi_client_restores_libero_plus_numpy_alias(self) -> None:
+        runner = (ROOT / "scripts/run_openpi_libero_max.py").read_text(
+            encoding="utf-8"
+        )
+        compatibility = 'if not hasattr(np, "float_")'
+        self.assertIn(compatibility, runner)
+        self.assertLess(
+            runner.index(compatibility),
+            runner.index("from libero_max.cosmos_integration"),
+        )
+
     def test_persistent_runner_disables_upstream_rollout_videos(self) -> None:
         runner = (ROOT / "scripts/run_cosmos_persistent_shard.py").read_text(
             encoding="utf-8"
