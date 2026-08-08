@@ -2,6 +2,7 @@
 """Launch one persistent FastWAM shard per GPU."""
 
 import argparse
+import importlib.metadata
 import json
 import os
 import subprocess
@@ -9,6 +10,22 @@ import sys
 from pathlib import Path
 
 from libero_max.manifest import load_manifest
+
+
+def _git_revision(root: Path) -> str:
+    return subprocess.check_output(
+        ["git", "-C", str(root), "rev-parse", "HEAD"], text=True
+    ).strip()
+
+
+def _versions(*packages: str) -> dict:
+    result = {}
+    for package in packages:
+        try:
+            result[package] = importlib.metadata.version(package)
+        except importlib.metadata.PackageNotFoundError:
+            result[package] = None
+    return result
 
 
 def main() -> int:
@@ -32,6 +49,7 @@ def main() -> int:
     )
     run_config = {
         "model": "FastWAM-LIBERO",
+        "source_revision": _git_revision(args.fastwam_root),
         "checkpoint": str(args.checkpoint.resolve()),
         "checkpoint_bytes": args.checkpoint.stat().st_size,
         "dataset_stats": str(args.dataset_stats.resolve()),
@@ -42,7 +60,18 @@ def main() -> int:
         "deterministic": True,
         "control_replay_before_event": True,
         "rollout_videos_disabled": True,
+        "runtime_versions": _versions(
+            "fastwam", "torch", "numpy", "numba", "transformers"
+        ),
+        "base_assets": os.environ.get("DIFFSYNTH_MODEL_BASE_PATH"),
     }
+    asset_lock = (
+        Path(os.environ.get("DIFFSYNTH_MODEL_BASE_PATH", "")) / "source_lock.json"
+    )
+    if asset_lock.is_file():
+        run_config["base_asset_source_lock"] = json.loads(
+            asset_lock.read_text(encoding="utf-8")
+        )
     (args.output_root / "run_config.json").write_text(
         json.dumps(run_config, indent=2, sort_keys=True) + "\n", encoding="utf-8"
     )

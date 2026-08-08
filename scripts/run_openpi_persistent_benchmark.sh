@@ -35,6 +35,52 @@ manifest = json.loads(source.read_text(encoding="utf-8"))
 manifest["protocol"]["query_interval"] = query_interval
 output.write_text(json.dumps(manifest, indent=2, sort_keys=True) + "\n", encoding="utf-8")
 PY
+"$OPENPI_PYTHON" - "$OPENPI_DIR" "$CHECKPOINT" "$OUTPUT_ROOT/run_config.json" \
+  "$GPUS_CSV" "$QUERY_INTERVAL" "$PORT_BASE" <<'PY'
+import importlib.metadata
+import json
+import pathlib
+import subprocess
+import sys
+
+root = pathlib.Path(sys.argv[1]).resolve()
+checkpoint = pathlib.Path(sys.argv[2]).resolve()
+output = pathlib.Path(sys.argv[3])
+gpus = [item for item in sys.argv[4].split(",") if item]
+
+def version(package):
+    try:
+        return importlib.metadata.version(package)
+    except importlib.metadata.PackageNotFoundError:
+        return None
+
+checkpoint_bytes = (
+    sum(path.stat().st_size for path in checkpoint.rglob("*") if path.is_file())
+    if checkpoint.is_dir()
+    else checkpoint.stat().st_size
+)
+payload = {
+    "model": "pi0.5-LIBERO",
+    "source_revision": subprocess.check_output(
+        ["git", "-C", str(root), "rev-parse", "HEAD"], text=True
+    ).strip(),
+    "checkpoint": str(checkpoint),
+    "checkpoint_bytes": checkpoint_bytes,
+    "physical_gpus": gpus,
+    "workers": len(gpus),
+    "query_interval": int(sys.argv[5]),
+    "port_base": int(sys.argv[6]),
+    "deterministic": True,
+    "deterministic_flow_noise": True,
+    "control_replay_before_event": True,
+    "rollout_videos_disabled": True,
+    "runtime_versions": {
+        package: version(package)
+        for package in ("openpi-client", "jax", "numpy", "torch")
+    },
+}
+output.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+PY
 server_pids=()
 worker_pids=()
 cleanup() {

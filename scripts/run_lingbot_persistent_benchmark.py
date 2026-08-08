@@ -2,6 +2,7 @@
 """Launch one persistent LingBot-VA shard per GPU."""
 
 import argparse
+import importlib.metadata
 import json
 import os
 import subprocess
@@ -9,6 +10,22 @@ import sys
 from pathlib import Path
 
 from libero_max.manifest import load_manifest
+
+
+def _git_revision(root: Path) -> str:
+    return subprocess.check_output(
+        ["git", "-C", str(root), "rev-parse", "HEAD"], text=True
+    ).strip()
+
+
+def _versions(*packages: str) -> dict:
+    result = {}
+    for package in packages:
+        try:
+            result[package] = importlib.metadata.version(package)
+        except importlib.metadata.PackageNotFoundError:
+            result[package] = None
+    return result
 
 
 def main() -> int:
@@ -35,6 +52,7 @@ def main() -> int:
     )
     run_config = {
         "model": "LingBot-VA-LIBERO-LONG",
+        "source_revision": _git_revision(args.lingbot_root),
         "checkpoint": str(args.checkpoint.resolve()),
         "checkpoint_bytes": checkpoint_bytes,
         "physical_gpus": gpus,
@@ -46,6 +64,9 @@ def main() -> int:
         "attention_backend": "torch SDPA",
         "bootstrap": "first conditioned frame replaced by four LIBERO no-ops",
         "rollout_videos_disabled": True,
+        "runtime_versions": _versions(
+            "torch", "numpy", "numba", "diffusers", "transformers"
+        ),
     }
     (args.output_root / "run_config.json").write_text(
         json.dumps(run_config, indent=2, sort_keys=True) + "\n", encoding="utf-8"
