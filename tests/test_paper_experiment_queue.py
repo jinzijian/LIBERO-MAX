@@ -20,6 +20,7 @@ class PaperExperimentQueueTest(unittest.TestCase):
         self.assertIn("PAPER_QUEUE_DONE", source)
         self.assertIn("LIBERO-plus", source)
         self.assertIn("LIBERO-PRO", source)
+        self.assertIn("OPENPI_SYNC_PID_FILE", source)
 
 
 if __name__ == "__main__":

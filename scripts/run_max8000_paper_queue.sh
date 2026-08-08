@@ -12,6 +12,7 @@ PYTHON="${PYTHON:-$DEPS_DIR/cosmos-policy/.venv/bin/python}"
 GPUS="${GPUS:-0,1,2,3}"
 FINAL_ROOT="${FINAL_ROOT:-$PROJECT_DIR/artifacts/max8000/paper_final}"
 COSMOS_PID_FILE="${COSMOS_PID_FILE:-$PROJECT_DIR/artifacts/max8000/cosmos_pro_hard_2400.launcher.pid}"
+OPENPI_SYNC_PID_FILE="${OPENPI_SYNC_PID_FILE:-$PROJECT_DIR/artifacts/max5600/openpi_uv_sync.pid}"
 
 BASE_MANIFEST="$PROJECT_DIR/benchmark/max5600/libero_max_5600.json"
 PRO_MANIFEST="$PROJECT_DIR/benchmark/max8000_candidate/libero_max_pro_hard_2400.json"
@@ -208,6 +209,14 @@ if [[ -f "$COSMOS_PID_FILE" ]]; then
     completed="$(find artifacts/max8000/cosmos_pro_hard_2400/cases -name DONE 2>/dev/null | wc -l)"
     failed="$(find artifacts/max8000/cosmos_pro_hard_2400/cases -name FAILED 2>/dev/null | wc -l)"
     log "WAIT Cosmos PRO-Hard done=$completed failed=$failed planned=2400"
+    sleep 60
+  done
+fi
+
+if [[ -f "$OPENPI_SYNC_PID_FILE" ]]; then
+  openpi_sync_pid="$(cat "$OPENPI_SYNC_PID_FILE")"
+  while kill -0 "$openpi_sync_pid" 2>/dev/null; do
+    log "WAIT OpenPI environment sync pid=$openpi_sync_pid"
     sleep 60
   done
 fi
