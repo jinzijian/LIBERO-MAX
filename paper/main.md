@@ -1,5 +1,13 @@
 # LIBERO-MAX: Do Vision-Language-Action Models Adapt When the World Changes Mid-Execution?
 
+> **Legacy v1 manuscript snapshot.** This document reports the original
+> 1,335-pair Physical Core study. The current 8,000-pair benchmark, including
+> MAX-PRO-Hard-2400 and the frozen multi-model comparison, is reported in the
+> generated `results/max8000/paper/MAX8000_RESULTS.md` and
+> `results/max8000/paper/MAX8000_ANALYSIS.md` artifacts once all registered
+> runs pass the publication gate. Do not combine the denominators or treat the
+> values below as MAX8000 results.
+
 ## Abstract
 
 Vision-language-action models are commonly evaluated in episodes whose visual
