@@ -411,6 +411,9 @@ PY
   "$PROJECT_DIR/results/max8000" \
   --media-output-dir "$PROJECT_DIR/assets/media" \
   >"$FINAL_ROOT/logs/package-paper-results.log"
+"$PYTHON" scripts/update_readme_paper_results.py "$FINAL_ROOT" \
+  "$PROJECT_DIR/README.md" \
+  >"$FINAL_ROOT/logs/update-readme-results.log"
 
 touch "$FINAL_ROOT/PAPER_QUEUE_DONE"
 log "PAPER QUEUE COMPLETE"

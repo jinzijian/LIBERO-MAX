@@ -224,23 +224,14 @@ GPUS=0,1,2,3,4,5,6,7 bash scripts/run_openpi_persistent_benchmark.sh \
   artifacts/max5600/pi05_libero
 ```
 
-### Current evaluation status
+<!-- PAPER_RESULTS_START -->
+## Paper-scale results
 
-As of 2026-08-07, the first Cosmos Policy and pi0.5 workers have reached a
-terminal state for all 5,600 planned cases, but the evidence-gated release is
-not final because infrastructure repairs remain:
-
-| Model | Measured pairs | Trigger-unreached | Infrastructure gaps | Measured control | Measured change |
-| --- | ---: | ---: | ---: | ---: | ---: |
-| Cosmos Policy Predict2-2B | 5,599 / 5,600 | 258 | 1 | 4,592 / 5,599 (82.01%) | 3,532 / 5,599 (63.08%) |
-| pi0.5-LIBERO | 5,463 / 5,600 | 108 | 137 | 4,692 / 5,463 (85.89%) | 3,883 / 5,463 (71.08%) |
-
-These are coverage-aware progress statistics, not final model rankings.
-Cosmos currently uses a 16-step query interval while pi0.5 uses 5 steps, and
-the incomplete infrastructure coverage must be repaired before a headline
-comparison. FastWAM-LIBERO and LingBot-VA-LIBERO-LONG checkpoints have been
-downloaded and checksum-verified; their shared-environment adapters and
-paired rollouts are still pending.
+The evidence-gated MAX-8000 and frozen cross-model evaluations are currently
+running. Final tables, figures, human-feasibility review queue, and verified
+simulator media are withheld until every planned arm has a terminal outcome
+and all infrastructure gaps have been repaired.
+<!-- PAPER_RESULTS_END -->
 
 ## Repository layout
 
