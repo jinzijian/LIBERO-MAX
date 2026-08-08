@@ -26,6 +26,7 @@ class Max8000ReleaseTest(unittest.TestCase):
         self.assertEqual(summary["matched_pairs"], 8000)
         self.assertEqual(summary["model_comparison_pairs"], 800)
         self.assertEqual(combined["benchmark_version"], "3.0.0")
+        self.assertEqual(combined["protocol"]["profile"], "official")
         self.assertEqual(pro["benchmark_version"], "3.0.0")
         self.assertEqual(comparison["benchmark_version"], "3.0.0")
         self.assertEqual(len(combined["cases"]), 8000)

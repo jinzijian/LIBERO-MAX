@@ -77,6 +77,7 @@ def main() -> int:
     frozen_pro["benchmark_version"] = RELEASE_VERSION
     frozen_combined = copy.deepcopy(combined)
     frozen_combined["benchmark_version"] = RELEASE_VERSION
+    frozen_combined["protocol"]["profile"] = "official"
     frozen_intent = copy.deepcopy(intent)
     frozen_intent["benchmark_version"] = RELEASE_VERSION
     frozen_comparison = copy.deepcopy(comparison)
