@@ -82,6 +82,23 @@ def _binary_metrics(records: List[Dict[str, Any]]) -> Dict[str, Any]:
     }
 
 
+def _end_to_end_metrics(records: List[Dict[str, Any]]) -> Dict[str, Any]:
+    metrics = _binary_metrics(records)
+    differences = [
+        int(record["intervention_correct"]) - int(record["control_correct"])
+        for record in records
+    ]
+    return {
+        "control": {"accuracy_on_planned": metrics["control"]},
+        "intervention": {"accuracy_on_planned": metrics["intervention"]},
+        "paired_robustness_delta_on_planned": metrics["delta"],
+        "outcome_table": {
+            "regression_under_change": sum(value == -1 for value in differences),
+            "intervention_side_gain": sum(value == 1 for value in differences),
+        },
+    }
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--run", action="append", type=_parse_run, required=True)
@@ -129,7 +146,7 @@ def main() -> None:
         metrics = summary["metrics"]["overall"]
         end_to_end = summary.get("end_to_end_metrics")
         if end_to_end is None:
-            raise ValueError("%s lacks all-case end-to-end metrics" % run["name"])
+            end_to_end = _end_to_end_metrics(run["end_to_end"])
         planned = coverage["planned"]
         valid = coverage["completed"]
         triggered = valid
