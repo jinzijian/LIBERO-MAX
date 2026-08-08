@@ -1,4 +1,7 @@
 import importlib.util
+import json
+import subprocess
+import tempfile
 import unittest
 from pathlib import Path
 
@@ -110,6 +113,60 @@ class AggregateEndToEndTest(unittest.TestCase):
         self.assertEqual(
             breakdown["camera"]["intervention"]["accuracy_on_planned"], 1.0
         )
+
+    def test_derived_aggregation_materializes_manifest_and_provenance(self):
+        source_manifest = (
+            Path(__file__).parents[1]
+            / "benchmark/max8000/libero_max_pro_model_comparison_800.json"
+        )
+        manifest = json.loads(source_manifest.read_text(encoding="utf-8"))
+        manifest["cases"] = manifest["cases"][:1]
+        case = manifest["cases"][0]
+        query_interval = manifest["protocol"]["query_interval"]
+        with tempfile.TemporaryDirectory() as raw_temp:
+            temp = Path(raw_temp)
+            manifest_path = temp / "manifest.json"
+            root = temp / "source"
+            output = temp / "derived"
+            case_root = root / "cases" / case["case_id"]
+            manifest_path.write_text(json.dumps(manifest))
+            for arm in ("control", "intervention"):
+                (case_root / arm).mkdir(parents=True)
+                (case_root / arm / "trace.jsonl").write_text(
+                    json.dumps(
+                        {
+                            "success": False,
+                            "init_state_sha256": "same",
+                            "query_interval": query_interval,
+                            "intervention_event_count": 0,
+                            "policy_queries": [],
+                        }
+                    )
+                    + "\n"
+                )
+
+            completed = subprocess.run(
+                [
+                    "python3",
+                    str(SCRIPT),
+                    str(root),
+                    "--manifest",
+                    str(manifest_path),
+                    "--output-dir",
+                    str(output),
+                ],
+                check=False,
+                capture_output=True,
+                text=True,
+            )
+            self.assertEqual(completed.returncode, 0, completed.stderr)
+            self.assertTrue((output / "manifest.json").is_file())
+            config = json.loads((output / "run_config.json").read_text())
+            self.assertEqual(config["run_type"], "derived_aggregation")
+            self.assertEqual(config["manifest"]["planned_cases"], 1)
+            self.assertFalse(
+                config["aggregation"]["source_runs"][0]["run_config_present"]
+            )
 
 
 if __name__ == "__main__":

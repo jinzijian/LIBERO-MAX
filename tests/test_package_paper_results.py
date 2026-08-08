@@ -29,6 +29,9 @@ class PackagePaperResultsTest(unittest.TestCase):
             )
             (run / "benchmark_summary.json").write_text("{}")
             (run / "end_to_end_results.jsonl").write_text("{}\n")
+            (run / "paired_results.jsonl").write_text("{}\n")
+            (run / "manifest.json").write_text("{}\n")
+            (run / "run_config.json").write_text("{}\n")
             (run / "raw_trace.bin").write_bytes(b"large trace")
             (table / "main_results.md").write_text("table")
             (table / "main_results.tex").write_text("\\begin{table}\n")
@@ -60,6 +63,30 @@ class PackagePaperResultsTest(unittest.TestCase):
             self.assertTrue((output / "paper/MAX8000_RESULTS.md").exists())
             self.assertTrue((media / "preview.gif").exists())
             self.assertFalse((media / "preview.trace.jsonl").exists())
+
+    def test_refuses_complete_bundle_with_missing_run_provenance(self):
+        with tempfile.TemporaryDirectory() as raw_temp:
+            temp = Path(raw_temp)
+            paper = temp / "paper"
+            run = paper / "runs" / "model"
+            run.mkdir(parents=True)
+            (paper / "experiment_status.json").write_text(
+                json.dumps({"paper_experiments_complete": True})
+            )
+            (run / "benchmark_summary.json").write_text("{}")
+            (run / "end_to_end_results.jsonl").write_text("{}\n")
+            (run / "paired_results.jsonl").write_text("{}\n")
+            (run / "manifest.json").write_text("{}\n")
+
+            completed = subprocess.run(
+                ["python3", str(SCRIPT), str(paper), str(temp / "results")],
+                check=False,
+                capture_output=True,
+                text=True,
+            )
+
+            self.assertNotEqual(completed.returncode, 0)
+            self.assertIn("required paper artifact is missing", completed.stderr)
 
 
 if __name__ == "__main__":

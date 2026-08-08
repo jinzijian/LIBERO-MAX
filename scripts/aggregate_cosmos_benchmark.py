@@ -7,6 +7,7 @@ from pathlib import Path
 from typing import Any, Dict, List
 
 from libero_max.manifest import load_manifest
+from libero_max.provenance import sha256_file, source_run_configs, write_run_config
 from libero_max.results import summarize_results
 
 
@@ -33,9 +34,7 @@ def _capture_outcome(outcomes: Dict[str, bool], case_id: str, value: Any) -> Non
 
 
 def _query_by_step(row: Dict[str, Any]) -> Dict[int, Dict[str, Any]]:
-    return {
-        query["policy_step"]: query for query in row.get("policy_queries", [])
-    }
+    return {query["policy_step"]: query for query in row.get("policy_queries", [])}
 
 
 def _terminal_trace_reasons(
@@ -271,6 +270,13 @@ def main() -> int:
     output_dir = args.output_dir or args.root
     output_dir.mkdir(parents=True, exist_ok=True)
     case_roots = [args.root, *args.case_root]
+    derived_output = output_dir.resolve() != args.root.resolve() or bool(args.case_root)
+    materialized_manifest = output_dir / "manifest.json"
+    if derived_output:
+        materialized_manifest.write_text(
+            json.dumps(manifest, indent=2, sort_keys=True) + "\n",
+            encoding="utf-8",
+        )
     records: List[Dict[str, Any]] = []
     missing: List[str] = []
     invalid: Dict[str, List[str]] = {}
@@ -455,8 +461,7 @@ def main() -> int:
     blocking_terminal_invalid = {
         case_id: reasons
         for case_id, reasons in terminal_invalid.items()
-        if set(reasons)
-        not in ({"trigger_unreached"}, {"response_query_unreached"})
+        if set(reasons) not in ({"trigger_unreached"}, {"response_query_unreached"})
     }
     execution_complete = (
         not missing
@@ -571,6 +576,28 @@ def main() -> int:
     output.write_text(
         json.dumps(report, indent=2, sort_keys=True) + "\n", encoding="utf-8"
     )
+    if derived_output:
+        write_run_config(
+            output_dir / "run_config.json",
+            {
+                "schema_version": 1,
+                "run_type": "derived_aggregation",
+                "created_by": "scripts/aggregate_cosmos_benchmark.py",
+                "manifest": {
+                    "source_path": str(manifest_path.resolve()),
+                    "source_sha256": sha256_file(manifest_path),
+                    "materialized_path": str(materialized_manifest.resolve()),
+                    "materialized_sha256": sha256_file(materialized_manifest),
+                    "benchmark_id": manifest["benchmark_id"],
+                    "benchmark_version": manifest["benchmark_version"],
+                    "planned_cases": len(manifest["cases"]),
+                },
+                "aggregation": {
+                    "output_dir": str(output_dir.resolve()),
+                    "source_runs": source_run_configs(case_roots),
+                },
+            },
+        )
     print(json.dumps(report, indent=2, sort_keys=True))
     return 0 if coverage["complete"] else 1
 

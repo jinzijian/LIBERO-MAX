@@ -8,6 +8,7 @@ import os
 from pathlib import Path
 
 from libero_max.manifest import load_manifest
+from libero_max.provenance import sha256_file, source_run_configs, write_run_config
 
 
 def _scenario_sha256(scenario) -> str:
@@ -81,6 +82,30 @@ def main() -> int:
             raise ValueError("refusing to replace non-symlink %s" % destination)
         os.symlink(source.resolve(), destination, target_is_directory=True)
         linked += 1
+    materialized_manifest = args.output_root / "manifest.json"
+    write_run_config(
+        args.output_root / "run_config.json",
+        {
+            "schema_version": 1,
+            "run_type": "composed_paired_run",
+            "created_by": "scripts/compose_paired_run.py",
+            "manifest": {
+                "source_path": str(args.manifest.resolve()),
+                "source_sha256": sha256_file(args.manifest),
+                "materialized_path": str(materialized_manifest.resolve()),
+                "materialized_sha256": sha256_file(materialized_manifest),
+                "benchmark_id": manifest["benchmark_id"],
+                "benchmark_version": manifest["benchmark_version"],
+                "planned_cases": len(manifest["cases"]),
+            },
+            "composition": {
+                "planned": len(manifest["cases"]),
+                "linked": linked,
+                "missing": missing,
+                "source_runs": source_run_configs(args.source_roots),
+            },
+        },
+    )
     print(
         json.dumps(
             {"planned": len(manifest["cases"]), "linked": linked, "missing": missing},

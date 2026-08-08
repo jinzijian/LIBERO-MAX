@@ -16,6 +16,13 @@ def _copy(source: Path, destination: Path) -> None:
     shutil.copy2(source, destination)
 
 
+def _copy_required(source: Path, destination: Path) -> None:
+    if not source.is_file():
+        raise FileNotFoundError("required paper artifact is missing: %s" % source)
+    destination.parent.mkdir(parents=True, exist_ok=True)
+    shutil.copy2(source, destination)
+
+
 def _files(root: Path, patterns: Iterable[str]) -> Iterable[Path]:
     for pattern in patterns:
         yield from sorted(root.glob(pattern))
@@ -69,9 +76,10 @@ def main() -> None:
             "benchmark_summary.json",
             "end_to_end_results.jsonl",
             "paired_results.jsonl",
+            "manifest.json",
             "run_config.json",
         ):
-            _copy(run_root / name, args.output_dir / relative / name)
+            _copy_required(run_root / name, args.output_dir / relative / name)
 
     if args.media_output_dir:
         for source in sorted((args.paper_root / "media").glob("*")):
