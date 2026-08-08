@@ -177,7 +177,10 @@ finalize_with_repairs() {
     fi
     log "$label infrastructure repair round=$attempt cases=$count"
     local repair_root="$FINAL_ROOT/work/${label}-repair-run-$attempt"
-    run_rollouts "${label}-repair-$attempt" "$launcher" "$repair_manifest" "$repair_root"
+    # Repair roots are durable. If the queue or host is interrupted, resume
+    # terminal pairs instead of discarding hours of validated rollout work.
+    RESUME=1 run_rollouts \
+      "${label}-repair-$attempt" "$launcher" "$repair_manifest" "$repair_root"
     local composed="$FINAL_ROOT/work/${label}-composed-$attempt"
     "$PYTHON" scripts/compose_paired_run.py "$manifest" \
       "$repair_root" "$current_root" --output-root "$composed" \

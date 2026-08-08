@@ -25,6 +25,7 @@ class PaperExperimentQueueTest(unittest.TestCase):
         self.assertIn("tables/ablation", source)
         self.assertIn("tables/tracks", source)
         self.assertIn("build_human_review_queue.py", source)
+        self.assertIn("RESUME=1 run_rollouts", source)
         self.assertIn("render_benchmark_media.py", source)
         self.assertIn("render_rollout_replay.py", source)
         self.assertIn("select_cosmos_replay_case", source)
