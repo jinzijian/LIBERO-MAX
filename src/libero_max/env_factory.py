@@ -46,13 +46,18 @@ def install_stable_camera_render(
         "maximum_attempts": maximum_attempts,
         "maximum_neighbor_delta": maximum_neighbor_delta,
         "maximum_repeat_delta": maximum_repeat_delta,
+        "fallbacks": 0,
     }
 
     def stable_render(*args: Any, **kwargs: Any) -> Any:
         previous_rgb = None
+        best_result = None
+        best_repeat_delta = None
+        last_result = None
         stats["calls"] += 1
         for attempt in range(1, maximum_attempts + 1):
             result = original_render(*args, **kwargs)
+            last_result = result
             rgb = result[0] if isinstance(result, tuple) else result
             rgb = np.ascontiguousarray(rgb)
             smooth = (
@@ -69,6 +74,16 @@ def install_stable_camera_render(
                     ).mean()
                 )
             )
+            if (
+                smooth
+                and repeat_delta is not None
+                and (
+                    best_repeat_delta is None
+                    or repeat_delta < best_repeat_delta
+                )
+            ):
+                best_repeat_delta = repeat_delta
+                best_result = result
             if previous_rgb is not None and smooth and repeat_delta <= maximum_repeat_delta:
                 stats["retries"] += attempt - 1
                 stats["maximum_attempts_used"] = max(
@@ -78,11 +93,9 @@ def install_stable_camera_render(
             previous_rgb = rgb.copy()
         stats["retries"] += maximum_attempts - 1
         stats["maximum_attempts_used"] = maximum_attempts
-        stats["failures"] = int(stats.get("failures", 0)) + 1
-        raise RenderStabilityError(
-            "camera render did not stabilize after %d same-state reads"
-            % maximum_attempts
-        )
+        stats["fallbacks"] += 1
+        stats["best_fallback_repeat_delta"] = best_repeat_delta
+        return best_result if best_result is not None else last_result
 
     sim.render = stable_render
     sim._libero_max_stable_render_installed = True

@@ -56,6 +56,10 @@ def _terminal_trace_reasons(
             qa = arm.get("render_initialization_qa")
             if not isinstance(qa, dict) or qa.get("status") != "passed":
                 reasons.append("%s_render_initialization_qa_missing" % arm_name)
+            elif int(qa.get("stable_camera_render", {}).get("fallbacks", 0)) != int(
+                qa.get("fallbacks_before_policy", 0)
+            ):
+                reasons.append("%s_runtime_render_fallback" % arm_name)
     if control.get("init_state_sha256") != intervention.get("init_state_sha256"):
         reasons.append("initial_state_mismatch")
     if (
@@ -237,6 +241,10 @@ def _validate_case(
             qa = arm.get("render_initialization_qa")
             if not isinstance(qa, dict) or qa.get("status") != "passed":
                 errors.append("%s render-initialization QA is missing" % arm_name)
+            elif int(qa.get("stable_camera_render", {}).get("fallbacks", 0)) != int(
+                qa.get("fallbacks_before_policy", 0)
+            ):
+                errors.append("%s used a runtime render fallback" % arm_name)
     if control.get("intervention_event_count") != 0:
         errors.append("control arm contains intervention events")
     if intervention.get("intervention_event_count") != 1:

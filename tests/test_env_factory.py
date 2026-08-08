@@ -51,15 +51,16 @@ class EnvFactoryTest(unittest.TestCase):
         self.assertEqual(stats["retries"], 2)
         self.assertEqual(stats["maximum_attempts_used"], 3)
 
-    def test_camera_wrapper_rejects_stable_random_buffer(self):
+    def test_camera_wrapper_marks_fallback_for_stable_random_buffer(self):
         random_frame = np.random.default_rng(0).integers(
             0, 256, size=(64, 64, 3), dtype=np.uint8
         )
         env = type("Env", (), {})()
         env.sim = _SequenceSim([random_frame, random_frame])
-        install_stable_camera_render(env, maximum_attempts=2)
-        with self.assertRaisesRegex(RenderStabilityError, "same-state reads"):
-            env.sim.render(camera_name="agentview", width=64, height=64)
+        stats = install_stable_camera_render(env, maximum_attempts=2)
+        rendered = env.sim.render(camera_name="agentview", width=64, height=64)
+        np.testing.assert_array_equal(rendered, random_frame)
+        self.assertEqual(stats["fallbacks"], 1)
 
     def test_primer_requires_two_identical_raw_renders(self):
         corrupt = np.ones((4, 4, 3), dtype=np.uint8)

@@ -189,6 +189,9 @@ class CosmosInterventionEnv:
         self.render_initialization_qa[
             "stable_camera_render"
         ] = self._stable_camera_render_qa
+        self.render_initialization_qa["fallbacks_before_policy"] = int(
+            self._stable_camera_render_qa.get("fallbacks", 0)
+        )
         try:
             setattr(
                 self._env,
