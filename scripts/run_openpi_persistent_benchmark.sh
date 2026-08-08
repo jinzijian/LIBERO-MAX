@@ -36,7 +36,8 @@ manifest = json.loads(source.read_text(encoding="utf-8"))
 manifest["protocol"]["query_interval"] = query_interval
 output.write_text(json.dumps(manifest, indent=2, sort_keys=True) + "\n", encoding="utf-8")
 PY
-"$OPENPI_PYTHON" - "$OPENPI_DIR" "$CHECKPOINT" "$OUTPUT_ROOT/run_config.json" \
+PYTHONPATH="$OPENPI_SITE_PACKAGES:$OPENPI_DIR/src:$OPENPI_DIR/packages/openpi-client/src${PYTHONPATH:+:$PYTHONPATH}" \
+  "$OPENPI_PYTHON" - "$OPENPI_DIR" "$CHECKPOINT" "$OUTPUT_ROOT/run_config.json" \
   "$GPUS_CSV" "$QUERY_INTERVAL" "$PORT_BASE" <<'PY'
 import importlib.metadata
 import json
