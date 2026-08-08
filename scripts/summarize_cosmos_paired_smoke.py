@@ -73,12 +73,15 @@ def summarize_pair(control, intervention):
         for step in set(control_queries) & set(intervention_queries)
         if step >= event_step
     )
-    if not response_steps:
-        raise ValueError("missing first post-intervention policy query")
-    response_step = response_steps[0]
-    post_event_action_chunk_mad = _action_chunk_mad(
-        control_queries[response_step]["actions"],
-        intervention_queries[response_step]["actions"],
+    response_query_reached = bool(response_steps)
+    response_step = response_steps[0] if response_steps else None
+    post_event_action_chunk_mad = (
+        _action_chunk_mad(
+            control_queries[response_step]["actions"],
+            intervention_queries[response_step]["actions"],
+        )
+        if response_step is not None
+        else None
     )
     control_success = bool(control["success"])
     intervention_success = bool(intervention["success"])
@@ -101,8 +104,11 @@ def summarize_pair(control, intervention):
         "mean_absolute_raw_pixel_delta": event["mean_absolute_raw_pixel_delta"],
         "pre_change_action_chunks_match": pre_change_action_chunks_match,
         "pre_change_query_steps": pre_change_steps,
+        "response_query_reached": response_query_reached,
         "policy_response_query_step": response_step,
-        "open_loop_exposure_steps": response_step - event_step,
+        "open_loop_exposure_steps": (
+            response_step - event_step if response_step is not None else None
+        ),
         "post_event_action_chunk_mad": post_event_action_chunk_mad,
         "control": control,
         "intervention": intervention,

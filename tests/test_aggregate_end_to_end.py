@@ -10,6 +10,50 @@ SPEC.loader.exec_module(MODULE)
 
 
 class AggregateEndToEndTest(unittest.TestCase):
+    def test_response_query_unreached_is_terminal_not_infrastructure(self):
+        control = {
+            "init_state_sha256": "same",
+            "query_interval": 16,
+            "intervention_event_count": 0,
+            "policy_queries": [
+                {"policy_step": 0, "action_chunk_sha256": "a"},
+                {"policy_step": 16, "action_chunk_sha256": "b"},
+            ],
+        }
+        intervention = {
+            **control,
+            "intervention_event_count": 1,
+            "intervention_events": [{"cosmos_query_boundary_step": 30}],
+        }
+
+        reasons = MODULE._terminal_trace_reasons(
+            control, intervention, {"query_interval": 16}
+        )
+
+        self.assertEqual(reasons, ["response_query_unreached"])
+
+    def test_post_trigger_query_missing_does_not_hide_prechange_mismatch(self):
+        control = {
+            "init_state_sha256": "same",
+            "query_interval": 16,
+            "intervention_event_count": 0,
+            "policy_queries": [{"policy_step": 0, "action_chunk_sha256": "a"}],
+        }
+        intervention = {
+            **control,
+            "intervention_event_count": 1,
+            "intervention_events": [{"cosmos_query_boundary_step": 10}],
+            "policy_queries": [{"policy_step": 0, "action_chunk_sha256": "z"}],
+        }
+
+        reasons = MODULE._terminal_trace_reasons(
+            control, intervention, {"query_interval": 16}
+        )
+
+        self.assertEqual(
+            reasons, ["pre_change_action_mismatch", "response_query_unreached"]
+        )
+
     def test_trigger_unreached_failures_remain_in_planned_denominator(self):
         summary = MODULE.summarize_end_to_end_outcomes(
             3,

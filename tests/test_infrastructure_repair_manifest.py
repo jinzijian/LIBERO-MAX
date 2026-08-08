@@ -22,6 +22,7 @@ class InfrastructureRepairManifestTest(unittest.TestCase):
                 "blocking_terminal_invalid": {"blocked": ["state mismatch"]},
                 "terminal_invalid": {
                     "unreached": ["trigger_unreached"],
+                    "no-response": ["response_query_unreached"],
                     "blocked": ["state mismatch"],
                 },
             }

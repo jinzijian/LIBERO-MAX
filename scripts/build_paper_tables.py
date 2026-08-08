@@ -148,8 +148,11 @@ def main() -> None:
         if end_to_end is None:
             end_to_end = _end_to_end_metrics(run["end_to_end"])
         planned = coverage["planned"]
-        valid = coverage["completed"]
-        triggered = valid
+        response_evaluable = coverage["completed"]
+        triggered = sum(
+            bool(record.get("trigger_reached", True))
+            for record in run["end_to_end"]
+        )
         full_differences = [
             int(record["intervention_correct"]) - int(record["control_correct"])
             for record in run["end_to_end"]
@@ -160,9 +163,11 @@ def main() -> None:
             {
                 "model": run["name"],
                 "track": summary["protocol"]["scoring_track"],
-                "valid_pairs": valid,
+                "triggered_pairs": triggered,
+                "response_evaluable_pairs": response_evaluable,
                 "planned_pairs": planned,
                 "trigger_coverage": triggered / planned,
+                "response_coverage": response_evaluable / planned,
                 "control_accuracy": end_to_end["control"]["accuracy_on_planned"],
                 "intervention_accuracy": end_to_end["intervention"][
                     "accuracy_on_planned"
@@ -177,15 +182,16 @@ def main() -> None:
         )
 
     lines = [
-        "| Model | Track | Triggered / planned | Trigger | Full control | Full change | Full delta | Triggered-only delta (95% CI) | Regressions | Recoveries | McNemar p |",
+        "| Model | Track | Trigger reached | Response-evaluable | Full control | Full change | Full delta | Response-conditioned delta (95% CI) | Regressions | Recoveries | McNemar p |",
         "| --- | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |",
     ]
     for row in main_rows:
         p_value = row["mcnemar_p"]
         lines.append(
-            "| {model} | {track} | {valid_pairs}/{planned_pairs} | {trigger} | {control} | {change} | {delta} | {conditional_delta} {ci} | {regressions} | {recoveries} | {p} |".format(
+            "| {model} | {track} | {triggered_pairs}/{planned_pairs} ({trigger}) | {response_evaluable_pairs}/{planned_pairs} ({response}) | {control} | {change} | {delta} | {conditional_delta} {ci} | {regressions} | {recoveries} | {p} |".format(
                 **row,
                 trigger=_percent(row["trigger_coverage"]),
+                response=_percent(row["response_coverage"]),
                 control=_percent(row["control_accuracy"]),
                 change=_percent(row["intervention_accuracy"]),
                 delta=_percent(row["paired_delta"]),

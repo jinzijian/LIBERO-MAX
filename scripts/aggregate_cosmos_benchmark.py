@@ -32,6 +32,66 @@ def _capture_outcome(outcomes: Dict[str, bool], case_id: str, value: Any) -> Non
         outcomes[case_id] = value
 
 
+def _query_by_step(row: Dict[str, Any]) -> Dict[int, Dict[str, Any]]:
+    return {
+        query["policy_step"]: query for query in row.get("policy_queries", [])
+    }
+
+
+def _terminal_trace_reasons(
+    control: Dict[str, Any],
+    intervention: Dict[str, Any],
+    protocol: Dict[str, Any],
+) -> List[str]:
+    """Classify a terminal pair that lacks a derived paired summary.
+
+    Trigger-unreached and response-query-unreached are policy/horizon outcomes,
+    not infrastructure failures. Both remain in the frozen end-to-end
+    denominator; only the latter has a valid intervention event.
+    """
+
+    reasons: List[str] = []
+    if control.get("init_state_sha256") != intervention.get("init_state_sha256"):
+        reasons.append("initial_state_mismatch")
+    if (
+        control.get("query_interval") != protocol["query_interval"]
+        or intervention.get("query_interval") != protocol["query_interval"]
+    ):
+        reasons.append("query_interval_mismatch")
+    if control.get("intervention_event_count") != 0:
+        reasons.append("control_intervention_event_count_mismatch")
+
+    event_count = intervention.get("intervention_event_count")
+    if event_count == 0:
+        reasons.append("trigger_unreached")
+        return reasons
+    if event_count != 1 or len(intervention.get("intervention_events", [])) != 1:
+        reasons.append("intervention_event_count_mismatch")
+        return reasons
+
+    event_step = intervention["intervention_events"][0].get(
+        "cosmos_query_boundary_step"
+    )
+    if not isinstance(event_step, int):
+        reasons.append("intervention_event_step_missing")
+        return reasons
+
+    control_queries = _query_by_step(control)
+    intervention_queries = _query_by_step(intervention)
+    common_steps = set(control_queries) & set(intervention_queries)
+    pre_change_steps = sorted(step for step in common_steps if step < event_step)
+    if not pre_change_steps or any(
+        control_queries[step].get("action_chunk_sha256")
+        != intervention_queries[step].get("action_chunk_sha256")
+        for step in pre_change_steps
+    ):
+        reasons.append("pre_change_action_mismatch")
+    response_steps = sorted(step for step in common_steps if step >= event_step)
+    if not response_steps:
+        reasons.append("response_query_unreached")
+    return reasons
+
+
 def _outcome_rate(outcomes: Dict[str, bool], planned: int) -> Dict[str, Any]:
     measured = len(outcomes)
     successes = sum(outcomes.values())
@@ -171,8 +231,21 @@ def _validate_case(
         errors.append("intervention arm must contain exactly one event")
     if not summary.get("pre_change_action_chunks_match"):
         errors.append("pre-change action chunks are not exactly matched")
-    if summary.get("post_event_action_chunk_mad") is None:
+    response_query_reached = summary.get(
+        "response_query_reached",
+        summary.get("policy_response_query_step") is not None,
+    )
+    if response_query_reached and summary.get("post_event_action_chunk_mad") is None:
         errors.append("post-event action response is missing")
+    if not response_query_reached and any(
+        summary.get(field) is not None
+        for field in (
+            "policy_response_query_step",
+            "open_loop_exposure_steps",
+            "post_event_action_chunk_mad",
+        )
+    ):
+        errors.append("post-event response fields exist without a response query")
     return errors
 
 
@@ -232,20 +305,9 @@ def main() -> int:
                         case_id,
                         intervention.get("success"),
                     )
-                    reasons = []
-                    if intervention.get("intervention_event_count") == 0:
-                        reasons.append("trigger_unreached")
-                    if control.get("init_state_sha256") != intervention.get(
-                        "init_state_sha256"
-                    ):
-                        reasons.append("initial_state_mismatch")
-                    if (
-                        control.get("query_interval")
-                        != manifest["protocol"]["query_interval"]
-                        or intervention.get("query_interval")
-                        != manifest["protocol"]["query_interval"]
-                    ):
-                        reasons.append("query_interval_mismatch")
+                    reasons = _terminal_trace_reasons(
+                        control, intervention, manifest["protocol"]
+                    )
                     terminal_invalid[case_id] = reasons or ["paired_summary_missing"]
                 except (OSError, ValueError, json.JSONDecodeError) as exc:
                     invalid[case_id] = ["failed to load terminal traces: %s" % exc]
@@ -266,6 +328,12 @@ def main() -> int:
             paired = {}
         if errors:
             invalid[case_id] = errors
+            continue
+        if not paired.get(
+            "response_query_reached",
+            paired.get("policy_response_query_step") is not None,
+        ):
+            terminal_invalid[case_id] = ["response_query_unreached"]
             continue
         event = paired["intervention"]["intervention_events"][0]
         intent = manifest["protocol"]["scoring_track"] == "intent_response"
@@ -352,10 +420,18 @@ def main() -> int:
                 "control_correct": control_outcomes[case_id],
                 "intervention_correct": intervention_outcomes[case_id],
                 "trigger_reached": "trigger_unreached" not in reasons,
+                "response_query_reached": not any(
+                    reason in reasons
+                    for reason in ("trigger_unreached", "response_query_unreached")
+                ),
                 "terminal_status": (
                     "trigger_unreached"
                     if "trigger_unreached" in reasons
-                    else "triggered"
+                    else (
+                        "response_query_unreached"
+                        if "response_query_unreached" in reasons
+                        else "triggered"
+                    )
                 ),
                 "change_type": case["scenario"].get("change_type"),
                 "change_family": case["scenario"]["change_family"],
@@ -379,7 +455,8 @@ def main() -> int:
     blocking_terminal_invalid = {
         case_id: reasons
         for case_id, reasons in terminal_invalid.items()
-        if set(reasons) != {"trigger_unreached"}
+        if set(reasons)
+        not in ({"trigger_unreached"}, {"response_query_unreached"})
     }
     execution_complete = (
         not missing
@@ -396,10 +473,23 @@ def main() -> int:
         "trigger_unreached": sum(
             "trigger_unreached" in reasons for reasons in terminal_invalid.values()
         ),
+        "trigger_reached": sum(
+            bool(record["trigger_reached"]) for record in end_to_end_records
+        ),
+        "response_query_unreached": sum(
+            "response_query_unreached" in reasons
+            for reasons in terminal_invalid.values()
+        ),
+        "response_evaluable": len(records),
         "retained_untriggered": sorted(
             case_id
             for case_id, reasons in terminal_invalid.items()
             if set(reasons) == {"trigger_unreached"}
+        ),
+        "retained_no_response": sorted(
+            case_id
+            for case_id, reasons in terminal_invalid.items()
+            if set(reasons) == {"response_query_unreached"}
         ),
         "blocking_terminal_invalid": blocking_terminal_invalid,
         "execution_complete": execution_complete,
@@ -455,12 +545,15 @@ def main() -> int:
             "end_to_end_scoring": (
                 "all %s frozen cases remain in the denominator; "
                 "trigger-unreached episodes are retained as pre-intervention "
-                "policy failures, while infrastructure errors remain missing"
+                "policy failures, and late triggers without a subsequent policy "
+                "query remain end-to-end failures but are excluded from "
+                "response-conditioned metrics; infrastructure errors remain missing"
                 % len(manifest["cases"])
             ),
             "conditional_adaptation": (
-                "metrics.* is conditioned on a valid intervention event and "
-                "must be reported with trigger coverage"
+                "metrics.* is conditioned on a valid intervention event followed "
+                "by a paired policy response query and must be reported with both "
+                "trigger and response-query coverage"
             ),
             "adaptation_latency": (
                 "event-to-first-updated-instruction-query steps"

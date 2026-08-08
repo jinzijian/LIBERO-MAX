@@ -66,6 +66,33 @@ class CosmosSummaryTest(unittest.TestCase):
         self.assertEqual(summary["post_event_action_chunk_mad"], 2.0)
         self.assertEqual(summary["paired_outcome"], "regression_under_change")
 
+    def test_late_trigger_without_next_query_is_a_terminal_model_outcome(self):
+        control = row(
+            "control",
+            False,
+            [query(0, "a", 0.0), query(16, "b", 1.0)],
+            [],
+        )
+        intervention = row(
+            "intervention",
+            False,
+            [query(0, "a", 0.0), query(16, "b", 1.0)],
+            [
+                {
+                    "cosmos_query_boundary_step": 30,
+                    "mean_absolute_raw_pixel_delta": 2.0,
+                }
+            ],
+        )
+
+        summary = MODULE.summarize_pair(control, intervention)
+
+        self.assertFalse(summary["response_query_reached"])
+        self.assertIsNone(summary["policy_response_query_step"])
+        self.assertIsNone(summary["open_loop_exposure_steps"])
+        self.assertIsNone(summary["post_event_action_chunk_mad"])
+        self.assertEqual(summary["paired_outcome"], "persistent_failure")
+
 
 if __name__ == "__main__":
     unittest.main()

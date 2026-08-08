@@ -394,8 +394,10 @@ for summary_path in sorted((root / "runs").glob("**/benchmark_summary.json")):
     coverage = summary["coverage"]
     runs[str(summary_path.parent.relative_to(root))] = {
         "planned": coverage["planned"],
-        "triggered": coverage["completed"],
+        "triggered": coverage.get("trigger_reached", coverage["completed"]),
+        "response_evaluable": coverage["completed"],
         "trigger_unreached": coverage.get("trigger_unreached", 0),
+        "response_query_unreached": coverage.get("response_query_unreached", 0),
         "execution_complete": coverage.get("execution_complete", False),
         "control_accuracy": summary["end_to_end_metrics"]["control"]["accuracy_on_planned"],
         "intervention_accuracy": summary["end_to_end_metrics"]["intervention"]["accuracy_on_planned"],
