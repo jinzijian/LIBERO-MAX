@@ -56,6 +56,19 @@ class FakeEnv:
         }, 0.0, False, {}
 
 
+class FlakyPlacementEnv(FakeEnv):
+    def __init__(self, failures):
+        super().__init__()
+        self.failures = failures
+        self.reset_calls = 0
+
+    def reset(self):
+        self.reset_calls += 1
+        if self.reset_calls <= self.failures:
+            raise RuntimeError("Cannot place all objects ):")
+        return super().reset()
+
+
 class FakeBackend:
     def __init__(self):
         self.changes = []
@@ -110,6 +123,42 @@ class CosmosIntegrationTest(unittest.TestCase):
             for _ in range(16):
                 env.step([0])
             self.assertEqual(len(backend.changes), 1)
+
+    def test_reset_retries_only_libero_placement_exhaustion(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            base = FlakyPlacementEnv(failures=2)
+            env = CosmosInterventionEnv(
+                env=base,
+                task_description="fake task",
+                scenario=SCENARIO,
+                arm="control",
+                trace_path=Path(tmp) / "trace.jsonl",
+                original_task_index=0,
+                backend=FakeBackend(),
+                primary_image_key=None,
+            )
+            env.reset()
+        self.assertEqual(base.reset_calls, 3)
+        self.assertEqual(env.reset_attempt_count, 3)
+
+    def test_reset_does_not_hide_unrelated_failures(self):
+        class BrokenEnv(FakeEnv):
+            def reset(self):
+                raise RuntimeError("renderer unavailable")
+
+        with tempfile.TemporaryDirectory() as tmp:
+            env = CosmosInterventionEnv(
+                env=BrokenEnv(),
+                task_description="fake task",
+                scenario=SCENARIO,
+                arm="control",
+                trace_path=Path(tmp) / "trace.jsonl",
+                original_task_index=0,
+                backend=FakeBackend(),
+                primary_image_key=None,
+            )
+            with self.assertRaisesRegex(RuntimeError, "renderer unavailable"):
+                env.reset()
 
     def test_physical_event_can_append_an_oracle_notification(self):
         with tempfile.TemporaryDirectory() as tmp:

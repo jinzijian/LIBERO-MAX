@@ -74,6 +74,7 @@ class CosmosInterventionEnv:
         warmup_steps: int = 10,
         primary_image_key: Optional[str] = "agentview_image",
         policy_notification: Optional[str] = None,
+        reset_attempts: int = 10,
     ):
         if arm not in {"control", "intervention"}:
             raise CosmosIntegrationError("arm must be control or intervention")
@@ -96,6 +97,10 @@ class CosmosInterventionEnv:
         if policy_notification is not None and not policy_notification.strip():
             raise CosmosIntegrationError("policy notification must be non-empty")
         self.policy_notification = policy_notification
+        if reset_attempts < 1:
+            raise CosmosIntegrationError("reset attempts must be positive")
+        self.reset_attempts = reset_attempts
+        self.reset_attempt_count = 0
         self.query_interval = None
         self.max_policy_steps = None
         self.policy_seed = None
@@ -128,7 +133,23 @@ class CosmosInterventionEnv:
         self.max_policy_steps = max_policy_steps
 
     def reset(self, *args: Any, **kwargs: Any) -> Any:
-        result = self._env.reset(*args, **kwargs)
+        # Some LIBERO tasks use a rejection sampler during ``reset`` even
+        # though the frozen benchmark state is restored immediately
+        # afterwards. A rare sampler exhaustion therefore prevents a valid
+        # frozen state from being evaluated. Retrying only this known setup
+        # failure is deterministic across paired arms and does not alter the
+        # restored initial state.
+        for attempt in range(1, self.reset_attempts + 1):
+            try:
+                result = self._env.reset(*args, **kwargs)
+                self.reset_attempt_count = attempt
+                break
+            except Exception as exc:
+                if (
+                    "Cannot place all objects" not in str(exc)
+                    or attempt == self.reset_attempts
+                ):
+                    raise
         self.episode_index += 1
         self.total_env_steps = 0
         self.init_state_sha256 = None
