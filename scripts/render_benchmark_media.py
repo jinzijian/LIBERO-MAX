@@ -17,6 +17,7 @@ from libero.libero import benchmark
 
 from cosmos_policy.experiments.robot.libero.libero_utils import get_libero_env
 from libero_max.libero_backend import LiberoMujocoBackend
+from libero_max.media_validation import validate_render
 from libero_max.pro_runtime import wrap_case_env
 from libero_max.runtime import InterventionRuntime, TriggerContext
 from libero_max.substrate import load_case_task
@@ -185,12 +186,11 @@ def main() -> None:
     for case in selected:
         rendered = _render_pair(case, args.resolution)
         change_type = case["scenario"]["change_type"]
+        validate_render(change_type, rendered["before"], rendered["after"])
         label = CHANGE_LABELS.get(change_type, change_type)
         category = case.get("substrate_category", "Base")
         category_label = _short_category(category)
-        before = _captioned(
-            rendered["before"], "Before · %s" % label, category_label
-        )
+        before = _captioned(rendered["before"], "Before · %s" % label, category_label)
         after = _captioned(rendered["after"], "After · %s" % label, category_label)
         slug = _slug(change_type)
         gif_path = args.output_dir / (slug + ".gif")
