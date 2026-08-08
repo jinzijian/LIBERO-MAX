@@ -11,7 +11,7 @@ class RenderStabilityError(RuntimeError):
 
 
 def install_stable_camera_render(
-    env: Any, maximum_attempts: int = 6, maximum_neighbor_delta: float = 40.0
+    env: Any, maximum_attempts: int = 32, maximum_neighbor_delta: float = 40.0
 ) -> Dict[str, Any]:
     """Wrap ``sim.render`` with same-camera readback stabilization.
 
