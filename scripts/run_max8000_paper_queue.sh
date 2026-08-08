@@ -384,5 +384,10 @@ if not payload["paper_experiments_complete"]:
     raise SystemExit("at least one paper run is incomplete")
 PY
 
+"$PYTHON" scripts/package_paper_results.py "$FINAL_ROOT" \
+  "$PROJECT_DIR/results/max8000" \
+  --media-output-dir "$PROJECT_DIR/assets/media" \
+  >"$FINAL_ROOT/logs/package-paper-results.log"
+
 touch "$FINAL_ROOT/PAPER_QUEUE_DONE"
 log "PAPER QUEUE COMPLETE"
