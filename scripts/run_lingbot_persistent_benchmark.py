@@ -63,10 +63,12 @@ def main() -> int:
         "control_replay_before_event": True,
         "native_cache_replay_before_event": True,
         "exact_runtime_state_snapshot_at_trigger_query": True,
+        "paired_render_mean_absolute_delta": 0.25,
         "paired_input_contract": (
-            "byte-identical policy images and MuJoCo state at every pre-event "
-            "query, with control action replay and exact control runtime-state "
-            "restore before the first post-event response query"
+            "byte-identical MuJoCo state at every pre-event query; policy images "
+            "must be byte-identical or remain within the locked EGL repeated-render "
+            "mean-absolute threshold of 0.25; control action replay and exact "
+            "control runtime-state restore precede the first response query"
         ),
         "native_cache_chunk": "4 video frames x 4 actions",
         "attention_backend": "torch SDPA",

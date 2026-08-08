@@ -5,6 +5,7 @@ import numpy as np
 
 from libero_max.lingbot_adapter import (
     DUMMY_ACTION,
+    compare_lingbot_paired_inputs,
     flatten_lingbot_actions,
     lingbot_policy_input_digests,
 )
@@ -33,6 +34,32 @@ class LingBotAdapterTest(unittest.TestCase):
         self.assertEqual(flat.shape, (16, 7))
         np.testing.assert_array_equal(flat[0], native[:, 0, 0])
         np.testing.assert_array_equal(flat[5], native[:, 1, 1])
+
+    def test_paired_input_qa_requires_exact_physics(self):
+        images = {"wrist": np.zeros((4, 4, 3), dtype=np.uint8)}
+        qa = compare_lingbot_paired_inputs(
+            images,
+            images,
+            {"sim_state_sha256": "a", "policy_image_sha256": {"wrist": "x"}},
+            {"sim_state_sha256": "b", "policy_image_sha256": {"wrist": "x"}},
+        )
+        self.assertEqual(qa["status"], "failed")
+        self.assertFalse(qa["sim_state_exact"])
+
+    def test_paired_input_qa_accepts_bounded_egl_pixel_variation(self):
+        control = {"wrist": np.zeros((4, 4, 3), dtype=np.uint8)}
+        changed = control["wrist"].copy()
+        changed.reshape(-1)[0] = 1
+        intervention = {"wrist": changed}
+        qa = compare_lingbot_paired_inputs(
+            control,
+            intervention,
+            {"sim_state_sha256": "a", "policy_image_sha256": {"wrist": "x"}},
+            {"sim_state_sha256": "a", "policy_image_sha256": {"wrist": "y"}},
+        )
+        self.assertEqual(qa["status"], "passed")
+        self.assertFalse(qa["images_byte_exact"])
+        self.assertEqual(qa["image_deltas"]["wrist"]["changed_values"], 1)
 
     def test_replaces_conditioned_bootstrap_frame_with_noops(self):
         native = np.ones((7, 4, 4), dtype=np.float32)

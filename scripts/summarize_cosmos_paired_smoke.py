@@ -74,17 +74,21 @@ def summarize_pair(control, intervention):
             for field in input_digest_fields)
         for step in pre_change_steps
     )
+    def policy_inputs_match(step):
+        digests_match = all(
+            control_queries[step][field] == intervention_queries[step][field]
+            for field in input_digest_fields
+        )
+        paired_qa = intervention_queries[step].get("paired_policy_input_qa", {})
+        return digests_match or (
+            paired_qa.get("status") == "passed"
+            and paired_qa.get("sim_state_exact") is True
+        )
+
     pre_change_policy_inputs_match = (
         None
         if not pre_change_policy_inputs_measured
-        else all(
-            all(
-                control_queries[step][field]
-                == intervention_queries[step][field]
-                for field in input_digest_fields
-            )
-            for step in pre_change_steps
-        )
+        else all(policy_inputs_match(step) for step in pre_change_steps)
     )
     if pre_change_policy_inputs_match is False:
         raise ValueError("control/intervention policy inputs differ before change")

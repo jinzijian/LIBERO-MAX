@@ -21,6 +21,7 @@ from libero_max.cosmos_integration import CosmosInterventionEnv
 from libero_max.env_factory import create_libero_env_with_retry
 from libero_max.lingbot_adapter import (
     DUMMY_ACTION,
+    compare_lingbot_paired_inputs,
     flatten_lingbot_actions,
     lingbot_policy_input_digests,
 )
@@ -266,6 +267,7 @@ def main() -> int:
                 rows = {}
                 control_native_queries = {}
                 control_input_digests = {}
+                control_policy_observations = {}
                 rolling_control_state = None
                 pre_event_control_state = None
                 state_replay_evidence = {
@@ -389,6 +391,7 @@ def main() -> int:
                                     policy_observation,
                                     wrapped.sim.get_state().flatten(),
                                 )
+                                paired_input_qa = None
                                 replay = (
                                     arm == "intervention"
                                     and not wrapped.runtime.applied
@@ -413,14 +416,20 @@ def main() -> int:
                                             "control native cache missing query step %d"
                                             % policy_step
                                         )
-                                    if input_digests != control_input_digests.get(
-                                        policy_step
-                                    ):
+                                    paired_input_qa = compare_lingbot_paired_inputs(
+                                        control_policy_observations[policy_step],
+                                        policy_observation,
+                                        control_input_digests[policy_step],
+                                        input_digests,
+                                    )
+                                    if paired_input_qa["status"] != "passed":
                                         raise RuntimeError(
                                             "LingBot pre-event policy inputs drifted "
-                                            "at policy_step=%d expected=%s observed=%s"
+                                            "at policy_step=%d qa=%s expected=%s "
+                                            "observed=%s"
                                             % (
                                                 policy_step,
+                                                paired_input_qa,
                                                 control_input_digests.get(policy_step),
                                                 input_digests,
                                             )
@@ -453,6 +462,10 @@ def main() -> int:
                                         control_input_digests[
                                             policy_step
                                         ] = input_digests
+                                        control_policy_observations[policy_step] = {
+                                            key: value.copy()
+                                            for key, value in policy_observation.items()
+                                        }
                                         if pre_event_control_state is None:
                                             (
                                                 rolling_control_state,
@@ -466,6 +479,8 @@ def main() -> int:
                                     actions, instruction=instruction, source=source
                                 )
                                 query.update(input_digests)
+                                if paired_input_qa is not None:
+                                    query["paired_policy_input_qa"] = paired_input_qa
                                 action_plan.extend(actions)
                                 native_for_cache = native
                                 query_index += 1

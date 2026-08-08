@@ -71,6 +71,31 @@ class CosmosSummaryTest(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "policy inputs differ"):
             MODULE.summarize_pair(control, intervention)
 
+    def test_accepts_measured_bounded_render_variation_with_exact_physics(self):
+        control_query = query(0, "a", 0.0, "input-a")
+        intervention_query = query(0, "a", 0.0, "input-b")
+        intervention_query["sim_state_sha256"] = "input-a"
+        intervention_query["paired_policy_input_qa"] = {
+            "status": "passed",
+            "sim_state_exact": True,
+            "images_byte_exact": False,
+        }
+        summary = MODULE.summarize_pair(
+            row("control", False, [control_query], []),
+            row(
+                "intervention",
+                False,
+                [intervention_query],
+                [
+                    {
+                        "cosmos_query_boundary_step": 16,
+                        "mean_absolute_raw_pixel_delta": 2.0,
+                    }
+                ],
+            ),
+        )
+        self.assertTrue(summary["pre_change_policy_inputs_match"])
+
     def test_proximity_event_maps_to_next_policy_query(self):
         control = row(
             "control",
