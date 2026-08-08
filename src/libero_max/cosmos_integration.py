@@ -114,6 +114,7 @@ class CosmosInterventionEnv:
         self.trigger_observation = None
         self.executed_actions: List[Dict[str, Any]] = []
         self.original_goal_completed_after_event = False
+        self.render_initialization_qa = None
 
     def __getattr__(self, name: str) -> Any:
         return getattr(self._env, name)
@@ -158,6 +159,12 @@ class CosmosInterventionEnv:
                     self._env.seed(self.policy_seed + attempt)
         if self.policy_seed is not None and hasattr(self._env, "seed"):
             self._env.seed(self.policy_seed)
+        # LIBERO hard reset replaces the underlying MjSim and its off-screen
+        # context, so the stable-render wrapper must be installed after every
+        # reset rather than only when the outer environment is constructed.
+        from .env_factory import install_stable_camera_render
+
+        self._stable_camera_render_qa = install_stable_camera_render(self._env)
         self.episode_index += 1
         self.total_env_steps = 0
         self.init_state_sha256 = None
@@ -167,16 +174,38 @@ class CosmosInterventionEnv:
         self.trigger_observation = None
         self.executed_actions = []
         self.original_goal_completed_after_event = False
+        self.render_initialization_qa = None
         if hasattr(self.backend, "reset_episode_state"):
             self.backend.reset_episode_state()
         self.runtime.reset(self.task_description)
         return result
 
     def set_init_state(self, initial_state: Any) -> Any:
+        from .env_factory import prime_offscreen_renderer
+
         self.init_state_sha256 = _state_digest(initial_state)
         observation = self._env.set_init_state(initial_state)
+        self.render_initialization_qa = prime_offscreen_renderer(self._env)
+        self.render_initialization_qa[
+            "stable_camera_render"
+        ] = self._stable_camera_render_qa
+        try:
+            setattr(
+                self._env,
+                "libero_max_render_qa",
+                self.render_initialization_qa,
+            )
+        except (AttributeError, TypeError):
+            pass
         self.setup_events = self.runtime.apply_setup()
-        if self.setup_events:
+        # Discard the observation produced while the frozen state and PRO
+        # transforms were being installed. The refreshed observation is read
+        # through the stabilized same-camera path and is the first one exposed
+        # to warmup or policy code.
+        if (
+            self.render_initialization_qa.get("status") == "passed"
+            or self.setup_events
+        ):
             observation = self.backend.refresh_observation()
         return observation
 
@@ -486,9 +515,7 @@ class CosmosInterventionEnv:
             "executed_actions": self.executed_actions,
             "final_instruction": self.runtime.current_instruction,
             "policy_notification": self.policy_notification,
-            "render_initialization_qa": getattr(
-                self._env, "libero_max_render_qa", None
-            ),
+            "render_initialization_qa": self.render_initialization_qa,
             "response_diagnostics": response,
         }
         self.trace_path.parent.mkdir(parents=True, exist_ok=True)
