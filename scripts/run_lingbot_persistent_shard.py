@@ -5,6 +5,7 @@ import argparse
 import collections
 import copy
 import hashlib
+import importlib.machinery
 import json
 import os
 import random
@@ -83,6 +84,7 @@ def main() -> int:
     # server selects PyTorch SDPA. Provide an explicit unused sentinel instead
     # of compiling a backend outside this run's locked configuration.
     flash_stub = types.ModuleType("flash_attn")
+    flash_stub.__spec__ = importlib.machinery.ModuleSpec("flash_attn", loader=None)
 
     def unavailable_flash_attention(*unused_args: Any, **unused_kwargs: Any) -> None:
         raise RuntimeError("FlashAttention is disabled; LingBot uses torch SDPA")

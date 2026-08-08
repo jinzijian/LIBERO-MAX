@@ -1,4 +1,5 @@
 import unittest
+from pathlib import Path
 
 import numpy as np
 
@@ -22,6 +23,13 @@ class LingBotAdapterTest(unittest.TestCase):
     def test_rejects_wrong_native_shape(self):
         with self.assertRaisesRegex(ValueError, "expected"):
             flatten_lingbot_actions(np.zeros((7, 16), dtype=np.float32), query_index=0)
+
+    def test_runner_gives_flash_stub_an_import_spec(self):
+        source = (
+            Path(__file__).parents[1] / "scripts" / "run_lingbot_persistent_shard.py"
+        ).read_text(encoding="utf-8")
+        self.assertIn("flash_stub.__spec__", source)
+        self.assertIn("ModuleSpec", source)
 
 
 if __name__ == "__main__":
