@@ -208,6 +208,14 @@ def main() -> None:
         "candidate_count": len(candidates),
         "selected_count": len(selected),
         "model_runs": args.run,
+        "human_review_protocol": {
+            "attempts_per_case": 3,
+            "feasible_rule": "at least one successful teleoperation",
+            "failure_rule": (
+                "zero of three is a benchmark-defect candidate, not automatic "
+                "proof of infeasibility"
+            ),
+        },
         "cases": selected,
     }
     (args.output_dir / "human_review_queue.json").write_text(
@@ -230,6 +238,11 @@ def main() -> None:
         "failed_model_controls",
         "successful_model_controls",
         "risk_signals",
+        "human_attempts",
+        "human_successes",
+        "human_feasibility_label",
+        "reviewer",
+        "review_notes",
     ]
     with (args.output_dir / "human_review_queue.csv").open(
         "w", newline="", encoding="utf-8"
@@ -245,12 +258,20 @@ def main() -> None:
                         row["successful_model_controls"]
                     ),
                     "risk_signals": "; ".join(row["risk_signals"]),
+                    "human_attempts": "",
+                    "human_successes": "",
+                    "human_feasibility_label": "",
+                    "reviewer": "",
+                    "review_notes": "",
                 }
             )
     markdown = [
         "# Human feasibility review queue",
         "",
         payload["interpretation"],
+        "Protocol: three teleoperation attempts per case; one success is "
+        "positive feasibility evidence, while 0/3 requires simulator and "
+        "expert review before any benchmark change.",
         "",
         "| Rank | Case | Score | Substrate | Change | Risk signals |",
         "| ---: | --- | ---: | --- | --- | --- |",
