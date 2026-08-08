@@ -329,7 +329,8 @@ finalize_with_repairs \
 
 mkdir -p "$FINAL_ROOT/tables/main" "$FINAL_ROOT/tables/tracks" \
   "$FINAL_ROOT/tables/model_comparison" "$FINAL_ROOT/tables/intent" \
-  "$FINAL_ROOT/tables/ablation" "$FINAL_ROOT/human_review"
+  "$FINAL_ROOT/tables/ablation" "$FINAL_ROOT/figures/main" \
+  "$FINAL_ROOT/figures/model_comparison" "$FINAL_ROOT/human_review"
 "$PYTHON" scripts/build_paper_tables.py \
   --run "Cosmos-Policy-q16=$FINAL_ROOT/runs/cosmos_max8000" \
   --run "pi0.5-LIBERO-q5=$FINAL_ROOT/runs/pi05_max8000_q5" \
@@ -360,6 +361,19 @@ mkdir -p "$FINAL_ROOT/tables/main" "$FINAL_ROOT/tables/tracks" \
   --run "Cosmos-notified-q16=results/v1/runs/cosmos2_notified_q16" \
   --output-dir "$FINAL_ROOT/tables/ablation" \
   >"$FINAL_ROOT/logs/build-ablation-tables.log"
+
+"$PYTHON" scripts/build_paper_figures.py \
+  --run "Cosmos-Policy-q16=$FINAL_ROOT/runs/cosmos_max8000" \
+  --run "pi0.5-LIBERO-q5=$FINAL_ROOT/runs/pi05_max8000_q5" \
+  --output-dir "$FINAL_ROOT/figures/main" \
+  >"$FINAL_ROOT/logs/build-main-figures.log"
+"$PYTHON" scripts/build_paper_figures.py \
+  --run "Cosmos-Policy=$FINAL_ROOT/runs/model_comparison/cosmos" \
+  --run "pi0.5-LIBERO=$FINAL_ROOT/runs/model_comparison/pi05" \
+  --run "FastWAM-LIBERO=$FINAL_ROOT/runs/model_comparison/fastwam" \
+  --run "LingBot-VA=$FINAL_ROOT/runs/model_comparison/lingbot" \
+  --output-dir "$FINAL_ROOT/figures/model_comparison" \
+  >"$FINAL_ROOT/logs/build-model-comparison-figures.log"
 
 "$PYTHON" scripts/build_human_review_queue.py "$COMBINED_MANIFEST" \
   --preflight "$BASE_PREFLIGHT" --preflight "$PRO_PREFLIGHT" \

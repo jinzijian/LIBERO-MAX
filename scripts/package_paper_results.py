@@ -51,6 +51,9 @@ def main() -> None:
             "human_review/*.md",
             "human_review/*.json",
             "human_review/*.csv",
+            "figures/**/*.png",
+            "figures/**/*.pdf",
+            "figures/**/*.json",
         ),
     ):
         _copy(source, args.output_dir / source.relative_to(args.paper_root))

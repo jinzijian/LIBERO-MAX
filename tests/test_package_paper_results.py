@@ -20,7 +20,8 @@ class PackagePaperResultsTest(unittest.TestCase):
             table = paper / "tables" / "main"
             review = paper / "human_review"
             media_source = paper / "media"
-            for path in (run, table, review, media_source):
+            figure = paper / "figures" / "main"
+            for path in (run, table, review, media_source, figure):
                 path.mkdir(parents=True)
             (paper / "experiment_status.json").write_text(
                 json.dumps({"paper_experiments_complete": True})
@@ -30,6 +31,7 @@ class PackagePaperResultsTest(unittest.TestCase):
             (run / "raw_trace.bin").write_bytes(b"large trace")
             (table / "main_results.md").write_text("table")
             (review / "human_review_queue.csv").write_text("case_id\n")
+            (figure / "overall_success.png").write_bytes(b"PNG")
             (media_source / "preview.gif").write_bytes(b"GIF89a")
             (media_source / "preview.trace.jsonl").write_text("large trace\n")
 
@@ -50,6 +52,7 @@ class PackagePaperResultsTest(unittest.TestCase):
             self.assertTrue((output / "runs/model/benchmark_summary.json").exists())
             self.assertTrue((output / "SHA256SUMS").exists())
             self.assertFalse((output / "runs/model/raw_trace.bin").exists())
+            self.assertTrue((output / "figures/main/overall_success.png").exists())
             self.assertTrue((media / "preview.gif").exists())
             self.assertFalse((media / "preview.trace.jsonl").exists())
 
