@@ -394,6 +394,14 @@ def main() -> int:
                                     and not wrapped.runtime.applied
                                     and bool(control_queries)
                                 )
+                                # Keep every global RNG boundary identical in
+                                # both arms even when pre-event model inference
+                                # is replaced by exact action/state replay.
+                                # LIBERO/robosuite code may consult the process
+                                # RNG while stepping or refreshing observations.
+                                generator_seed = _noise_seed(seed, query_index)
+                                torch.manual_seed(generator_seed)
+                                np.random.seed(generator_seed)
                                 if replay:
                                     if policy_step not in control_queries:
                                         raise RuntimeError(
@@ -410,7 +418,12 @@ def main() -> int:
                                     ):
                                         raise RuntimeError(
                                             "LingBot pre-event policy inputs drifted "
-                                            "at policy_step=%d" % policy_step
+                                            "at policy_step=%d expected=%s observed=%s"
+                                            % (
+                                                policy_step,
+                                                control_input_digests.get(policy_step),
+                                                input_digests,
+                                            )
                                         )
                                     native = control_native_queries[
                                         policy_step
@@ -420,9 +433,6 @@ def main() -> int:
                                     )
                                     source = "control_replay"
                                 else:
-                                    generator_seed = _noise_seed(seed, query_index)
-                                    torch.manual_seed(generator_seed)
-                                    np.random.seed(generator_seed)
                                     native = np.asarray(
                                         model.infer(
                                             {
