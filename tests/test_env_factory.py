@@ -76,7 +76,7 @@ class EnvFactoryTest(unittest.TestCase):
         bad = _RenderEnv(
             [
                 np.full((4, 4, 3), value, dtype=np.uint8)
-                for value in range(6)
+                for value in range(32)
             ]
         )
         good_frame = np.zeros((4, 4, 3), dtype=np.uint8)
@@ -99,7 +99,7 @@ class EnvFactoryTest(unittest.TestCase):
         env = _RenderEnv(
             [
                 np.full((4, 4, 3), value, dtype=np.uint8)
-                for value in range(6)
+                for value in range(32)
             ]
         )
         with self.assertRaisesRegex(RenderStabilityError, "did not stabilize"):

@@ -129,7 +129,7 @@ def _render_snapshot(env: Any) -> Dict[str, Any]:
 
 def prime_offscreen_renderer(
     env: Any,
-    attempts: int = 6,
+    attempts: int = 32,
     maximum_neighbor_delta: float = 40.0,
     maximum_repeat_delta: float = 0.25,
 ) -> Dict[str, Any]:
