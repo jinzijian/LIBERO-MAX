@@ -141,7 +141,9 @@ def summarize_end_to_end_breakdown(
     return result
 
 
-def _validate_case(case: Dict[str, Any], summary: Dict[str, Any]) -> List[str]:
+def _validate_case(
+    case: Dict[str, Any], summary: Dict[str, Any], protocol: Dict[str, Any]
+) -> List[str]:
     errors: List[str] = []
     if not summary.get("matched"):
         errors.append("paired summary is not matched")
@@ -154,6 +156,7 @@ def _validate_case(case: Dict[str, Any], summary: Dict[str, Any]) -> List[str]:
         "original_task_index": case["task_index"],
         "init_state_index": case["init_state_index"],
         "policy_seed": case["policy_seed"],
+        "query_interval": protocol["query_interval"],
     }
     for arm_name, arm in (("control", control), ("intervention", intervention)):
         for field, value in expected.items():
@@ -236,6 +239,13 @@ def main() -> int:
                         "init_state_sha256"
                     ):
                         reasons.append("initial_state_mismatch")
+                    if (
+                        control.get("query_interval")
+                        != manifest["protocol"]["query_interval"]
+                        or intervention.get("query_interval")
+                        != manifest["protocol"]["query_interval"]
+                    ):
+                        reasons.append("query_interval_mismatch")
                     terminal_invalid[case_id] = reasons or ["paired_summary_missing"]
                 except (OSError, ValueError, json.JSONDecodeError) as exc:
                     invalid[case_id] = ["failed to load terminal traces: %s" % exc]
@@ -250,7 +260,7 @@ def main() -> int:
                 case_id,
                 paired.get("intervention_success"),
             )
-            errors = _validate_case(case, paired)
+            errors = _validate_case(case, paired, manifest["protocol"])
         except (OSError, json.JSONDecodeError) as exc:
             errors = ["failed to load summary: %s" % exc]
             paired = {}
