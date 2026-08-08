@@ -444,6 +444,10 @@ if not payload["paper_experiments_complete"]:
     raise SystemExit("at least one paper run is incomplete")
 PY
 
+"$PYTHON" scripts/build_paper_appendix.py "$FINAL_ROOT" \
+  "$FINAL_ROOT/paper/MAX8000_RESULTS.md" \
+  >"$FINAL_ROOT/logs/build-paper-appendix.log"
+
 "$PYTHON" scripts/package_paper_results.py "$FINAL_ROOT" \
   "$PROJECT_DIR/results/max8000" \
   --media-output-dir "$PROJECT_DIR/assets/media" \

@@ -29,6 +29,7 @@ class UpdateReadmePaperResultsTest(unittest.TestCase):
             self.assertIn("full frozen denominator", section)
             self.assertIn("response-query coverage", section)
             self.assertIn("LaTeX", section)
+            self.assertIn("MAX8000_RESULTS.md", section)
             self.assertIn("cosmos-rollout-replay.gif", section)
             self.assertIn("42 cases", section)
             self.assertIn("top 10", section)

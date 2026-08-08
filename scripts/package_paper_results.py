@@ -49,6 +49,7 @@ def main() -> None:
             "tables/**/*.md",
             "tables/**/*.tex",
             "tables/**/*.json",
+            "paper/*.md",
             "human_review/*.md",
             "human_review/*.json",
             "human_review/*.csv",

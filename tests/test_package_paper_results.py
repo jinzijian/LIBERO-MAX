@@ -21,7 +21,8 @@ class PackagePaperResultsTest(unittest.TestCase):
             review = paper / "human_review"
             media_source = paper / "media"
             figure = paper / "figures" / "main"
-            for path in (run, table, review, media_source, figure):
+            appendix = paper / "paper"
+            for path in (run, table, review, media_source, figure, appendix):
                 path.mkdir(parents=True)
             (paper / "experiment_status.json").write_text(
                 json.dumps({"paper_experiments_complete": True})
@@ -33,6 +34,7 @@ class PackagePaperResultsTest(unittest.TestCase):
             (table / "main_results.tex").write_text("\\begin{table}\n")
             (review / "human_review_queue.csv").write_text("case_id\n")
             (figure / "overall_success.png").write_bytes(b"PNG")
+            (appendix / "MAX8000_RESULTS.md").write_text("appendix")
             (media_source / "preview.gif").write_bytes(b"GIF89a")
             (media_source / "preview.trace.jsonl").write_text("large trace\n")
 
@@ -55,6 +57,7 @@ class PackagePaperResultsTest(unittest.TestCase):
             self.assertFalse((output / "runs/model/raw_trace.bin").exists())
             self.assertTrue((output / "figures/main/overall_success.png").exists())
             self.assertTrue((output / "tables/main/main_results.tex").exists())
+            self.assertTrue((output / "paper/MAX8000_RESULTS.md").exists())
             self.assertTrue((media / "preview.gif").exists())
             self.assertFalse((media / "preview.trace.jsonl").exists())
 

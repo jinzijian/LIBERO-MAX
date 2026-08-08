@@ -89,7 +89,9 @@ def build_section(paper_root: Path) -> str:
             "Machine-readable summaries, full-denominator rows, Markdown and "
             "LaTeX confidence-interval tables, pairwise tests, figures, and "
             "SHA-256 checksums are "
-            "under [`results/max8000`](results/max8000).",
+            "under [`results/max8000`](results/max8000). A single paper-ready "
+            "experiment appendix is available at "
+            "[`MAX8000_RESULTS.md`](results/max8000/paper/MAX8000_RESULTS.md).",
             END,
         ]
     )
