@@ -486,6 +486,9 @@ class CosmosInterventionEnv:
             "executed_actions": self.executed_actions,
             "final_instruction": self.runtime.current_instruction,
             "policy_notification": self.policy_notification,
+            "render_initialization_qa": getattr(
+                self._env, "libero_max_render_qa", None
+            ),
             "response_diagnostics": response,
         }
         self.trace_path.parent.mkdir(parents=True, exist_ok=True)
