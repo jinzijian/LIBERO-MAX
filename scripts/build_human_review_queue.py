@@ -45,8 +45,10 @@ def _load_preflight(paths: Iterable[Path]) -> Dict[str, Dict[str, Any]]:
     return rows
 
 
-def _load_model_controls(specs: Iterable[str]) -> Dict[str, Dict[str, bool]]:
-    controls: Dict[str, Dict[str, bool]] = defaultdict(dict)
+def _load_model_outcomes(
+    specs: Iterable[str],
+) -> Dict[str, Dict[str, Dict[str, bool]]]:
+    outcomes: Dict[str, Dict[str, Dict[str, bool]]] = defaultdict(dict)
     for spec in specs:
         if "=" not in spec:
             raise ValueError("--run must use MODEL=RUN_ROOT")
@@ -62,14 +64,17 @@ def _load_model_controls(specs: Iterable[str]) -> Dict[str, Dict[str, bool]]:
             if not line.strip():
                 continue
             row = json.loads(line)
-            controls[row["pair_id"]][model] = bool(row["control_correct"])
-    return controls
+            outcomes[row["pair_id"]][model] = {
+                "control": bool(row["control_correct"]),
+                "intervention": bool(row["intervention_correct"]),
+            }
+    return outcomes
 
 
 def _score_case(
     case: Dict[str, Any],
     preflight: Dict[str, Any],
-    controls: Dict[str, bool],
+    model_outcomes: Dict[str, Any],
 ) -> Dict[str, Any]:
     scenario = case["scenario"]
     change_type = scenario["change_type"]
@@ -129,8 +134,25 @@ def _score_case(
         score += 2.0
         reasons.append("large post-event settling margin")
 
+    controls = {
+        model: bool(outcome.get("control"))
+        if isinstance(outcome, dict)
+        else bool(outcome)
+        for model, outcome in model_outcomes.items()
+    }
+    interventions = {
+        model: bool(outcome.get("intervention"))
+        for model, outcome in model_outcomes.items()
+        if isinstance(outcome, dict) and "intervention" in outcome
+    }
     failed_models = sorted(model for model, success in controls.items() if not success)
     successful_models = sorted(model for model, success in controls.items() if success)
+    failed_interventions = sorted(
+        model for model, success in interventions.items() if not success
+    )
+    successful_interventions = sorted(
+        model for model, success in interventions.items() if success
+    )
     score += 1.5 * len(failed_models)
     if len(controls) >= 2 and not successful_models:
         score += 4.0
@@ -138,6 +160,13 @@ def _score_case(
     if successful_models:
         score -= 4.0
         reasons.append("at least one model completed the matched control")
+    score += 0.75 * len(failed_interventions)
+    if len(interventions) >= 2 and not successful_interventions:
+        score += 3.0
+        reasons.append("all evaluated model interventions failed")
+    if successful_interventions:
+        score -= 5.0
+        reasons.append("at least one model completed the changed episode")
 
     return {
         "case_id": case["case_id"],
@@ -155,6 +184,8 @@ def _score_case(
         "minimum_image_std": round(minimum_std, 3),
         "failed_model_controls": failed_models,
         "successful_model_controls": successful_models,
+        "failed_model_interventions": failed_interventions,
+        "successful_model_interventions": successful_interventions,
         "risk_signals": reasons,
     }
 
@@ -190,9 +221,13 @@ def main() -> None:
 
     manifest = json.loads(args.manifest.read_text(encoding="utf-8"))
     preflight = _load_preflight(args.preflight)
-    controls = _load_model_controls(args.run)
+    model_outcomes = _load_model_outcomes(args.run)
     rows = [
-        _score_case(case, preflight.get(case["case_id"], {}), controls[case["case_id"]])
+        _score_case(
+            case,
+            preflight.get(case["case_id"], {}),
+            model_outcomes[case["case_id"]],
+        )
         for case in manifest["cases"]
     ]
     candidates = [row for row in rows if row["risk_score"] >= args.minimum_score]
@@ -237,6 +272,8 @@ def main() -> None:
         "minimum_image_std",
         "failed_model_controls",
         "successful_model_controls",
+        "failed_model_interventions",
+        "successful_model_interventions",
         "risk_signals",
         "human_attempts",
         "human_successes",
@@ -256,6 +293,12 @@ def main() -> None:
                     "failed_model_controls": "; ".join(row["failed_model_controls"]),
                     "successful_model_controls": "; ".join(
                         row["successful_model_controls"]
+                    ),
+                    "failed_model_interventions": "; ".join(
+                        row["failed_model_interventions"]
+                    ),
+                    "successful_model_interventions": "; ".join(
+                        row["successful_model_interventions"]
                     ),
                     "risk_signals": "; ".join(row["risk_signals"]),
                     "human_attempts": "",

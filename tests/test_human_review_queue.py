@@ -55,6 +55,32 @@ class HumanReviewQueueTest(unittest.TestCase):
             "at least one model completed the matched control", row["risk_signals"]
         )
 
+    def test_successful_changed_episode_is_stronger_feasibility_evidence(self):
+        case = {
+            "case_id": "p0",
+            "task_suite_name": "libero_goal",
+            "task_index": 0,
+            "init_state_index": 0,
+            "substrate_category": "base",
+            "scenario": {
+                "change_type": "obstacle_insertion",
+                "severity": "high",
+                "randomization": {"draw_id": 0},
+            },
+        }
+        row = MODULE._score_case(
+            case,
+            {"task_description": "pick up the bowl"},
+            {
+                "model-a": {"control": True, "intervention": True},
+                "model-b": {"control": True, "intervention": False},
+            },
+        )
+        self.assertEqual(row["successful_model_interventions"], ["model-a"])
+        self.assertIn(
+            "at least one model completed the changed episode", row["risk_signals"]
+        )
+
     def test_missing_substrate_runtime_is_not_a_topology_risk(self):
         case = {
             "case_id": "base-0",
