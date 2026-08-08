@@ -32,6 +32,21 @@ def _interval(value: Any) -> str:
     return "[%s, %s]" % (_percent(value[0]), _percent(value[1]))
 
 
+def _wilson_interval(successes: int, total: int) -> Any:
+    if not total:
+        return None
+    z = 1.959963984540054
+    rate = successes / total
+    denominator = 1.0 + z * z / total
+    center = (rate + z * z / (2.0 * total)) / denominator
+    radius = (
+        z
+        * math.sqrt(rate * (1.0 - rate) / total + z * z / (4.0 * total * total))
+        / denominator
+    )
+    return [max(0.0, center - radius), min(1.0, center + radius)]
+
+
 def _mcnemar(left_only: int, right_only: int) -> Any:
     discordant = left_only + right_only
     if discordant == 0:
@@ -238,8 +253,7 @@ def main() -> None:
         planned = coverage["planned"]
         response_evaluable = coverage["completed"]
         triggered = sum(
-            bool(record.get("trigger_reached", True))
-            for record in run["end_to_end"]
+            bool(record.get("trigger_reached", True)) for record in run["end_to_end"]
         )
         full_differences = [
             int(record["intervention_correct"]) - int(record["control_correct"])
@@ -257,10 +271,24 @@ def main() -> None:
                 "trigger_coverage": triggered / planned,
                 "response_coverage": response_evaluable / planned,
                 "control_accuracy": end_to_end["control"]["accuracy_on_planned"],
+                "control_accuracy_95ci": _wilson_interval(
+                    sum(
+                        bool(record["control_correct"]) for record in run["end_to_end"]
+                    ),
+                    planned,
+                ),
                 "intervention_accuracy": end_to_end["intervention"][
                     "accuracy_on_planned"
                 ],
+                "intervention_accuracy_95ci": _wilson_interval(
+                    sum(
+                        bool(record["intervention_correct"])
+                        for record in run["end_to_end"]
+                    ),
+                    planned,
+                ),
                 "paired_delta": end_to_end["paired_robustness_delta_on_planned"],
+                "paired_delta_95ci_full": _paired_delta_ci(full_differences),
                 "conditional_paired_delta": metrics["paired_robustness_delta"],
                 "paired_delta_95ci": metrics["paired_robustness_delta_95ci_bootstrap"],
                 "regressions": full_regressions,
@@ -270,19 +298,22 @@ def main() -> None:
         )
 
     lines = [
-        "| Model | Track | Trigger reached | Response-evaluable | Full control | Full change | Full delta | Response-conditioned delta (95% CI) | Regressions | Recoveries | McNemar p |",
+        "| Model | Track | Trigger reached | Response-evaluable | Full control (95% CI) | Full change (95% CI) | Full delta (95% CI) | Response-conditioned delta (95% CI) | Regressions | Recoveries | McNemar p |",
         "| --- | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |",
     ]
     for row in main_rows:
         p_value = row["mcnemar_p"]
         lines.append(
-            "| {model} | {track} | {triggered_pairs}/{planned_pairs} ({trigger}) | {response_evaluable_pairs}/{planned_pairs} ({response}) | {control} | {change} | {delta} | {conditional_delta} {ci} | {regressions} | {recoveries} | {p} |".format(
+            "| {model} | {track} | {triggered_pairs}/{planned_pairs} ({trigger}) | {response_evaluable_pairs}/{planned_pairs} ({response}) | {control} {control_ci} | {change} {change_ci} | {delta} {full_delta_ci} | {conditional_delta} {ci} | {regressions} | {recoveries} | {p} |".format(
                 **row,
                 trigger=_percent(row["trigger_coverage"]),
                 response=_percent(row["response_coverage"]),
                 control=_percent(row["control_accuracy"]),
+                control_ci=_interval(row["control_accuracy_95ci"]),
                 change=_percent(row["intervention_accuracy"]),
+                change_ci=_interval(row["intervention_accuracy_95ci"]),
                 delta=_percent(row["paired_delta"]),
+                full_delta_ci=_interval(row["paired_delta_95ci_full"]),
                 conditional_delta=_percent(row["conditional_paired_delta"]),
                 ci=_interval(row["paired_delta_95ci"]),
                 p="--" if p_value is None else "%.4g" % p_value,
@@ -533,11 +564,8 @@ def main() -> None:
             / len(groups),
             "response": sum(_response_coverage(group) for group in groups)
             / len(groups),
-            "control": sum(metric["control"] for metric in group_metrics)
-            / len(groups),
-            "intervention": sum(
-                metric["intervention"] for metric in group_metrics
-            )
+            "control": sum(metric["control"] for metric in group_metrics) / len(groups),
+            "intervention": sum(metric["intervention"] for metric in group_metrics)
             / len(groups),
             "delta": sum(metric["delta"] for metric in group_metrics) / len(groups),
         }

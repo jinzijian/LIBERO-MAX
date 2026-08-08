@@ -99,8 +99,13 @@ class PaperTablesTest(unittest.TestCase):
                 build_paper_tables.main()
 
             table = (output / "main_results.md").read_text(encoding="utf-8")
+            self.assertIn("Full control (95% CI)", table)
+            self.assertIn("Full delta (95% CI)", table)
             self.assertIn("2/2 (100.0)", table)
             self.assertIn("1/2 (50.0)", table)
+            results = json.loads((output / "results.json").read_text())
+            self.assertEqual(results["main"][0]["paired_delta_95ci_full"], [-1.0, 0.0])
+            self.assertEqual(len(results["main"][0]["control_accuracy_95ci"]), 2)
             latex = (output / "main_results.tex").read_text(encoding="utf-8")
             self.assertIn(r"\begin{table*}[t]", latex)
             self.assertIn(r"physical\_completion", latex)
