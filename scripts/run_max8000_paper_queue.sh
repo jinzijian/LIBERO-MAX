@@ -420,29 +420,14 @@ mkdir -p "$FINAL_ROOT/tables/main" "$FINAL_ROOT/tables/tracks" \
   --output-dir "$FINAL_ROOT/human_review" \
   >"$FINAL_ROOT/logs/build-human-review.log"
 
-"$PYTHON" - "$FINAL_ROOT" <<'PY'
-import json, pathlib, sys
-root = pathlib.Path(sys.argv[1])
-runs = {}
-for summary_path in sorted((root / "runs").glob("**/benchmark_summary.json")):
-    summary = json.loads(summary_path.read_text(encoding="utf-8"))
-    coverage = summary["coverage"]
-    runs[str(summary_path.parent.relative_to(root))] = {
-        "planned": coverage["planned"],
-        "triggered": coverage.get("trigger_reached", coverage["completed"]),
-        "response_evaluable": coverage["completed"],
-        "trigger_unreached": coverage.get("trigger_unreached", 0),
-        "response_query_unreached": coverage.get("response_query_unreached", 0),
-        "execution_complete": coverage.get("execution_complete", False),
-        "control_accuracy": summary["end_to_end_metrics"]["control"]["accuracy_on_planned"],
-        "intervention_accuracy": summary["end_to_end_metrics"]["intervention"]["accuracy_on_planned"],
-        "paired_delta": summary["end_to_end_metrics"]["paired_robustness_delta_on_planned"],
-    }
-payload = {"paper_experiments_complete": all(row["execution_complete"] for row in runs.values()), "runs": runs}
-(root / "experiment_status.json").write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8")
-if not payload["paper_experiments_complete"]:
-    raise SystemExit("at least one paper run is incomplete")
-PY
+"$PYTHON" scripts/build_experiment_status.py "$FINAL_ROOT" \
+  --expected-runs 15 \
+  --external-run "frozen/intent/cosmos=results/v1/runs/cosmos2_intent/benchmark_summary.json" \
+  --external-run "frozen/intent/pi05=results/v1/runs/pi05_intent/benchmark_summary.json" \
+  --external-run "frozen/ablation/cosmos-q16=results/v1/runs/cosmos2_q16_subset/benchmark_summary.json" \
+  --external-run "frozen/ablation/cosmos-q5=results/v1/runs/cosmos2_q5_subset/benchmark_summary.json" \
+  --external-run "frozen/ablation/cosmos-notified-q16=results/v1/runs/cosmos2_notified_q16/benchmark_summary.json" \
+  >"$FINAL_ROOT/logs/build-experiment-status.log"
 
 "$PYTHON" scripts/build_paper_appendix.py "$FINAL_ROOT" \
   "$FINAL_ROOT/paper/MAX8000_RESULTS.md" \
