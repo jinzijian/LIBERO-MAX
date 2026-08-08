@@ -41,6 +41,7 @@ def _terminal_trace_reasons(
     control: Dict[str, Any],
     intervention: Dict[str, Any],
     protocol: Dict[str, Any],
+    require_render_qa: bool = False,
 ) -> List[str]:
     """Classify a terminal pair that lacks a derived paired summary.
 
@@ -50,6 +51,11 @@ def _terminal_trace_reasons(
     """
 
     reasons: List[str] = []
+    if require_render_qa:
+        for arm_name, arm in (("control", control), ("intervention", intervention)):
+            qa = arm.get("render_initialization_qa")
+            if not isinstance(qa, dict) or qa.get("status") != "passed":
+                reasons.append("%s_render_initialization_qa_missing" % arm_name)
     if control.get("init_state_sha256") != intervention.get("init_state_sha256"):
         reasons.append("initial_state_mismatch")
     if (
@@ -201,7 +207,10 @@ def summarize_end_to_end_breakdown(
 
 
 def _validate_case(
-    case: Dict[str, Any], summary: Dict[str, Any], protocol: Dict[str, Any]
+    case: Dict[str, Any],
+    summary: Dict[str, Any],
+    protocol: Dict[str, Any],
+    require_render_qa: bool = False,
 ) -> List[str]:
     errors: List[str] = []
     if not summary.get("matched"):
@@ -224,6 +233,10 @@ def _validate_case(
                     "%s.%s expected %r, found %r"
                     % (arm_name, field, value, arm.get(field))
                 )
+        if require_render_qa:
+            qa = arm.get("render_initialization_qa")
+            if not isinstance(qa, dict) or qa.get("status") != "passed":
+                errors.append("%s render-initialization QA is missing" % arm_name)
     if control.get("intervention_event_count") != 0:
         errors.append("control arm contains intervention events")
     if intervention.get("intervention_event_count") != 1:
@@ -263,6 +276,11 @@ def main() -> int:
         "--output-dir",
         type=Path,
         help="write derived results here while reading case traces from ROOT",
+    )
+    parser.add_argument(
+        "--require-render-qa",
+        action="store_true",
+        help="treat traces without a passed EGL initialization guard as infrastructure gaps",
     )
     args = parser.parse_args()
     manifest_path = args.manifest or args.root / "manifest.json"
@@ -312,7 +330,10 @@ def main() -> int:
                         intervention.get("success"),
                     )
                     reasons = _terminal_trace_reasons(
-                        control, intervention, manifest["protocol"]
+                        control,
+                        intervention,
+                        manifest["protocol"],
+                        require_render_qa=args.require_render_qa,
                     )
                     terminal_invalid[case_id] = reasons or ["paired_summary_missing"]
                 except (OSError, ValueError, json.JSONDecodeError) as exc:
@@ -328,7 +349,12 @@ def main() -> int:
                 case_id,
                 paired.get("intervention_success"),
             )
-            errors = _validate_case(case, paired, manifest["protocol"])
+            errors = _validate_case(
+                case,
+                paired,
+                manifest["protocol"],
+                require_render_qa=args.require_render_qa,
+            )
         except (OSError, json.JSONDecodeError) as exc:
             errors = ["failed to load summary: %s" % exc]
             paired = {}
@@ -547,6 +573,11 @@ def main() -> int:
             "by_dynamic_phase": metrics.get("by_dynamic_phase", {}),
         },
         "measurement_notes": {
+            "render_initialization_qa": (
+                "required for both paired arms; unstable EGL contexts are infrastructure gaps"
+                if args.require_render_qa
+                else "not required by this aggregation"
+            ),
             "end_to_end_scoring": (
                 "all %s frozen cases remain in the denominator; "
                 "trigger-unreached episodes are retained as pre-intervention "
@@ -595,6 +626,7 @@ def main() -> int:
                 "aggregation": {
                     "output_dir": str(output_dir.resolve()),
                     "source_runs": source_run_configs(case_roots),
+                    "require_render_initialization_qa": args.require_render_qa,
                 },
             },
         )

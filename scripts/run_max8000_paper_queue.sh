@@ -140,8 +140,21 @@ finalize_with_repairs() {
   local current_root="$raw_root"
 
   if [[ -f "$final_root/PAPER_RUN_COMPLETE" ]]; then
-    log "SKIP finalized $label"
-    return
+    set +e
+    "$PYTHON" scripts/aggregate_cosmos_benchmark.py "$final_root" \
+      --require-render-qa \
+      >"$FINAL_ROOT/logs/${label}-render-qa-revalidate.log" 2>&1
+    local revalidate_status=$?
+    set -e
+    if [[ "$revalidate_status" == "0" ]]; then
+      assert_complete "$final_root"
+      log "SKIP finalized $label"
+      return
+    fi
+    log "REPAIR finalized $label because render-initialization QA is absent"
+    mv "$final_root/PAPER_RUN_COMPLETE" \
+      "$final_root/PAPER_RUN_COMPLETE.pre-render-qa"
+    current_root="$final_root"
   fi
 
   for attempt in 1 2 3; do
@@ -149,6 +162,7 @@ finalize_with_repairs() {
     mkdir -p "$audit_root"
     set +e
     "$PYTHON" scripts/aggregate_cosmos_benchmark.py "$current_root" \
+      --require-render-qa \
       --manifest "$manifest" --output-dir "$audit_root" \
       >"$FINAL_ROOT/logs/${label}-aggregate-$attempt.log" 2>&1
     set -e
@@ -174,6 +188,7 @@ finalize_with_repairs() {
   "$PYTHON" scripts/compose_paired_run.py "$manifest" "$current_root" \
     --output-root "$final_root" >"$FINAL_ROOT/logs/${label}-compose-final.log"
   "$PYTHON" scripts/aggregate_cosmos_benchmark.py "$final_root" \
+    --require-render-qa \
     >"$FINAL_ROOT/logs/${label}-aggregate-final.log"
   assert_complete "$final_root"
   touch "$final_root/PAPER_RUN_COMPLETE"
@@ -239,6 +254,7 @@ run_smoke() {
   run_rollouts "${label}-smoke" "$launcher" "$FINAL_ROOT/work/runtime-smoke.json" "$root"
   set +e
   "$PYTHON" scripts/aggregate_cosmos_benchmark.py "$root" \
+    --require-render-qa \
     >"$FINAL_ROOT/logs/${label}-smoke-aggregate.log" 2>&1
   set -e
   assert_complete "$root"
@@ -303,6 +319,7 @@ set +e
   --case-root "$FINAL_ROOT/runs/cosmos_pro_2400" \
   --manifest "$COMBINED_MANIFEST" \
   --output-dir "$FINAL_ROOT/runs/cosmos_max8000" \
+  --require-render-qa \
   >"$FINAL_ROOT/logs/cosmos-max8000-aggregate.log" 2>&1
 set -e
 assert_complete "$FINAL_ROOT/runs/cosmos_max8000"
@@ -312,6 +329,7 @@ mkdir -p "$FINAL_ROOT/runs/model_comparison/cosmos"
   "$FINAL_ROOT/runs/cosmos_pro_2400" \
   --manifest "$COMPARISON_MANIFEST" \
   --output-dir "$FINAL_ROOT/runs/model_comparison/cosmos" \
+  --require-render-qa \
   >"$FINAL_ROOT/logs/cosmos-comparison-aggregate.log"
 assert_complete "$FINAL_ROOT/runs/model_comparison/cosmos"
 
@@ -362,6 +380,7 @@ set +e
   --case-root "$FINAL_ROOT/runs/pi05_pro_2400_q5" \
   --manifest "$FINAL_ROOT/work/libero_max_8000_q5.json" \
   --output-dir "$FINAL_ROOT/runs/pi05_max8000_q5" \
+  --require-render-qa \
   >"$FINAL_ROOT/logs/pi05-max8000-aggregate.log" 2>&1
 set -e
 assert_complete "$FINAL_ROOT/runs/pi05_max8000_q5"

@@ -62,6 +62,7 @@ run_model() {
       >"$FINAL_ROOT/logs/${label}-prelaunch-smoke.exit_status"
     set +e
     "$PYTHON" scripts/aggregate_cosmos_benchmark.py "$smoke_root" \
+      --require-render-qa \
       >"$FINAL_ROOT/logs/${label}-prelaunch-smoke-aggregate.log" 2>&1
     set -e
     "$PYTHON" - "$smoke_root" <<'PY'

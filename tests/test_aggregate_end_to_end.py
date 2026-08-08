@@ -13,6 +13,44 @@ SPEC.loader.exec_module(MODULE)
 
 
 class AggregateEndToEndTest(unittest.TestCase):
+    def test_render_qa_is_an_infrastructure_gate_when_required(self):
+        control = {
+            "init_state_sha256": "same",
+            "query_interval": 16,
+            "intervention_event_count": 0,
+            "policy_queries": [],
+        }
+        intervention = dict(control)
+
+        reasons = MODULE._terminal_trace_reasons(
+            control,
+            intervention,
+            {"query_interval": 16},
+            require_render_qa=True,
+        )
+
+        self.assertEqual(
+            reasons,
+            [
+                "control_render_initialization_qa_missing",
+                "intervention_render_initialization_qa_missing",
+                "trigger_unreached",
+            ],
+        )
+
+        passed = {"status": "passed"}
+        control["render_initialization_qa"] = passed
+        intervention["render_initialization_qa"] = passed
+        self.assertEqual(
+            MODULE._terminal_trace_reasons(
+                control,
+                intervention,
+                {"query_interval": 16},
+                require_render_qa=True,
+            ),
+            ["trigger_unreached"],
+        )
+
     def test_response_query_unreached_is_terminal_not_infrastructure(self):
         control = {
             "init_state_sha256": "same",
