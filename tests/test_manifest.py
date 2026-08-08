@@ -77,6 +77,7 @@ class ManifestTest(unittest.TestCase):
             "category": "semantic",
             "bddl_file": "libero_goal_lan/task.bddl",
             "init_states_file": "libero_goal_lan/task.pruned_init",
+            "init_reference_bddl_file": "libero_goal_lan/task.bddl",
             "language": "open the cabinet's middle drawer",
             "source_revision": "c86fc3b",
         }

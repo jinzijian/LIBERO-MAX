@@ -17,6 +17,7 @@ if not hasattr(np, "float_"):
 from libero_max.cosmos_integration import CosmosInterventionEnv, retain_action_prefix
 from libero_max.manifest import load_manifest
 from libero_max.substrate import load_case_task
+from libero_max.pro_runtime import wrap_case_env
 from summarize_cosmos_paired_smoke import summarize_pair
 
 
@@ -169,6 +170,7 @@ def main() -> int:
                 env, task_description = get_libero_env(
                     task, cfg.model_family, resolution=cfg.env_img_res
                 )
+                env = wrap_case_env(env, case)
                 env.seed(cfg.seed)
                 wrapped = CosmosInterventionEnv(
                     env=env,

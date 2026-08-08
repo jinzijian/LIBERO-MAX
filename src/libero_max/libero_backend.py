@@ -39,10 +39,14 @@ class LiberoMujocoBackend:
     """Apply supported LIBERO-MAX changes to a live MuJoCo model."""
 
     def __init__(self, env: Any):
+        substrate_transform = getattr(env, "transform_observation", None)
         base_env = getattr(env, "env", env)
         if not hasattr(base_env, "sim"):
             raise LiberoBackendError("environment does not expose a MuJoCo sim")
         self.env = base_env
+        self._substrate_transform = (
+            substrate_transform if callable(substrate_transform) else None
+        )
         self._removed_positions: Dict[str, np.ndarray] = {}
         self._observation_corruption: Dict[str, Any] = {}
         self._observation_counter = 0
@@ -87,7 +91,10 @@ class LiberoMujocoBackend:
             self.env._post_process()
         if hasattr(self.env, "_update_observables"):
             self.env._update_observables(force=True)
-        return self.transform_observation(self.env._get_observations())
+        observation = self.env._get_observations()
+        if self._substrate_transform is not None:
+            observation = self._substrate_transform(observation)
+        return self.transform_observation(observation)
 
     def transform_observation(self, observation: Dict[str, Any]) -> Dict[str, Any]:
         """Apply an enabled sensor event without changing simulator physics."""

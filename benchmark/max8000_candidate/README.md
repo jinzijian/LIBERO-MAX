@@ -11,4 +11,5 @@ This directory contains a deterministic candidate, not a frozen release.
 
 The candidate is promoted to `benchmark/max8000/` only after all 2,400
 PRO-Hard configurations pass real-MuJoCo preflight and the version 3.0.0 freeze
-audit succeeds. See `docs/MAX_PRO_HARD_DESIGN.md`.
+audit succeeds. The PRO-aware config runtime must also be published or vendored
+before release. See `docs/MAX_PRO_HARD_DESIGN.md`.

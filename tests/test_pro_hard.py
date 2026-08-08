@@ -27,6 +27,10 @@ def _task(category, suite, index, rich_distractors=True):
         "source_revision": REVISION,
         "bddl_file": "%s/%s/task_%d.bddl" % (category, suite, index),
         "init_states_file": "%s/task_%d.pruned_init" % (suite, index),
+        "init_reference_bddl_file": "semantic/%s/task_%d.bddl" % (
+            suite,
+            index,
+        ),
         "trigger_entity": "target",
         "primary_target": "target",
         "primary_receptacle": "basket",
@@ -105,6 +109,9 @@ class ProHardManifestTest(unittest.TestCase):
         case = self.manifest["cases"][0]
         self.assertEqual(case["substrate_variant"]["benchmark"], "LIBERO-PRO")
         self.assertFalse(case["substrate_variant"]["bddl_file"].startswith("/"))
+        self.assertFalse(
+            case["substrate_variant"]["init_reference_bddl_file"].startswith("/")
+        )
         self.assertEqual(case["substrate_variant"]["source_revision"], REVISION)
 
     def test_summary_marks_candidate_until_mujoco_preflight(self):

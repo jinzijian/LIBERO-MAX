@@ -140,6 +140,9 @@ The PRO control and intervention arms use the same perturbed BDDL, init state,
 instruction, policy seed, and pre-event action chunks. Their only paired
 difference is whether the MAX event fires after execution begins. Results must
 report Base-5600 and PRO-Hard-2400 separately before any combined aggregate.
+Config-driven PRO perturbations are applied after frozen-state restoration and
+on every policy observation; topology-extended occlusion tasks use a
+joint-name state adapter rather than padding the MuJoCo vector by position.
 
 The candidate is pinned to the public LIBERO-PRO dataset revision
 `c86fc3b8293185a6f373677018ff3e37f8391602`. It contains 400 distinct PRO task

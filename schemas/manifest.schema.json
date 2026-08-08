@@ -61,6 +61,7 @@
               "category",
               "bddl_file",
               "init_states_file",
+              "init_reference_bddl_file",
               "language",
               "source_revision"
             ],
@@ -76,6 +77,11 @@
                 "type": "string",
                 "minLength": 13,
                 "pattern": "^(?!/)(?!.*(?:^|/)\\.\\.(?:/|$)).*\\.pruned_init$"
+              },
+              "init_reference_bddl_file": {
+                "type": "string",
+                "minLength": 6,
+                "pattern": "^(?!/)(?!.*(?:^|/)\\.\\.(?:/|$)).*\\.bddl$"
               },
               "language": {"type": "string", "minLength": 1},
               "source_revision": {"type": "string", "minLength": 1}

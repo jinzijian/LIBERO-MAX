@@ -78,9 +78,21 @@ def _task_record(
     suite: str,
     bddl_path: Path,
     init_path: Path,
+    init_reference_bddl_path: Path,
 ):
     text = bddl_path.read_text(encoding="utf-8")
     metadata = parse_bddl_metadata(text)
+    reference_metadata = parse_bddl_metadata(
+        init_reference_bddl_path.read_text(encoding="utf-8")
+    )
+    reserved_objects = sorted(
+        set(metadata["objects"]) - set(reference_metadata["objects"])
+    )
+    metadata["distractor_objects"] = [
+        name
+        for name in metadata["distractor_objects"]
+        if name not in reserved_objects
+    ]
     task_name = bddl_path.stem
     try:
         task_index = task_map[suite].index(task_name)
@@ -105,7 +117,14 @@ def _task_record(
         "source_revision": source_revision,
         "bddl_file": str(bddl_path.relative_to(dataset_root / "bddl_files")),
         "init_states_file": str(init_path.relative_to(dataset_root / "init_files")),
+        "init_reference_bddl_file": str(
+            init_reference_bddl_path.relative_to(dataset_root / "bddl_files")
+        ),
         "bddl_sha256": hashlib.sha256(bddl_path.read_bytes()).hexdigest(),
+        "init_reference_bddl_sha256": hashlib.sha256(
+            init_reference_bddl_path.read_bytes()
+        ).hexdigest(),
+        "pro_reserved_objects": reserved_objects,
         **metadata,
         "trigger_entity": trigger,
         "primary_target": target,
@@ -148,6 +167,7 @@ def main() -> int:
                         suite,
                         bddl_path,
                         init_dir / (bddl_path.stem + ".pruned_init"),
+                        bddl_path,
                     )
                 )
     for category, folder in EXTENSION_CATEGORIES.items():
@@ -155,6 +175,14 @@ def main() -> int:
             bddl_dir = args.dataset_root / "bddl_files" / folder / "bddl" / suite
             init_dir = args.dataset_root / "init_files" / suite
             for bddl_path in sorted(bddl_dir.glob("*.bddl")):
+                init_reference_bddl_path = (
+                    args.dataset_root
+                    / "bddl_files"
+                    / (suite + "_lan")
+                    / bddl_path.name
+                )
+                if not init_reference_bddl_path.is_file():
+                    raise FileNotFoundError(str(init_reference_bddl_path))
                 rows.append(
                     _task_record(
                         args.dataset_root,
@@ -165,6 +193,7 @@ def main() -> int:
                         suite,
                         bddl_path,
                         init_dir / (bddl_path.stem + ".pruned_init"),
+                        init_reference_bddl_path,
                     )
                 )
     for row in rows:

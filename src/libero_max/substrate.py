@@ -4,7 +4,7 @@ from pathlib import Path, PurePosixPath
 from typing import Any, Dict, MutableMapping, Optional, Tuple
 
 
-def _variant_path(root: str, relative: str) -> Path:
+def variant_path(root: str, relative: str) -> Path:
     parts = PurePosixPath(relative).parts
     if not parts or any(part in {"", ".", ".."} for part in parts):
         raise ValueError("unsafe substrate variant path: %s" % relative)
@@ -43,8 +43,8 @@ def load_case_task(
     from libero.libero import get_libero_path
     import torch
 
-    bddl_path = _variant_path(get_libero_path("bddl_files"), variant["bddl_file"])
-    init_path = _variant_path(
+    bddl_path = variant_path(get_libero_path("bddl_files"), variant["bddl_file"])
+    init_path = variant_path(
         get_libero_path("init_states"), variant["init_states_file"]
     )
     if not bddl_path.is_file():

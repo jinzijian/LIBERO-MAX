@@ -31,6 +31,7 @@ from libero_max.preflight import (
     settle_metrics,
 )
 from libero_max.runtime import InterventionRuntime, TriggerContext
+from libero_max.pro_runtime import wrap_case_env
 from libero_max.substrate import load_case_task
 
 
@@ -83,7 +84,9 @@ def _run_case(
     if not 0 <= case["init_state_index"] < len(initial_states):
         raise ValueError("initial-state index is outside task")
     env, task_description = get_libero_env(task, "cosmos", resolution=256)
+    env = wrap_case_env(env, case)
     try:
+        env.seed(case["policy_seed"])
         env.reset()
         observation = env.set_init_state(initial_states[case["init_state_index"]])
         backend = LiberoMujocoBackend(env)

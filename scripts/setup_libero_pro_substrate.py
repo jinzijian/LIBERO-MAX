@@ -44,6 +44,8 @@ def main() -> int:
     package_root = args.libero_pro_root / "libero" / "libero"
     required = [
         package_root / "assets",
+        package_root / "envs" / "perturbation_config.py",
+        package_root / "envs" / "robustness_perturbations.py",
         args.dataset_root / "bddl_files",
         args.dataset_root / "init_files",
     ]
@@ -54,10 +56,16 @@ def main() -> int:
         "benchmark_root": str(package_root.resolve()),
         "bddl_files": str((args.dataset_root / "bddl_files").resolve()),
         "init_states": str((args.dataset_root / "init_files").resolve()),
-        "datasets": str((args.libero_pro_root / "libero" / "datasets").resolve()),
+        "datasets": str(args.dataset_root.resolve()),
         "assets": str((package_root / "assets").resolve()),
     }
     args.config_dir.mkdir(parents=True, exist_ok=True)
+    runtime_revision = subprocess.run(
+        ["git", "-C", str(args.libero_pro_root), "rev-parse", "HEAD"],
+        check=True,
+        capture_output=True,
+        text=True,
+    ).stdout.strip()
     # JSON is valid YAML and avoids an extra setup-time dependency.
     (args.config_dir / "config.yaml").write_text(
         json.dumps(config, indent=2, sort_keys=True) + "\n", encoding="utf-8"
@@ -68,6 +76,7 @@ def main() -> int:
         "libero_pro_root": str(args.libero_pro_root.resolve()),
         "dataset_root": str(args.dataset_root.resolve()),
         "config_dir": str(args.config_dir.resolve()),
+        "runtime_revision": runtime_revision,
     }
     (args.config_dir / "source_lock.json").write_text(
         json.dumps(lock, indent=2, sort_keys=True) + "\n", encoding="utf-8"

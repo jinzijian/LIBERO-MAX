@@ -13,6 +13,7 @@ import numpy as np
 from libero_max.cosmos_integration import CosmosInterventionEnv
 from libero_max.scenario import load_scenarios, validate_scenario_collection
 from libero_max.substrate import load_case_task
+from libero_max.pro_runtime import wrap_case_env
 
 
 MAX_STEPS = {
@@ -98,6 +99,7 @@ def main() -> int:
     if not 0 <= args.init_state_index < len(initial_states):
         raise IndexError("init-state index is out of range")
     env, task_description = get_libero_env(task, "cosmos", resolution=256)
+    env = wrap_case_env(env, case)
     env.seed(args.policy_seed)
     wrapped = CosmosInterventionEnv(
         env=env,

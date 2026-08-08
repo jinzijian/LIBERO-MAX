@@ -47,6 +47,15 @@ The ten substrate categories are:
 9. object shape;
 10. initial pose, position, and yaw.
 
+For the six config-driven robustness categories, loading a BDDL is not enough.
+The evaluator applies the pinned `:perturbation_config` after restoring the
+frozen state, and transforms every policy observation when the category calls
+for observation noise. `view_occlusion` adds one free object joint; its shared
+original init state is mapped into the extended model by joint name, while the
+new occluder keeps its deterministic reset pose before the configured
+front-occlusion placement is applied. PRO-only occluders are reserved and can
+never be sampled again as MAX distractors.
+
 The eight MAX events remain illumination switch, camera pose/FOV shift, visual
 theme switch, sensor-corruption onset, target relocation, receptacle
 relocation, five-object distractor burst, and obstacle insertion.
@@ -60,6 +69,12 @@ The candidate pins:
 - dataset: `zhouxueyang/LIBERO-Pro` revision
   `c86fc3b8293185a6f373677018ff3e37f8391602`;
 - dataset license: CC-BY-4.0.
+
+The current real-MuJoCo candidate uses the PRO-aware runtime commit
+`2b910b5b5f53016bef9907632f6f840f1ce2229c`, which provides the BDDL config
+parser and runtime perturbation hooks. That dependency must be published or
+vendored before the version 3.0.0 freeze; the setup script refuses a plain PRO
+checkout that lacks those modules.
 
 The upstream seven-case `runtime_object_move` category is intentionally
 excluded because it already introduces a near-grasp runtime change. Treating
@@ -113,6 +128,8 @@ The candidate becomes version 3.0.0 only when:
    pre-event action chunks;
 8. infrastructure gaps are repaired rather than charged to the model;
 9. the freeze audit creates versioned manifests and SHA-256 checksums.
+10. the pinned PRO-aware runtime is publicly retrievable or vendored with the
+    release.
 
 Run the remote preflight with the PRO implementation and data configuration:
 

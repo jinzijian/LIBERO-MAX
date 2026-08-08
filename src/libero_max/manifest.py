@@ -45,6 +45,7 @@ SUBSTRATE_VARIANT_FIELDS = {
     "category",
     "bddl_file",
     "init_states_file",
+    "init_reference_bddl_file",
     "language",
     "source_revision",
 }
@@ -211,6 +212,13 @@ def validate_manifest(data: Any) -> List[str]:
                 ):
                     errors.append(
                         "%s.substrate_variant.init_states_file must be a safe relative .pruned_init path"
+                        % label
+                    )
+                if "init_reference_bddl_file" in variant and not _safe_relative_path(
+                    variant["init_reference_bddl_file"], ".bddl"
+                ):
+                    errors.append(
+                        "%s.substrate_variant.init_reference_bddl_file must be a safe relative .bddl path"
                         % label
                     )
 

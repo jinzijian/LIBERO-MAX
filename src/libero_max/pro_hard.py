@@ -182,6 +182,7 @@ def _build_pro_case(
             "category": category,
             "bddl_file": task["bddl_file"],
             "init_states_file": task["init_states_file"],
+            "init_reference_bddl_file": task["init_reference_bddl_file"],
             "language": task["language"],
             "source_revision": task["source_revision"],
         },
