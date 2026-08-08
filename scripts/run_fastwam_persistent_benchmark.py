@@ -114,6 +114,7 @@ def main() -> int:
         handles.append(handle)
         processes.append(
             (
+                shard_index,
                 gpu,
                 subprocess.Popen(
                     command, env=environment, stdout=handle, stderr=subprocess.STDOUT
@@ -122,8 +123,8 @@ def main() -> int:
         )
     statuses = {}
     try:
-        for gpu, process in processes:
-            statuses[gpu] = process.wait()
+        for shard_index, gpu, process in processes:
+            statuses["shard%d-gpu%s" % (shard_index, gpu)] = process.wait()
     finally:
         for handle in handles:
             handle.close()
