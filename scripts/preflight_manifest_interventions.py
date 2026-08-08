@@ -119,6 +119,11 @@ def _run_case(
         if setup_events:
             observation = backend.refresh_observation()
         before = observation["agentview_image"].copy()
+        pre_image_mean = float(np.asarray(before, dtype=np.float32).mean())
+        pre_image_std = float(np.asarray(before, dtype=np.float32).std())
+        pre_image_valid = (
+            pre_image_mean >= min_image_mean and pre_image_std >= min_image_std
+        )
         trigger = case["scenario"]["trigger"]
         if trigger["type"] == "on_proximity":
             step = 1
@@ -217,9 +222,13 @@ def _run_case(
             .get("randomization", {})
             .get("draw_id"),
             "task_description": task_description,
+            "substrate_runtime": getattr(env, "substrate_info", None),
             "setup_event_count": len(setup_events),
             "operation": case["scenario"]["change"]["operation"],
             "mean_absolute_raw_pixel_delta": _pixel_mad(before, after),
+            "pre_image_mean": pre_image_mean,
+            "pre_image_std": pre_image_std,
+            "pre_image_valid": pre_image_valid,
             "post_image_mean": image_mean,
             "post_image_std": image_std,
             "image_valid": image_mean >= min_image_mean and image_std >= min_image_std,
@@ -283,6 +292,10 @@ def main() -> int:
             validation_errors = []
             if row["mean_absolute_raw_pixel_delta"] <= 0:
                 validation_errors.append("intervention produced zero pixel change")
+            if not row["pre_image_valid"]:
+                validation_errors.append(
+                    "pre-intervention image failed visibility thresholds"
+                )
             if not row["image_valid"]:
                 validation_errors.append(
                     "post-intervention image failed visibility thresholds"

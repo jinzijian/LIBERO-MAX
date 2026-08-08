@@ -5,7 +5,7 @@ from unittest.mock import patch
 
 import numpy as np
 
-from libero_max.pro_runtime import _adapt_flattened_state
+from libero_max.pro_runtime import EXPECTED_PRO_COMPONENTS, _adapt_flattened_state
 
 
 class _State:
@@ -17,6 +17,13 @@ class _State:
 
 
 class ProRuntimeStateAdapterTest(unittest.TestCase):
+    def test_every_released_pro_category_has_an_explicit_runtime_contract(self):
+        self.assertEqual(len(EXPECTED_PRO_COMPONENTS), 10)
+        self.assertEqual(
+            EXPECTED_PRO_COMPONENTS["view_occlusion"],
+            frozenset({"object_placement", "joint_name_v1"}),
+        )
+
     def test_maps_shared_joints_and_preserves_variant_only_joint(self):
         # Source: joint_a free, joint_b hinge. Variant inserts a free occluder
         # between them, exactly the topology change used by view_occlusion.

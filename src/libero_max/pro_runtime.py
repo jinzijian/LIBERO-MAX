@@ -20,6 +20,20 @@ class ProRuntimeError(RuntimeError):
     """Raised when a PRO task cannot be reproduced faithfully."""
 
 
+EXPECTED_PRO_COMPONENTS = {
+    "semantic": frozenset(),
+    "object": frozenset(),
+    "position": frozenset(),
+    "task": frozenset(),
+    "visual_noise_glare": frozenset({"lighting", "observation"}),
+    "camera_view_angle": frozenset({"camera"}),
+    "object_texture": frozenset({"object_appearance"}),
+    "view_occlusion": frozenset({"object_placement", "joint_name_v1"}),
+    "object_shape": frozenset({"object_shape"}),
+    "initial_pose_position_angle": frozenset({"initial_pose"}),
+}
+
+
 def _joint_widths(joint_type: int) -> Tuple[int, int]:
     # MuJoCo joint types: free=0, ball=1, slide=2, hinge=3.
     if joint_type == 0:
@@ -168,7 +182,6 @@ class ProSubstrateEnv:
         self._vec_env = SimpleNamespace(
             envs=[SimpleNamespace(_env=self._env)]
         )
-        self._observation_index = 0
         self.substrate_info: Dict[str, Any] = {}
         self._static_info: Dict[str, Any] = {}
 
@@ -176,7 +189,6 @@ class ProSubstrateEnv:
         return getattr(self._env, name)
 
     def reset(self, *args: Any, **kwargs: Any) -> Any:
-        self._observation_index = 0
         self.substrate_info = {}
         self._static_info = {}
         return self._env.reset(*args, **kwargs)
@@ -206,15 +218,37 @@ class ProSubstrateEnv:
         )
         lighting = apply_sim_lighting(self._vec_env, self.spec, self.options)
         camera = apply_camera_pose(self._vec_env, self.spec, self.options)
+        state_adapter = (
+            "joint_name_v1"
+            if len(np.asarray(initial_state).reshape(-1)) != len(adapted)
+            else "identity"
+        )
+        components = {
+            name for name, info in self._static_info.items() if info is not None
+        }
+        if lighting != (None, None):
+            components.add("lighting")
+        if camera != (None, None):
+            components.add("camera")
+        if self.spec.observation_perturbation is not None:
+            components.add("observation")
+        if state_adapter != "identity":
+            components.add(state_adapter)
+        expected = EXPECTED_PRO_COMPONENTS.get(self.variant["category"])
+        if expected is None:
+            raise ProRuntimeError(
+                "unknown PRO category: %s" % self.variant["category"]
+            )
+        missing = sorted(expected - components)
+        if missing:
+            raise ProRuntimeError(
+                "PRO category %s did not apply: %s"
+                % (self.variant["category"], ", ".join(missing))
+            )
         self.substrate_info = {
-            "state_adapter": (
-                "joint_name_v1"
-                if len(np.asarray(initial_state).reshape(-1)) != len(adapted)
-                else "identity"
-            ),
-            "static": self._static_info,
-            "lighting": lighting,
-            "camera": camera,
+            "category": self.variant["category"],
+            "state_adapter": state_adapter,
+            "applied_components": sorted(components),
         }
         return self.transform_observation(self._raw_observation())
 
@@ -231,8 +265,11 @@ class ProSubstrateEnv:
         if not image_keys:
             return observation
         pixels = {key: observation[key][None].copy() for key in image_keys}
-        seed = int(self.case["scenario"]["seed"]) + self._observation_index
-        self._observation_index += 1
+        # The substrate draw is frozen per case. Keeping its pixel transform
+        # fixed makes control/intervention observations exactly paired before
+        # the MAX event and prevents preflight deltas from measuring fresh
+        # noise rather than the intervention.
+        seed = int(self.case["scenario"]["seed"])
         transformed = apply_case_to_observation(
             {"pixels": pixels}, self.spec, seed, self.options
         )

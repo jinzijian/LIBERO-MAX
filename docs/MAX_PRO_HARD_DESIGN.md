@@ -56,6 +56,11 @@ new occluder keeps its deterministic reset pose before the configured
 front-occlusion placement is applied. PRO-only occluders are reserved and can
 never be sampled again as MAX distractors.
 
+The runtime records a compact applied-component audit for every preflight row.
+Pixel-space substrate noise uses the case's frozen seed rather than resampling
+on every frame, preserving exact paired observations before the MAX event.
+Both the pre-event and post-event images must pass the visibility gate.
+
 The eight MAX events remain illumination switch, camera pose/FOV shift, visual
 theme switch, sensor-corruption onset, target relocation, receptacle
 relocation, five-object distractor burst, and obstacle insertion.
