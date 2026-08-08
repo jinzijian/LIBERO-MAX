@@ -29,6 +29,7 @@ if ! openpi_runtime_ready "$OPENPI_PYTHON"; then
   fi
 fi
 OPENPI_SITE_PACKAGES="$("$OPENPI_PYTHON" -c 'import site; print(site.getsitepackages()[0])')"
+OPENPI_SERVER_PYTHONPATH="$OPENPI_SITE_PACKAGES:$OPENPI_DIR/src:$OPENPI_DIR/packages/openpi-client/src:$PROJECT_DIR/src:$PROJECT_DIR"
 CLIENT_PYTHON="${CLIENT_PYTHON:-$DEPS_DIR/cosmos-policy/.venv/bin/python}"
 CHECKPOINT="${CHECKPOINT:-$DEPS_DIR/openpi-assets/pi05_libero}"
 GPUS_CSV="${GPUS:-0,1,2,3,4,5,6,7}"
@@ -84,7 +85,7 @@ manifest = json.loads(source.read_text(encoding="utf-8"))
 manifest["protocol"]["query_interval"] = query_interval
 output.write_text(json.dumps(manifest, indent=2, sort_keys=True) + "\n", encoding="utf-8")
 PY
-PYTHONPATH="$OPENPI_SITE_PACKAGES:$OPENPI_DIR/src:$OPENPI_DIR/packages/openpi-client/src${PYTHONPATH:+:$PYTHONPATH}" \
+PYTHONPATH="$OPENPI_SERVER_PYTHONPATH" \
   "$OPENPI_PYTHON" - "$OPENPI_DIR" "$CHECKPOINT" "$OUTPUT_ROOT/run_config.json" \
   "$GPUS_CSV" "$QUERY_INTERVAL" "$PORT_BASE" "$CLIENT_RUNTIME_JSON" <<'PY'
 import importlib.metadata
@@ -147,7 +148,7 @@ for gpu in "${gpu_ids[@]}"; do
   port="$((PORT_BASE + gpu))"
   CUDA_VISIBLE_DEVICES="$gpu" \
   XLA_PYTHON_CLIENT_PREALLOCATE="${XLA_PYTHON_CLIENT_PREALLOCATE:-false}" \
-  PYTHONPATH="$OPENPI_SITE_PACKAGES:$OPENPI_DIR/src:$OPENPI_DIR/packages/openpi-client/src${PYTHONPATH:+:$PYTHONPATH}" \
+  PYTHONPATH="$OPENPI_SERVER_PYTHONPATH" \
     "$OPENPI_PYTHON" scripts/serve_openpi_deterministic.py \
       --port "$port" \
       --checkpoint "$CHECKPOINT" \
@@ -155,12 +156,22 @@ for gpu in "${gpu_ids[@]}"; do
   server_pids+=("$!")
 done
 
-for gpu in "${gpu_ids[@]}"; do
+for index in "${!gpu_ids[@]}"; do
+  gpu="${gpu_ids[$index]}"
   port="$((PORT_BASE + gpu))"
-  "$CLIENT_PYTHON" - "$port" <<'PY'
-import socket, sys, time
+  server_pid="${server_pids[$index]}"
+  "$CLIENT_PYTHON" - "$port" "$server_pid" <<'PY'
+import os, socket, sys, time
 port = int(sys.argv[1])
+server_pid = int(sys.argv[2])
 for _ in range(600):
+    try:
+        os.kill(server_pid, 0)
+    except ProcessLookupError:
+        raise SystemExit(
+            "policy server process %d exited before port %d became ready"
+            % (server_pid, port)
+        )
     try:
         with socket.create_connection(("127.0.0.1", port), timeout=1):
             raise SystemExit(0)

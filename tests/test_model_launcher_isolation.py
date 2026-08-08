@@ -35,9 +35,15 @@ class ModelLauncherIsolationTest(unittest.TestCase):
         self.assertIn('hasattr(mujoco.MjModel, "mesh_scale")', source)
         self.assertIn('"simulator_client": json.loads(sys.argv[7])', source)
         self.assertIn("OPENPI_SITE_PACKAGES", source)
-        active = source.index('PYTHONPATH="$OPENPI_SITE_PACKAGES:')
-        inherited = source.index("${PYTHONPATH:+:$PYTHONPATH}", active)
-        self.assertLess(active, inherited)
+        self.assertIn("OPENPI_SERVER_PYTHONPATH", source)
+        self.assertIn('PYTHONPATH="$OPENPI_SERVER_PYTHONPATH"', source)
+        declaration = source.index('OPENPI_SERVER_PYTHONPATH="')
+        self.assertNotIn(
+            "${PYTHONPATH:+:$PYTHONPATH}",
+            source[declaration : source.index("CLIENT_PYTHON=", declaration)],
+        )
+        self.assertIn("os.kill(server_pid, 0)", source)
+        self.assertIn("exited before port", source)
 
 
 if __name__ == "__main__":
