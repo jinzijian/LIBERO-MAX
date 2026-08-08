@@ -37,3 +37,8 @@ counterevidence to base-task infeasibility; a successful model intervention is
 stronger counterevidence because it completes the exact changed episode.
 Neither replaces the direct positive check from a successful human
 intervention rollout.
+
+Model-failure evidence is normalized by the number of models evaluated for a
+case. This prevents the frozen 800-case four-model subset from receiving a
+higher priority merely because it has two additional model outcomes; ranking
+depends on failure rate and the physical/task risk signals instead.

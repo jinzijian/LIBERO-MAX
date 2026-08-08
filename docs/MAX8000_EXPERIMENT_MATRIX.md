@@ -62,7 +62,9 @@ expert teleoperation. Model failures are triage signals only and never remove
 cases from reported denominators. Reviewers make three attempts per case; one
 success establishes positive feasibility evidence. Zero of three creates a
 benchmark-defect candidate that requires a second independent reviewer before
-any versioned correction.
+any versioned correction. Failure evidence is normalized by model coverage so
+the 800-case four-model subset is not preferentially ranked simply because it
+has more evaluated policies.
 
 ## Media and publication gate
 

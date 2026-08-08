@@ -101,6 +101,34 @@ class HumanReviewQueueTest(unittest.TestCase):
         )
         self.assertNotIn("topology-extended state adapter", row["risk_signals"])
 
+    def test_failure_evidence_is_normalized_across_model_coverage(self):
+        case = {
+            "case_id": "p0",
+            "task_suite_name": "libero_goal",
+            "task_index": 0,
+            "init_state_index": 0,
+            "substrate_category": "base",
+            "scenario": {
+                "change_type": "camera_shift",
+                "severity": "high",
+                "randomization": {"draw_id": 0},
+            },
+        }
+        preflight = {"task_description": "pick up the bowl"}
+        two_models = MODULE._score_case(
+            case,
+            preflight,
+            {"a": False, "b": False},
+        )
+        four_models = MODULE._score_case(
+            case,
+            preflight,
+            {"a": False, "b": False, "c": False, "d": False},
+        )
+        self.assertEqual(two_models["risk_score"], four_models["risk_score"])
+        self.assertEqual(two_models["control_failure_rate"], 1.0)
+        self.assertEqual(four_models["control_failure_rate"], 1.0)
+
 
 if __name__ == "__main__":
     unittest.main()

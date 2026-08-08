@@ -153,14 +153,20 @@ def _score_case(
     successful_interventions = sorted(
         model for model, success in interventions.items() if success
     )
-    score += 1.5 * len(failed_models)
+    control_failure_rate = len(failed_models) / len(controls) if controls else None
+    intervention_failure_rate = (
+        len(failed_interventions) / len(interventions) if interventions else None
+    )
+    if control_failure_rate is not None:
+        score += 3.0 * control_failure_rate
     if len(controls) >= 2 and not successful_models:
         score += 4.0
         reasons.append("all evaluated model controls failed")
     if successful_models:
         score -= 4.0
         reasons.append("at least one model completed the matched control")
-    score += 0.75 * len(failed_interventions)
+    if intervention_failure_rate is not None:
+        score += 1.5 * intervention_failure_rate
     if len(interventions) >= 2 and not successful_interventions:
         score += 3.0
         reasons.append("all evaluated model interventions failed")
@@ -186,6 +192,8 @@ def _score_case(
         "successful_model_controls": successful_models,
         "failed_model_interventions": failed_interventions,
         "successful_model_interventions": successful_interventions,
+        "control_failure_rate": control_failure_rate,
+        "intervention_failure_rate": intervention_failure_rate,
         "risk_signals": reasons,
     }
 
@@ -274,6 +282,8 @@ def main() -> None:
         "successful_model_controls",
         "failed_model_interventions",
         "successful_model_interventions",
+        "control_failure_rate",
+        "intervention_failure_rate",
         "risk_signals",
         "human_attempts",
         "human_successes",
