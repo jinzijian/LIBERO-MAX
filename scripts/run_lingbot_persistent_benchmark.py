@@ -62,9 +62,11 @@ def main() -> int:
         "cuda_recomputation_bitwise_deterministic": False,
         "control_replay_before_event": True,
         "native_cache_replay_before_event": True,
+        "exact_runtime_state_snapshot_at_trigger_query": True,
         "paired_input_contract": (
             "byte-identical policy images and MuJoCo state at every pre-event "
-            "query, with control action and native-cache replay"
+            "query, with control action replay and exact control runtime-state "
+            "restore before the first post-event response query"
         ),
         "native_cache_chunk": "4 video frames x 4 actions",
         "attention_backend": "torch SDPA",

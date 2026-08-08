@@ -51,6 +51,15 @@ class LingBotAdapterTest(unittest.TestCase):
         self.assertIn("flash_stub.__spec__", source)
         self.assertIn("ModuleSpec", source)
 
+    def test_runner_restores_exact_state_only_after_the_event(self):
+        source = (
+            Path(__file__).parents[1] / "scripts" / "run_lingbot_persistent_shard.py"
+        ).read_text(encoding="utf-8")
+        self.assertIn("_capture_lingbot_runtime_state", source)
+        self.assertIn("_restore_lingbot_runtime_state", source)
+        self.assertIn('wrapped.runtime.applied', source)
+        self.assertIn('restored_before_response_query', source)
+
 
 if __name__ == "__main__":
     unittest.main()
