@@ -55,6 +55,26 @@ class HumanReviewQueueTest(unittest.TestCase):
             "at least one model completed the matched control", row["risk_signals"]
         )
 
+    def test_missing_substrate_runtime_is_not_a_topology_risk(self):
+        case = {
+            "case_id": "base-0",
+            "task_suite_name": "libero_object",
+            "task_index": 0,
+            "init_state_index": 0,
+            "substrate_category": "Objects Layout",
+            "scenario": {
+                "change_type": "illumination_switch",
+                "severity": "high",
+                "randomization": {"draw_id": 0},
+            },
+        }
+        row = MODULE._score_case(
+            case,
+            {"task_description": "pick up the bowl"},
+            {},
+        )
+        self.assertNotIn("topology-extended state adapter", row["risk_signals"])
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -121,7 +121,8 @@ def _score_case(
     elif minimum_std < 12.0:
         score += 2.0
         reasons.append("low image contrast")
-    if (preflight.get("substrate_runtime") or {}).get("state_adapter") != "identity":
+    state_adapter = (preflight.get("substrate_runtime") or {}).get("state_adapter")
+    if state_adapter and state_adapter != "identity":
         score += 2.0
         reasons.append("topology-extended state adapter")
     if float(preflight.get("max_excess_settle_displacement_m", 0.0)) > 0.01:
