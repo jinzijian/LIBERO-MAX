@@ -78,7 +78,10 @@ def build_appendix(paper_root: Path) -> str:
     analysis = analysis_path.read_text(encoding="utf-8").strip()
     analysis_lines = analysis.splitlines()
     if analysis_lines and analysis_lines[0].startswith("# "):
-        analysis = "\n".join(analysis_lines[1:]).lstrip()
+        analysis_lines = analysis_lines[1:]
+    analysis = "\n".join(
+        "### " + line[3:] if line.startswith("## ") else line for line in analysis_lines
+    ).lstrip()
     grouped = {
         "main": [],
         "comparison": [],
