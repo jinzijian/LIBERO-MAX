@@ -75,7 +75,7 @@ def build_section(paper_root: Path) -> str:
             "The following GIF reconstructs a real Cosmos intervention trajectory "
             "from its recorded action trace and verifies the exact event step.",
             "",
-            "![Cosmos target-relocation rollout replay](assets/media/cosmos-target-relocation-rollout.gif)",
+            "![Audited Cosmos rollout replay](assets/media/cosmos-rollout-replay.gif)",
             "",
             "### Human feasibility secondary review",
             "",

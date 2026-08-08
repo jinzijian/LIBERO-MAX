@@ -67,7 +67,9 @@ any versioned correction.
 ## Media and publication gate
 
 The release includes eight real-MuJoCo before/after GIFs, an overview image,
-and one replay of a recorded Cosmos action trace with event-step verification.
+and one deterministic replay of a response-evaluable recorded Cosmos action
+trace with event-step verification. The replay selector prefers successful
+target/receptacle relocation cases and records the exact selected case ID.
 Final README results are generated only when every listed run is
 execution-complete. The compact bundle contains Markdown and LaTeX tables,
 JSON summaries, full-denominator rows, figures, the human-review queue, run

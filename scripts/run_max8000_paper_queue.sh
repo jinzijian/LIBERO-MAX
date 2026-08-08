@@ -167,6 +167,40 @@ output.write_text(json.dumps(manifest, indent=2, sort_keys=True) + "\n", encodin
 PY
 }
 
+select_cosmos_replay_case() {
+  "$PYTHON" - "$1" <<'PY'
+import json, pathlib, sys
+root = pathlib.Path(sys.argv[1])
+rows = [
+    json.loads(line)
+    for line in (root / "paired_results.jsonl").read_text(encoding="utf-8").splitlines()
+    if line.strip()
+]
+change_priority = {
+    "target_relocation": 0,
+    "receptacle_relocation": 1,
+    "distractor_burst": 2,
+    "obstacle_insertion": 3,
+}
+candidates = [
+    row for row in rows
+    if row.get("policy_response_query_step") is not None
+]
+if not candidates:
+    raise SystemExit("no response-evaluable Cosmos case is available for replay")
+selected = min(
+    candidates,
+    key=lambda row: (
+        not (row["control_correct"] and row["intervention_correct"]),
+        not row["control_correct"],
+        change_priority.get(row.get("change_type"), 10),
+        row["pair_id"],
+    ),
+)
+print(selected["pair_id"])
+PY
+}
+
 run_smoke() {
   local label="$1"
   local launcher="$2"
@@ -264,11 +298,12 @@ MUJOCO_GL=egl PYOPENGL_PLATFORM=egl MUJOCO_EGL_DEVICE_ID=0 \
   "$PYTHON" scripts/render_benchmark_media.py "$PRO_MANIFEST" \
     --preflight "$PRO_PREFLIGHT" --output-dir "$FINAL_ROOT/media" \
     >"$FINAL_ROOT/logs/render-media.log"
+replay_case="$(select_cosmos_replay_case "$FINAL_ROOT/runs/cosmos_pro_2400")"
+log "Render audited Cosmos replay case=$replay_case"
 MUJOCO_GL=egl PYOPENGL_PLATFORM=egl MUJOCO_EGL_DEVICE_ID=0 \
-  "$PYTHON" scripts/render_rollout_replay.py "$COMPARISON_MANIFEST" \
-    "$FINAL_ROOT/runs/cosmos_pro_2400" \
-    pro-task-10-t00-i04-target_relocation-d0-p195 \
-    "$FINAL_ROOT/media/cosmos-target-relocation-rollout.gif" \
+  "$PYTHON" scripts/render_rollout_replay.py "$PRO_MANIFEST" \
+    "$FINAL_ROOT/runs/cosmos_pro_2400" "$replay_case" \
+    "$FINAL_ROOT/media/cosmos-rollout-replay.gif" \
     >"$FINAL_ROOT/logs/render-rollout-replay.log"
 
 # Main pi0.5 runs: native q5 on all 8,000 cases, plus a separate q16 rerun on
