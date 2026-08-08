@@ -20,6 +20,16 @@ export LIBERO_CONFIG_PATH="${LIBERO_PRO_CONFIG:-$DEPS_DIR/libero-pro-config}"
 export TORCH_FORCE_NO_WEIGHTS_ONLY_LOAD=1
 export PYTHONPATH="$ACTIVE_SITE_PACKAGES:$DEPS_DIR/robosuite-1.4.0:$LIBERO_OVERLAY:$DEPS_DIR/.venv-libero/lib/python3.10/site-packages:$LIBERO_IMPL_DIR:$LINGBOT_ROOT:$PROJECT_DIR/src${PYTHONPATH:+:$PYTHONPATH}"
 
+"$PYTHON" - <<'PY'
+import mujoco
+
+if mujoco.__version__ != "3.2.6" or not hasattr(mujoco.MjModel, "mesh_scale"):
+    raise SystemExit(
+        "LingBot PRO runtime requires mujoco==3.2.6 with MjModel.mesh_scale; "
+        "install it in the active model venv"
+    )
+PY
+
 command=(
   "$PYTHON" "$PROJECT_DIR/scripts/run_lingbot_persistent_benchmark.py"
   "$(realpath "$1")" --output-root "$(realpath -m "$2")"

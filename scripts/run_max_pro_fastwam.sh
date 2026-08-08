@@ -25,6 +25,16 @@ export DIFFSYNTH_MODEL_BASE_PATH="$BASE_ASSETS"
 export DIFFSYNTH_DOWNLOAD_SOURCE=huggingface
 export PYTHONPATH="$ACTIVE_SITE_PACKAGES:$DEPS_DIR/robosuite-1.4.0:$LIBERO_OVERLAY:$DEPS_DIR/.venv-libero/lib/python3.10/site-packages:$LIBERO_IMPL_DIR:$FASTWAM_ROOT:$FASTWAM_ROOT/experiments/libero:$PROJECT_DIR/src${PYTHONPATH:+:$PYTHONPATH}"
 
+"$PYTHON" - <<'PY'
+import mujoco
+
+if mujoco.__version__ != "3.2.6" or not hasattr(mujoco.MjModel, "mesh_scale"):
+    raise SystemExit(
+        "FastWAM PRO runtime requires mujoco==3.2.6 with MjModel.mesh_scale; "
+        "install it in the active model venv"
+    )
+PY
+
 command=(
   "$PYTHON" "$PROJECT_DIR/scripts/run_fastwam_persistent_benchmark.py"
   "$(realpath "$1")" --output-root "$(realpath -m "$2")"

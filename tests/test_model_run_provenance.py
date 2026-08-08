@@ -17,6 +17,7 @@ class ModelRunProvenanceTest(unittest.TestCase):
             self.assertIn("runtime_versions", source)
             self.assertIn("checkpoint_bytes", source)
             self.assertIn("control_replay_before_event", source)
+            self.assertIn('"mujoco"', source)
 
 
 if __name__ == "__main__":

@@ -13,7 +13,7 @@ GPUS="${GPUS:-4,5,6,7}"
 SMOKE_GPU="${SMOKE_GPU:-${GPUS%%,*}}"
 FINAL_ROOT="${FINAL_ROOT:-$PROJECT_DIR/artifacts/max8000/paper_final}"
 MANIFEST="$PROJECT_DIR/benchmark/max8000/libero_max_pro_model_comparison_800.json"
-SMOKE_MANIFEST="$FINAL_ROOT/work/runtime-smoke.json"
+SMOKE_MANIFEST="$FINAL_ROOT/work/pro-runtime-compatibility-smoke.json"
 
 mkdir -p "$FINAL_ROOT/logs" "$FINAL_ROOT/work"
 cd "$PROJECT_DIR"
@@ -25,11 +25,23 @@ if [[ ! -f "$SMOKE_MANIFEST" ]]; then
 import json, pathlib, sys
 source, output = map(pathlib.Path, sys.argv[1:])
 manifest = json.loads(source.read_text(encoding="utf-8"))
-wanted = "pro-task-10-t00-i04-target_relocation-d0-p195"
-manifest["benchmark_id"] += "-runtime-smoke"
-manifest["cases"] = [case for case in manifest["cases"] if case["case_id"] == wanted]
-if len(manifest["cases"]) != 1:
-    raise SystemExit("frozen runtime-smoke case is missing")
+wanted_categories = (
+    "initial_pose_position_angle",
+    "object_shape",
+    "view_occlusion",
+)
+selected = []
+for category in wanted_categories:
+    candidates = [
+        case
+        for case in manifest["cases"]
+        if case["substrate_category"] == "LIBERO-PRO/" + category
+    ]
+    if not candidates:
+        raise SystemExit("frozen compatibility-smoke category is missing: " + category)
+    selected.append(min(candidates, key=lambda case: case["case_id"]))
+manifest["benchmark_id"] += "-pro-runtime-compatibility-smoke"
+manifest["cases"] = selected
 output.write_text(json.dumps(manifest, indent=2, sort_keys=True) + "\n", encoding="utf-8")
 PY
 fi
@@ -37,7 +49,7 @@ fi
 run_model() {
   local label="$1"
   local launcher="$2"
-  local smoke_root="$FINAL_ROOT/work/${label}-smoke"
+  local smoke_root="$FINAL_ROOT/work/${label}-compatibility-smoke"
   local raw_root="$FINAL_ROOT/work/${label}-comparison-800-raw"
 
   if [[ ! -f "$smoke_root/PAPER_RUN_COMPLETE" ]]; then

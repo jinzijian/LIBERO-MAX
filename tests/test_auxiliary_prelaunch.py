@@ -10,7 +10,10 @@ class AuxiliaryPrelaunchTest(unittest.TestCase):
         source = (ROOT / "scripts/run_max8000_auxiliary_prelaunch.sh").read_text(
             encoding="utf-8"
         )
-        self.assertIn("runtime-smoke.json", source)
+        self.assertIn("pro-runtime-compatibility-smoke.json", source)
+        self.assertIn('"initial_pose_position_angle"', source)
+        self.assertIn('"object_shape"', source)
+        self.assertIn('"view_occlusion"', source)
         self.assertIn("run_max_pro_fastwam.sh", source)
         self.assertIn("run_max_pro_lingbot.sh", source)
         self.assertIn("libero_max_pro_model_comparison_800.json", source)

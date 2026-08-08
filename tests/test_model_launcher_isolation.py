@@ -13,6 +13,8 @@ class ModelLauncherIsolationTest(unittest.TestCase):
             active = source.index('export PYTHONPATH="$ACTIVE_SITE_PACKAGES:')
             shared = source.index("$DEPS_DIR/.venv-libero/lib/python3.10/site-packages")
             self.assertLess(active, shared)
+            self.assertIn('mujoco.__version__ != "3.2.6"', source)
+            self.assertIn('hasattr(mujoco.MjModel, "mesh_scale")', source)
 
     def test_openpi_pro_launcher_pins_pro_runtime_paths(self):
         source = (ROOT / "scripts" / "run_max_pro_openpi.sh").read_text(

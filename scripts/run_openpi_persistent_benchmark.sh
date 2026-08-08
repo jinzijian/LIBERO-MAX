@@ -78,7 +78,7 @@ payload = {
     "rollout_videos_disabled": True,
     "runtime_versions": {
         package: version(package)
-        for package in ("openpi-client", "jax", "numpy", "torch")
+        for package in ("openpi-client", "jax", "numpy", "torch", "mujoco")
     },
 }
 output.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8")

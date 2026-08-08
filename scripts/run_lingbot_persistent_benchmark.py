@@ -65,7 +65,7 @@ def main() -> int:
         "bootstrap": "first conditioned frame replaced by four LIBERO no-ops",
         "rollout_videos_disabled": True,
         "runtime_versions": _versions(
-            "torch", "numpy", "numba", "diffusers", "transformers"
+            "torch", "numpy", "numba", "diffusers", "transformers", "mujoco"
         ),
     }
     (args.output_root / "run_config.json").write_text(

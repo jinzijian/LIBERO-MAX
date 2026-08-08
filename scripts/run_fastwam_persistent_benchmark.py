@@ -61,7 +61,7 @@ def main() -> int:
         "control_replay_before_event": True,
         "rollout_videos_disabled": True,
         "runtime_versions": _versions(
-            "fastwam", "torch", "numpy", "numba", "transformers"
+            "fastwam", "torch", "numpy", "numba", "transformers", "mujoco"
         ),
         "base_assets": os.environ.get("DIFFSYNTH_MODEL_BASE_PATH"),
     }
