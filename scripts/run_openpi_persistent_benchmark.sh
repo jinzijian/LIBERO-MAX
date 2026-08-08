@@ -10,6 +10,24 @@ PROJECT_DIR="${PROJECT_DIR:-/vepfs/zijian/LIBERO-MAX}"
 DEPS_DIR="${DEPS_DIR:-/vepfs/zijian/alter-wam-deps}"
 OPENPI_DIR="${OPENPI_DIR:-$DEPS_DIR/openpi}"
 OPENPI_PYTHON="${OPENPI_PYTHON:-$OPENPI_DIR/.venv/bin/python}"
+OPENPI_FALLBACK_PYTHON="${OPENPI_FALLBACK_PYTHON:-/tmp/openpi-venv/bin/python}"
+
+openpi_runtime_ready() {
+  local candidate="$1"
+  PYTHONPATH="$OPENPI_DIR/src:$OPENPI_DIR/packages/openpi-client/src" \
+    "$candidate" -c \
+      'from openpi.policies import policy_config; from openpi.serving.websocket_policy_server import WebsocketPolicyServer; from openpi.training import config' \
+      >/dev/null 2>&1
+}
+
+if ! openpi_runtime_ready "$OPENPI_PYTHON"; then
+  if openpi_runtime_ready "$OPENPI_FALLBACK_PYTHON"; then
+    OPENPI_PYTHON="$OPENPI_FALLBACK_PYTHON"
+  else
+    echo "no complete OpenPI runtime is available" >&2
+    exit 1
+  fi
+fi
 OPENPI_SITE_PACKAGES="$("$OPENPI_PYTHON" -c 'import site; print(site.getsitepackages()[0])')"
 CLIENT_PYTHON="${CLIENT_PYTHON:-$DEPS_DIR/cosmos-policy/.venv/bin/python}"
 CHECKPOINT="${CHECKPOINT:-$DEPS_DIR/openpi-assets/pi05_libero}"
@@ -63,6 +81,7 @@ checkpoint_bytes = (
 )
 payload = {
     "model": "pi0.5-LIBERO",
+    "python": sys.executable,
     "source_revision": subprocess.check_output(
         ["git", "-C", str(root), "rev-parse", "HEAD"], text=True
     ).strip(),

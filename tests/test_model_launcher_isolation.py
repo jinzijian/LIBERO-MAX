@@ -28,6 +28,9 @@ class ModelLauncherIsolationTest(unittest.TestCase):
         source = (ROOT / "scripts" / "run_openpi_persistent_benchmark.sh").read_text(
             encoding="utf-8"
         )
+        self.assertIn("OPENPI_FALLBACK_PYTHON", source)
+        self.assertIn("openpi_runtime_ready", source)
+        self.assertIn('"python": sys.executable', source)
         self.assertIn("OPENPI_SITE_PACKAGES", source)
         active = source.index('PYTHONPATH="$OPENPI_SITE_PACKAGES:')
         inherited = source.index("${PYTHONPATH:+:$PYTHONPATH}", active)
