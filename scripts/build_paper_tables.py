@@ -261,6 +261,15 @@ def main() -> None:
         ]
         full_regressions = sum(value == -1 for value in full_differences)
         full_recoveries = sum(value == 1 for value in full_differences)
+        preserved_capability = sum(
+            bool(record["control_correct"]) and bool(record["intervention_correct"])
+            for record in run["end_to_end"]
+        )
+        persistent_failure = sum(
+            not bool(record["control_correct"])
+            and not bool(record["intervention_correct"])
+            for record in run["end_to_end"]
+        )
         main_rows.append(
             {
                 "model": run["name"],
@@ -293,6 +302,8 @@ def main() -> None:
                 "paired_delta_95ci": metrics["paired_robustness_delta_95ci_bootstrap"],
                 "regressions": full_regressions,
                 "recoveries": full_recoveries,
+                "preserved_capability": preserved_capability,
+                "persistent_failure": persistent_failure,
                 "mcnemar_p": _mcnemar(full_regressions, full_recoveries),
             }
         )
@@ -321,6 +332,20 @@ def main() -> None:
         )
     (args.output_dir / "main_results.md").write_text(
         "\n".join(lines) + "\n", encoding="utf-8"
+    )
+
+    outcome_lines = [
+        "| Model | n | Preserved capability (C=1, I=1) | Intervention-side gain (C=0, I=1) | Regression under change (C=1, I=0) | Persistent failure (C=0, I=0) |",
+        "| --- | ---: | ---: | ---: | ---: | ---: |",
+    ]
+    for row in main_rows:
+        outcome_lines.append(
+            "| {model} | {planned_pairs} | {preserved_capability} | {recoveries} | {regressions} | {persistent_failure} |".format(
+                **row
+            )
+        )
+    (args.output_dir / "paired_outcomes.md").write_text(
+        "\n".join(outcome_lines) + "\n", encoding="utf-8"
     )
 
     type_lines = [

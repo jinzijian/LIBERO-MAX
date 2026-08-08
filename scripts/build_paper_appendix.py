@@ -9,6 +9,11 @@ from typing import List, Tuple
 
 TABLES: List[Tuple[str, str, str]] = [
     ("Headline MAX-8000 evaluation", "tables/main/main_results.md", "main"),
+    (
+        "Complete paired outcome decomposition",
+        "tables/main/paired_outcomes.md",
+        "main",
+    ),
     ("Base versus PRO-Hard tracks", "tables/tracks/main_results.md", "main"),
     ("Substrate-category macro average", "tables/main/category_macro.md", "main"),
     ("Change-type breakdown", "tables/main/by_change_type.md", "main"),
