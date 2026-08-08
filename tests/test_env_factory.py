@@ -5,6 +5,7 @@ import numpy as np
 from libero_max.env_factory import (
     RenderStabilityError,
     create_libero_env_with_retry,
+    install_stable_camera_render,
     prime_offscreen_renderer,
 )
 
@@ -24,7 +25,42 @@ class _RenderEnv:
         self.closed = True
 
 
+class _SequenceSim:
+    def __init__(self, frames):
+        self.frames = list(frames)
+        self.index = 0
+
+    def render(self, *args, **kwargs):
+        frame = self.frames[min(self.index, len(self.frames) - 1)]
+        self.index += 1
+        return frame.copy()
+
+
 class EnvFactoryTest(unittest.TestCase):
+    def test_camera_wrapper_flushes_stale_cross_camera_buffer(self):
+        stale = np.ones((4, 4, 3), dtype=np.uint8)
+        current = np.zeros((4, 4, 3), dtype=np.uint8)
+        env = type("Env", (), {})()
+        env.sim = _SequenceSim([stale, current, current])
+
+        stats = install_stable_camera_render(env, maximum_attempts=3)
+        rendered = env.sim.render(camera_name="agentview", width=4, height=4)
+
+        np.testing.assert_array_equal(rendered, current)
+        self.assertEqual(stats["calls"], 1)
+        self.assertEqual(stats["retries"], 2)
+        self.assertEqual(stats["maximum_attempts_used"], 3)
+
+    def test_camera_wrapper_rejects_stable_random_buffer(self):
+        random_frame = np.random.default_rng(0).integers(
+            0, 256, size=(64, 64, 3), dtype=np.uint8
+        )
+        env = type("Env", (), {})()
+        env.sim = _SequenceSim([random_frame, random_frame])
+        install_stable_camera_render(env, maximum_attempts=2)
+        with self.assertRaisesRegex(RenderStabilityError, "same-state reads"):
+            env.sim.render(camera_name="agentview", width=64, height=64)
+
     def test_primer_requires_two_identical_raw_renders(self):
         corrupt = np.ones((4, 4, 3), dtype=np.uint8)
         stable = np.zeros((4, 4, 3), dtype=np.uint8)
