@@ -1,0 +1,22 @@
+import unittest
+from pathlib import Path
+
+
+SCRIPT = Path(__file__).parents[1] / "scripts" / "run_max8000_paper_queue.sh"
+
+
+class PaperExperimentQueueTest(unittest.TestCase):
+    def test_queue_preserves_evidence_gates_and_deliverables(self):
+        source = SCRIPT.read_text(encoding="utf-8")
+        self.assertIn("assert_complete", source)
+        self.assertIn("build_infrastructure_repair_manifest.py", source)
+        self.assertIn("trigger-unreached", source)
+        self.assertIn("build_paper_tables.py", source)
+        self.assertIn("build_human_review_queue.py", source)
+        self.assertIn("render_benchmark_media.py", source)
+        self.assertIn("render_rollout_replay.py", source)
+        self.assertIn("PAPER_QUEUE_DONE", source)
+
+
+if __name__ == "__main__":
+    unittest.main()
