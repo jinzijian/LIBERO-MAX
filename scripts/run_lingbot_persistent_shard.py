@@ -246,6 +246,21 @@ def main() -> int:
                                     and not wrapped.runtime.applied
                                     and bool(control_queries)
                                 )
+                                generator_seed = _noise_seed(seed, query_index)
+                                torch.manual_seed(generator_seed)
+                                np.random.seed(generator_seed)
+                                predicted_native = np.asarray(
+                                    model.infer(
+                                        {
+                                            "obs": policy_observation,
+                                            "prompt": instruction,
+                                        }
+                                    )["action"],
+                                    dtype=np.float32,
+                                )
+                                predicted_actions = flatten_lingbot_actions(
+                                    predicted_native, query_index
+                                )
                                 if replay:
                                     if policy_step not in control_queries:
                                         raise RuntimeError(
@@ -266,34 +281,40 @@ def main() -> int:
                                         )
                                     # The paired evaluator replays both the
                                     # physical action chunk and LingBot's
-                                    # native cache tensor. Recomputing this
-                                    # tensor is not bitwise deterministic on
-                                    # the released CUDA stack even when the
-                                    # MuJoCo state and both RGB inputs are
-                                    # byte-identical.
+                                    # native cache tensor. Query zero masks the
+                                    # native conditioning frame with physical
+                                    # no-ops, so an action-level equality check
+                                    # alone cannot guarantee identical cache
+                                    # state at the next query.
                                     native = control_native_queries[
                                         policy_step
                                     ].copy()
                                     actions = np.asarray(
                                         control_queries[policy_step], dtype=np.float32
                                     )
+                                    if not np.allclose(
+                                        predicted_actions,
+                                        actions,
+                                        rtol=0.0,
+                                        atol=1e-6,
+                                    ):
+                                        absolute_error = np.abs(
+                                            predicted_actions - actions
+                                        )
+                                        raise RuntimeError(
+                                            "LingBot pre-event replay prediction "
+                                            "drifted at policy_step=%d max_abs=%.9g "
+                                            "mean_abs=%.9g"
+                                            % (
+                                                policy_step,
+                                                float(absolute_error.max()),
+                                                float(absolute_error.mean()),
+                                            )
+                                        )
                                     source = "control_replay"
                                 else:
-                                    generator_seed = _noise_seed(seed, query_index)
-                                    torch.manual_seed(generator_seed)
-                                    np.random.seed(generator_seed)
-                                    native = np.asarray(
-                                        model.infer(
-                                            {
-                                                "obs": policy_observation,
-                                                "prompt": instruction,
-                                            }
-                                        )["action"],
-                                        dtype=np.float32,
-                                    )
-                                    actions = flatten_lingbot_actions(
-                                        native, query_index
-                                    )
+                                    native = predicted_native
+                                    actions = predicted_actions
                                     source = "model"
                                     if arm == "control":
                                         control_native_queries[
