@@ -105,6 +105,42 @@ def summarize_end_to_end_outcomes(
     }
 
 
+def summarize_end_to_end_breakdown(
+    cases: List[Dict[str, Any]],
+    control_outcomes: Dict[str, bool],
+    intervention_outcomes: Dict[str, bool],
+    field: str,
+) -> Dict[str, Dict[str, Any]]:
+    """Return full-denominator paired outcomes for one manifest field."""
+
+    groups: Dict[str, List[str]] = {}
+    for case in cases:
+        if field.startswith("scenario."):
+            value = case["scenario"].get(field.split(".", 1)[1])
+        else:
+            value = case.get(field)
+        if value is None:
+            continue
+        groups.setdefault(str(value), []).append(case["case_id"])
+    result = {}
+    for value, case_ids in sorted(groups.items()):
+        selected = set(case_ids)
+        result[value] = summarize_end_to_end_outcomes(
+            len(case_ids),
+            {
+                case_id: outcome
+                for case_id, outcome in control_outcomes.items()
+                if case_id in selected
+            },
+            {
+                case_id: outcome
+                for case_id, outcome in intervention_outcomes.items()
+                if case_id in selected
+            },
+        )
+    return result
+
+
 def _validate_case(case: Dict[str, Any], summary: Dict[str, Any]) -> List[str]:
     errors: List[str] = []
     if not summary.get("matched"):
@@ -140,6 +176,13 @@ def _validate_case(case: Dict[str, Any], summary: Dict[str, Any]) -> List[str]:
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("root", type=Path)
+    parser.add_argument(
+        "--case-root",
+        action="append",
+        type=Path,
+        default=[],
+        help="additional run root containing case traces",
+    )
     parser.add_argument("--manifest", type=Path)
     parser.add_argument(
         "--output-dir",
@@ -151,6 +194,7 @@ def main() -> int:
     manifest = load_manifest(manifest_path)
     output_dir = args.output_dir or args.root
     output_dir.mkdir(parents=True, exist_ok=True)
+    case_roots = [args.root, *args.case_root]
     records: List[Dict[str, Any]] = []
     missing: List[str] = []
     invalid: Dict[str, List[str]] = {}
@@ -159,12 +203,22 @@ def main() -> int:
     intervention_outcomes: Dict[str, bool] = {}
     for case in manifest["cases"]:
         case_id = case["case_id"]
-        summary_path = args.root / "cases" / case_id / "paired_summary.json"
+        matching_case_dirs = [
+            root / "cases" / case_id
+            for root in case_roots
+            if (root / "cases" / case_id).exists()
+        ]
+        if len(matching_case_dirs) > 1:
+            invalid[case_id] = ["case exists in multiple case roots"]
+            continue
+        if not matching_case_dirs:
+            missing.append(case_id)
+            continue
+        case_dir = matching_case_dirs[0]
+        summary_path = case_dir / "paired_summary.json"
         if not summary_path.exists():
-            intervention_trace = (
-                args.root / "cases" / case_id / "intervention" / "trace.jsonl"
-            )
-            control_trace = args.root / "cases" / case_id / "control" / "trace.jsonl"
+            intervention_trace = case_dir / "intervention" / "trace.jsonl"
+            control_trace = case_dir / "control" / "trace.jsonl"
             if intervention_trace.exists() and control_trace.exists():
                 try:
                     intervention = _load_trace(intervention_trace)
@@ -321,6 +375,26 @@ def main() -> int:
         "protocol": manifest["protocol"],
         "coverage": coverage,
         "end_to_end_metrics": end_to_end_metrics,
+        "end_to_end_breakdowns": {
+            "by_change_type": summarize_end_to_end_breakdown(
+                manifest["cases"],
+                control_outcomes,
+                intervention_outcomes,
+                "scenario.change_type",
+            ),
+            "by_substrate_category": summarize_end_to_end_breakdown(
+                manifest["cases"],
+                control_outcomes,
+                intervention_outcomes,
+                "substrate_category",
+            ),
+            "by_task_suite": summarize_end_to_end_breakdown(
+                manifest["cases"],
+                control_outcomes,
+                intervention_outcomes,
+                "task_suite_name",
+            ),
+        },
         "metrics": None
         if metrics is None
         else {
