@@ -1,4 +1,5 @@
 import unittest
+from unittest import mock
 
 import numpy as np
 
@@ -61,6 +62,21 @@ class EnvFactoryTest(unittest.TestCase):
         self.assertEqual(stats["calls"], 1)
         self.assertEqual(stats["retries"], 2)
         self.assertEqual(stats["maximum_attempts_used"], 3)
+
+    def test_camera_wrapper_reactivates_owning_context_before_every_read(self):
+        current = np.zeros((4, 4, 3), dtype=np.uint8)
+        env = type("Env", (), {})()
+        env.sim = _SequenceSim([current, current])
+
+        with mock.patch(
+            "libero_max.env_factory._activate_offscreen_context",
+            return_value=True,
+        ) as activate:
+            stats = install_stable_camera_render(env, maximum_attempts=2)
+            env.sim.render(camera_name="agentview", width=4, height=4)
+
+        self.assertEqual(activate.call_count, 2)
+        self.assertEqual(stats["context_activations"], 2)
 
     def test_camera_wrapper_marks_fallback_for_stable_random_buffer(self):
         random_frame = np.random.default_rng(0).integers(

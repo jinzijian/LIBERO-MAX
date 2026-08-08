@@ -31,6 +31,27 @@ def disable_single_episode_hard_reset(env: Any) -> bool:
     return False
 
 
+def _activate_offscreen_context(sim: Any) -> bool:
+    """Make this simulator's EGL context and framebuffer current."""
+
+    context = getattr(sim, "_render_context_offscreen", None)
+    if context is None:
+        return False
+    gl_context = getattr(context, "gl_ctx", None)
+    if gl_context is None or not callable(getattr(gl_context, "make_current", None)):
+        return False
+    gl_context.make_current()
+    render_context = getattr(context, "con", None)
+    if render_context is not None:
+        import mujoco
+
+        mujoco.mjr_setBuffer(
+            mujoco.mjtFramebuffer.mjFB_OFFSCREEN,
+            render_context,
+        )
+    return True
+
+
 def install_stable_camera_render(
     env: Any,
     maximum_attempts: int = 32,
@@ -39,10 +60,11 @@ def install_stable_camera_render(
 ) -> Dict[str, Any]:
     """Wrap ``sim.render`` with same-camera readback stabilization.
 
-    MuJoCo 3.2.6 on the locked EGL worker can return a stale buffer from the
-    previously rendered camera. Re-rendering the same camera without advancing
-    physics converges in two or three reads. The wrapper requires two identical
-    smooth RGB buffers, so no stale cross-camera frame reaches a policy.
+    MuJoCo 3.2.6 on the locked EGL worker can retain a different environment's
+    EGL context or return a stale buffer from the previously rendered camera.
+    Each read explicitly reactivates the owning context and off-screen
+    framebuffer. The wrapper then requires two identical smooth RGB buffers,
+    so no stale cross-camera frame reaches a policy.
     """
 
     import numpy as np
@@ -68,6 +90,7 @@ def install_stable_camera_render(
         "maximum_neighbor_delta": maximum_neighbor_delta,
         "maximum_repeat_delta": maximum_repeat_delta,
         "fallbacks": 0,
+        "context_activations": 0,
     }
 
     def stable_render(*args: Any, **kwargs: Any) -> Any:
@@ -77,6 +100,8 @@ def install_stable_camera_render(
         last_result = None
         stats["calls"] += 1
         for attempt in range(1, maximum_attempts + 1):
+            if _activate_offscreen_context(sim):
+                stats["context_activations"] += 1
             result = original_render(*args, **kwargs)
             last_result = result
             rgb = result[0] if isinstance(result, tuple) else result
