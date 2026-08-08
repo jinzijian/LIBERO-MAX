@@ -82,8 +82,9 @@ def build_section(paper_root: Path) -> str:
             "### Human feasibility secondary review",
             "",
             "%d cases met the risk threshold; the diverse top %d are queued for "
-            "three-attempt expert teleoperation. This queue is triage only and "
-            "does not remove any case from the reported denominator. See "
+            "three-attempt expert teleoperation; every 0/3 defect candidate then "
+            "goes to an independent second reviewer. This queue is triage only "
+            "and does not remove any case from the reported denominator. See "
             "[`human_review_queue.csv`](results/max8000/human_review/human_review_queue.csv) "
             "and [`docs/HUMAN_FEASIBILITY_REVIEW.md`](docs/HUMAN_FEASIBILITY_REVIEW.md)."
             % (review["candidate_count"], review["selected_count"]),

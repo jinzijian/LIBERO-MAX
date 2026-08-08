@@ -138,13 +138,14 @@ def build_appendix(paper_root: Path) -> str:
             "%d cases meet the deterministic risk threshold; the diverse top "
             "%d are queued for expert teleoperation. The ranking is triage only "
             "and changes no benchmark denominator. Each case receives %d attempts; "
-            "%s. If all attempts fail, %s."
+            "%s. If all attempts fail, %s. %s."
             % (
                 review["candidate_count"],
                 review["selected_count"],
                 protocol["attempts_per_case"],
                 protocol["feasible_rule"],
                 protocol["failure_rule"],
+                protocol["secondary_review_rule"],
             ),
             "",
             "The machine-readable run summaries, full-denominator rows, LaTeX "

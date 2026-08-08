@@ -24,6 +24,9 @@ class BuildPaperAppendixTest(unittest.TestCase):
                             "attempts_per_case": 3,
                             "feasible_rule": "one success is feasible",
                             "failure_rule": "require a second reviewer",
+                            "secondary_review_rule": (
+                                "an independent reviewer reproduces the case"
+                            ),
                         },
                     }
                 )

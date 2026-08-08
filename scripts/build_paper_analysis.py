@@ -223,7 +223,8 @@ def build_analysis(paper_root: Path) -> str:
         "",
         "- %d cases meet the deterministic risk threshold and %d are queued "
         "for three-attempt expert teleoperation. This list is triage only and "
-        "does not change any reported denominator."
+        "does not change any reported denominator. Every 0/3 defect candidate "
+        "is forwarded to an independent second reviewer."
         % (review["candidate_count"], review["selected_count"]),
         "",
     ]
