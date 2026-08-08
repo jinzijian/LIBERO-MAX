@@ -150,6 +150,8 @@ def prime_offscreen_renderer(
         raise ValueError("render priming requires at least two attempts")
     previous = None
     image_keys = []
+    neighbor_deltas: Dict[str, float] = {}
+    repeat_deltas: Dict[str, float] = {}
     for render_attempt in range(1, attempts + 1):
         current = _render_snapshot(env)
         if not current:
@@ -159,14 +161,21 @@ def prime_offscreen_renderer(
             key: mean_neighbor_delta(current[key]) for key in image_keys
         }
         smooth = max(neighbor_deltas.values()) <= maximum_neighbor_delta
-        stable = previous is not None and image_keys == sorted(previous) and all(
-            float(
-                np.abs(
-                    previous[key].astype(np.int16) - current[key].astype(np.int16)
-                ).mean()
-            )
-            <= maximum_repeat_delta
-            for key in image_keys
+        repeat_deltas = (
+            {}
+            if previous is None or image_keys != sorted(previous)
+            else {
+                key: float(
+                    np.abs(
+                        previous[key].astype(np.int16)
+                        - current[key].astype(np.int16)
+                    ).mean()
+                )
+                for key in image_keys
+            }
+        )
+        stable = bool(repeat_deltas) and all(
+            value <= maximum_repeat_delta for value in repeat_deltas.values()
         )
         if stable and smooth:
             return {
@@ -179,8 +188,9 @@ def prime_offscreen_renderer(
             }
         previous = current
     raise RenderStabilityError(
-        "off-screen camera buffers did not stabilize after %d renders (%s)"
-        % (attempts, ", ".join(image_keys))
+        "off-screen camera buffers did not stabilize after %d renders "
+        "(neighbor=%r repeat=%r)"
+        % (attempts, neighbor_deltas, repeat_deltas)
     )
 
 
