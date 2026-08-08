@@ -133,7 +133,7 @@ def main() -> None:
     axis.set_xticks(x, model_names)
     axis.set_ylim(0, 105)
     axis.grid(axis="y", alpha=0.25, linewidth=0.6)
-    axis.legend(frameon=False, ncols=2, loc="upper right")
+    axis.legend(frameon=False, loc="upper left", bbox_to_anchor=(1.01, 1.0))
     axis.set_title("Static competence versus mid-execution change")
     fig.tight_layout()
     _write_figure(fig, args.output_dir, "overall_success")
@@ -171,13 +171,22 @@ def main() -> None:
         (axes[1], trigger, True),
     ):
         axis.set_yticks(range(len(runs)), model_names)
-        axis.set_xticks(range(len(types)), [_label(value) for value in types])
-        axis.tick_params(axis="x", rotation=28)
+        axis.set_xticks(range(len(types)))
+        if percent:
+            axis.set_xticklabels([_label(value) for value in types], rotation=28)
+        else:
+            axis.set_xticklabels([])
         for row_index in range(len(runs)):
             for column_index in range(len(types)):
                 value = matrix[row_index, column_index]
                 if np.isfinite(value):
                     text = "%.1f%%" % value if percent else "%+.1f" % value
+                    color = (
+                        "white"
+                        if (percent and value >= 60)
+                        or (not percent and abs(value) >= 0.55 * maximum)
+                        else "black"
+                    )
                     axis.text(
                         column_index,
                         row_index,
@@ -185,7 +194,7 @@ def main() -> None:
                         ha="center",
                         va="center",
                         fontsize=7.5,
-                        color="black",
+                        color=color,
                     )
     axes[0].set_title("Paired robustness delta by change type (percentage points)")
     axes[1].set_title("Trigger coverage by change type")
