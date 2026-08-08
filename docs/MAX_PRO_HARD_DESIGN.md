@@ -77,17 +77,18 @@ relocation, five-object distractor burst, and obstacle insertion.
 
 The candidate pins:
 
-- code: `Zxy-MLlab/LIBERO-PRO` commit
-  `eafdb809426b13153aa1e4c42d6601844217dfec`;
+- code: public `Zxy-MLlab/LIBERO-PRO` branch
+  `codex/pr1-bddl-robustness`, commit
+  `2b910b5b5f53016bef9907632f6f840f1ce2229c` (based on upstream
+  `eafdb809426b13153aa1e4c42d6601844217dfec`);
 - dataset: `zhouxueyang/LIBERO-Pro` revision
   `c86fc3b8293185a6f373677018ff3e37f8391602`;
 - dataset license: CC-BY-4.0.
 
-The current real-MuJoCo candidate uses the PRO-aware runtime commit
-`2b910b5b5f53016bef9907632f6f840f1ce2229c`, which provides the BDDL config
-parser and runtime perturbation hooks. That dependency must be published or
-vendored before the version 3.0.0 freeze; the setup script refuses a plain PRO
-checkout that lacks those modules.
+The real-MuJoCo candidate uses that PRO-aware public runtime commit, which
+provides the BDDL config parser and runtime perturbation hooks. The setup
+script refuses a plain PRO checkout or any other revision so a silent fallback
+to BDDL-only evaluation cannot occur.
 
 The upstream seven-case `runtime_object_move` category is intentionally
 excluded because it already introduces a near-grasp runtime change. Treating
@@ -102,6 +103,11 @@ artifact release and independent MuJoCo validation.
 Download and configure the pinned external artifacts:
 
 ```bash
+git clone --branch codex/pr1-bddl-robustness --single-branch \
+  https://github.com/Zxy-MLlab/LIBERO-PRO.git /path/to/LIBERO-PRO
+git -C /path/to/LIBERO-PRO checkout \
+  2b910b5b5f53016bef9907632f6f840f1ce2229c
+
 python scripts/setup_libero_pro_substrate.py \
   --libero-pro-root /path/to/LIBERO-PRO \
   --dataset-root /path/to/libero-pro-data \

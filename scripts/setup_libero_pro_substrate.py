@@ -8,6 +8,7 @@ from pathlib import Path
 
 
 DEFAULT_REVISION = "c86fc3b8293185a6f373677018ff3e37f8391602"
+DEFAULT_RUNTIME_REVISION = "2b910b5b5f53016bef9907632f6f840f1ce2229c"
 
 
 def main() -> int:
@@ -16,6 +17,7 @@ def main() -> int:
     parser.add_argument("--dataset-root", type=Path, required=True)
     parser.add_argument("--config-dir", type=Path, required=True)
     parser.add_argument("--revision", default=DEFAULT_REVISION)
+    parser.add_argument("--runtime-revision", default=DEFAULT_RUNTIME_REVISION)
     args = parser.parse_args()
     subprocess.run(
         [
@@ -66,6 +68,11 @@ def main() -> int:
         capture_output=True,
         text=True,
     ).stdout.strip()
+    if runtime_revision != args.runtime_revision:
+        raise RuntimeError(
+            "LIBERO-PRO runtime revision mismatch: expected %s, found %s"
+            % (args.runtime_revision, runtime_revision)
+        )
     # JSON is valid YAML and avoids an extra setup-time dependency.
     (args.config_dir / "config.yaml").write_text(
         json.dumps(config, indent=2, sort_keys=True) + "\n", encoding="utf-8"
