@@ -166,6 +166,7 @@ run_smoke() {
   local label="$1"
   local launcher="$2"
   local root="$FINAL_ROOT/work/${label}-smoke"
+  local GPUS="${SMOKE_GPU:-${GPUS%%,*}}"
   if [[ -f "$root/PAPER_RUN_COMPLETE" ]]; then
     return
   fi
