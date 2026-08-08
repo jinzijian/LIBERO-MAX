@@ -20,6 +20,8 @@ class PaperExperimentQueueTest(unittest.TestCase):
         self.assertIn("build_paper_appendix.py", source)
         self.assertIn("build_experiment_status.py", source)
         self.assertIn("build_paper_analysis.py", source)
+        self.assertIn("ensure_rollouts", source)
+        self.assertIn("RAW_ROLLOUT_FINISHED", source)
         self.assertIn("tables/ablation", source)
         self.assertIn("tables/tracks", source)
         self.assertIn("build_human_review_queue.py", source)

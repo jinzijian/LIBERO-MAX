@@ -40,7 +40,34 @@ run_rollouts() {
   local status=$?
   set -e
   printf '%s\n' "$status" >"$FINAL_ROOT/logs/$label.exit_status"
-  log "END rollout $label launcher_status=$status"
+    log "END rollout $label launcher_status=$status"
+}
+
+ensure_rollouts() {
+  local label="$1"
+  local launcher="$2"
+  local manifest="$3"
+  local root="$4"
+  local marker="$root/RAW_ROLLOUT_FINISHED"
+  local pid_file="$root/PRELAUNCH_PID"
+  if [[ -f "$marker" ]]; then
+    log "SKIP prelaunched rollout $label"
+    return
+  fi
+  if [[ -f "$pid_file" ]]; then
+    local prelaunch_pid
+    prelaunch_pid="$(cat "$pid_file")"
+    while kill -0 "$prelaunch_pid" 2>/dev/null && [[ ! -f "$marker" ]]; do
+      log "WAIT prelaunched rollout $label pid=$prelaunch_pid"
+      sleep 60
+    done
+  fi
+  if [[ -f "$marker" ]]; then
+    log "READY prelaunched rollout $label"
+    return
+  fi
+  RESUME=1 run_rollouts "$label" "$launcher" "$manifest" "$root"
+  touch "$marker"
 }
 
 assert_complete() {
@@ -313,7 +340,7 @@ finalize_with_repairs \
   pi05-base-q5 artifacts/max5600/pi05_libero/manifest.json \
   artifacts/max5600/pi05_libero "$FINAL_ROOT/runs/pi05_base_5600_q5" \
   launch_pi_base
-run_rollouts pi05-pro-2400-q5 launch_pi_pro_q5 "$PRO_MANIFEST" \
+ensure_rollouts pi05-pro-2400-q5 launch_pi_pro_q5 "$PRO_MANIFEST" \
   "$FINAL_ROOT/work/pi05-pro-2400-q5-raw"
 finalize_with_repairs \
   pi05-pro-q5 "$FINAL_ROOT/work/pi05-pro-2400-q5-raw/manifest.json" \
@@ -338,8 +365,8 @@ set +e
 set -e
 assert_complete "$FINAL_ROOT/runs/pi05_max8000_q5"
 
-run_rollouts pi05-comparison-800-q16 launch_pi_pro_q16 "$COMPARISON_MANIFEST" \
-  "$FINAL_ROOT/work/pi05-comparison-800-q16-raw"
+ensure_rollouts pi05-comparison-800-q16 launch_pi_pro_q16 \
+  "$COMPARISON_MANIFEST" "$FINAL_ROOT/work/pi05-comparison-800-q16-raw"
 finalize_with_repairs \
   pi05-comparison-q16 "$FINAL_ROOT/work/pi05-comparison-800-q16-raw/manifest.json" \
   "$FINAL_ROOT/work/pi05-comparison-800-q16-raw" \
@@ -347,7 +374,7 @@ finalize_with_repairs \
 
 # q16 cross-model comparison on exactly the same 800 frozen cases.
 run_smoke fastwam launch_fastwam
-run_rollouts fastwam-comparison-800 launch_fastwam "$COMPARISON_MANIFEST" \
+ensure_rollouts fastwam-comparison-800 launch_fastwam "$COMPARISON_MANIFEST" \
   "$FINAL_ROOT/work/fastwam-comparison-800-raw"
 finalize_with_repairs \
   fastwam-comparison "$COMPARISON_MANIFEST" \
@@ -355,7 +382,7 @@ finalize_with_repairs \
   "$FINAL_ROOT/runs/model_comparison/fastwam" launch_fastwam
 
 run_smoke lingbot launch_lingbot
-run_rollouts lingbot-comparison-800 launch_lingbot "$COMPARISON_MANIFEST" \
+ensure_rollouts lingbot-comparison-800 launch_lingbot "$COMPARISON_MANIFEST" \
   "$FINAL_ROOT/work/lingbot-comparison-800-raw"
 finalize_with_repairs \
   lingbot-comparison "$COMPARISON_MANIFEST" \
