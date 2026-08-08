@@ -28,6 +28,9 @@ class BuildPaperAppendixTest(unittest.TestCase):
                     }
                 )
             )
+            analysis = root / "paper/MAX8000_ANALYSIS.md"
+            analysis.parent.mkdir()
+            analysis.write_text("# analysis\n\nValidated finding.")
             for title, relative, _ in TABLES:
                 path = root / relative
                 path.parent.mkdir(parents=True, exist_ok=True)

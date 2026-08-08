@@ -348,6 +348,7 @@ def main() -> None:
         "\n".join(outcome_lines) + "\n", encoding="utf-8"
     )
 
+    type_rows = []
     type_lines = [
         "| Model | Change type | n | Trigger | Response | Control | Change | Delta |",
         "| --- | --- | ---: | ---: | ---: | ---: | ---: | ---: |",
@@ -362,6 +363,21 @@ def main() -> None:
             if not rows:
                 continue
             metrics = _binary_metrics(rows)
+            type_rows.append(
+                {
+                    "model": run["name"],
+                    "change_type": change_type,
+                    "n": metrics["n"],
+                    "trigger_coverage": sum(
+                        record["trigger_reached"] for record in rows
+                    )
+                    / len(rows),
+                    "response_coverage": _response_coverage(rows),
+                    "control_accuracy": metrics["control"],
+                    "intervention_accuracy": metrics["intervention"],
+                    "paired_delta": metrics["delta"],
+                }
+            )
             type_lines.append(
                 "| %s | %s | %d | %s | %s | %s | %s | %s |"
                 % (
@@ -454,6 +470,7 @@ def main() -> None:
         "\n".join(stratified_lines) + "\n", encoding="utf-8"
     )
 
+    draw_rows = []
     draw_lines = [
         "| Model | Change type | Draw | n | Control | Change | Delta |",
         "| --- | --- | ---: | ---: | ---: | ---: | ---: |",
@@ -479,6 +496,17 @@ def main() -> None:
                     if record["change_type"] == change_type
                     and record["intervention_draw_id"] == draw_id
                 ]
+            )
+            draw_rows.append(
+                {
+                    "model": run["name"],
+                    "change_type": change_type,
+                    "draw_id": draw_id,
+                    "n": metrics["n"],
+                    "control_accuracy": metrics["control"],
+                    "intervention_accuracy": metrics["intervention"],
+                    "paired_delta": metrics["delta"],
+                }
             )
             draw_lines.append(
                 "| %s | %s | %s | %d | %s | %s | %s |"
@@ -794,6 +822,8 @@ def main() -> None:
         json.dumps(
             {
                 "main": main_rows,
+                "by_change_type": type_rows,
+                "by_type_draw": draw_rows,
                 "category_macro": macro_rows,
                 "model_comparisons": comparisons,
             },

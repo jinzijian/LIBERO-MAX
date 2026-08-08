@@ -429,6 +429,10 @@ mkdir -p "$FINAL_ROOT/tables/main" "$FINAL_ROOT/tables/tracks" \
   --external-run "frozen/ablation/cosmos-notified-q16=results/v1/runs/cosmos2_notified_q16/benchmark_summary.json" \
   >"$FINAL_ROOT/logs/build-experiment-status.log"
 
+"$PYTHON" scripts/build_paper_analysis.py "$FINAL_ROOT" \
+  "$FINAL_ROOT/paper/MAX8000_ANALYSIS.md" \
+  >"$FINAL_ROOT/logs/build-paper-analysis.log"
+
 "$PYTHON" scripts/build_paper_appendix.py "$FINAL_ROOT" \
   "$FINAL_ROOT/paper/MAX8000_RESULTS.md" \
   >"$FINAL_ROOT/logs/build-paper-appendix.log"

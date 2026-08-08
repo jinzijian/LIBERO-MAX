@@ -70,6 +70,15 @@ def build_appendix(paper_root: Path) -> str:
             encoding="utf-8"
         )
     )
+    analysis_path = paper_root / "paper/MAX8000_ANALYSIS.md"
+    if not analysis_path.is_file():
+        raise FileNotFoundError(
+            "required paper analysis is missing: %s" % analysis_path
+        )
+    analysis = analysis_path.read_text(encoding="utf-8").strip()
+    analysis_lines = analysis.splitlines()
+    if analysis_lines and analysis_lines[0].startswith("# "):
+        analysis = "\n".join(analysis_lines[1:]).lstrip()
     grouped = {
         "main": [],
         "comparison": [],
@@ -90,6 +99,10 @@ def build_appendix(paper_root: Path) -> str:
         "denominator. `trigger_unreached` and late-trigger/no-response-query "
         "episodes remain end-to-end model outcomes; infrastructure gaps block "
         "generation rather than being charged to a policy.",
+        "",
+        "## Validated analysis",
+        "",
+        analysis,
         "",
         "## A. Main physical evaluation",
         "",
