@@ -6,11 +6,14 @@ COSMOS_DEPS="${COSMOS_DEPS:-/vepfs/zijian/alter-wam-deps}"
 OPENPI_DIR="${OPENPI_DIR:-$COSMOS_DEPS/openpi}"
 OPENPI_CLIENT_OVERLAY="${OPENPI_CLIENT_OVERLAY:-$COSMOS_DEPS/openpi-client-overlay}"
 CLIENT_PYTHON="${CLIENT_PYTHON:-$COSMOS_DEPS/cosmos-policy/.venv/bin/python}"
+LIBERO_IMPL_DIR="${LIBERO_IMPL_DIR:-$COSMOS_DEPS/LIBERO-plus}"
+LIBERO_OVERLAY="${LIBERO_OVERLAY:-$COSMOS_DEPS/libero-plus-python-overlay}"
 GPU_ID="${GPU_ID:?set GPU_ID}"
 PORT_BASE="${PORT_BASE:-8100}"
 PORT="$((PORT_BASE + GPU_ID))"
 OUTPUT_ROOT="${OUTPUT_ROOT:?set OUTPUT_ROOT}"
 SCENARIO_FILE="${SCENARIO_FILE:?set SCENARIO_FILE}"
+CASE_FILE="${CASE_FILE:-}"
 SUITE="${SUITE:?set SUITE}"
 TASK_INDEX="${TASK_INDEX:?set TASK_INDEX}"
 INIT_STATE_INDEX="${INIT_STATE_INDEX:?set INIT_STATE_INDEX}"
@@ -20,7 +23,7 @@ POLICY_NOTIFICATION="${POLICY_NOTIFICATION:-}"
 
 site_packages="$COSMOS_DEPS/cosmos-policy/.venv/lib/python3.10/site-packages"
 legacy_site_packages="$COSMOS_DEPS/.venv-libero/lib/python3.10/site-packages"
-pythonpath="$PROJECT_DIR/src:$OPENPI_DIR/packages/openpi-client/src:$OPENPI_CLIENT_OVERLAY:$COSMOS_DEPS/robosuite-1.4.0:$COSMOS_DEPS/libero-plus-python-overlay:$site_packages:$legacy_site_packages:$COSMOS_DEPS/LIBERO-plus:$COSMOS_DEPS/cosmos-policy"
+pythonpath="$PROJECT_DIR/src:$OPENPI_DIR/packages/openpi-client/src:$OPENPI_CLIENT_OVERLAY:$COSMOS_DEPS/robosuite-1.4.0:$LIBERO_OVERLAY:$site_packages:$legacy_site_packages:$LIBERO_IMPL_DIR:$COSMOS_DEPS/cosmos-policy"
 
 mkdir -p "$OUTPUT_ROOT"
 for arm in control intervention; do
@@ -33,6 +36,10 @@ for arm in control intervention; do
   if [[ -n "$POLICY_NOTIFICATION" ]]; then
     notification_args=(--policy-notification "$POLICY_NOTIFICATION")
   fi
+  case_args=()
+  if [[ -n "$CASE_FILE" ]]; then
+    case_args=(--case "$CASE_FILE")
+  fi
   mkdir -p "$arm_dir"
   : > "$arm_dir/trace.jsonl"
   MUJOCO_GL=egl \
@@ -43,6 +50,7 @@ for arm in control intervention; do
   PYTHONPATH="$pythonpath" \
   "$CLIENT_PYTHON" "$PROJECT_DIR/scripts/run_openpi_libero_max.py" \
     --scenario "$SCENARIO_FILE" \
+    "${case_args[@]}" \
     --arm "$arm" \
     --suite "$SUITE" \
     --task-index "$TASK_INDEX" \

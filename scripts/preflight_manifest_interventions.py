@@ -14,6 +14,7 @@ from typing import Any, Dict, List
 os.environ.setdefault("TORCH_FORCE_NO_WEIGHTS_ONLY_LOAD", "1")
 
 import numpy as np
+
 # LIBERO-Plus sensor-noise variants still use the removed NumPy 1.x dtype
 # alias. It is exactly equivalent to float64 in that code path.
 if not hasattr(np, "float_"):
@@ -30,6 +31,7 @@ from libero_max.preflight import (
     settle_metrics,
 )
 from libero_max.runtime import InterventionRuntime, TriggerContext
+from libero_max.substrate import load_case_task
 
 
 def _scenario_sha256(case: Dict[str, Any]) -> str:
@@ -77,17 +79,10 @@ def _run_case(
     min_image_mean: float,
     min_image_std: float,
 ) -> Dict[str, Any]:
-    suite = benchmark.get_benchmark_dict()[case["task_suite_name"]](
-        task_order_index=0
-    )
-    if not 0 <= case["task_index"] < suite.n_tasks:
-        raise ValueError("task index is outside suite")
-    initial_states = suite.get_task_init_states(case["task_index"])
+    task, initial_states = load_case_task(case, benchmark)
     if not 0 <= case["init_state_index"] < len(initial_states):
         raise ValueError("initial-state index is outside task")
-    env, task_description = get_libero_env(
-        suite.get_task(case["task_index"]), "cosmos", resolution=256
-    )
+    env, task_description = get_libero_env(task, "cosmos", resolution=256)
     try:
         env.reset()
         observation = env.set_init_state(initial_states[case["init_state_index"]])
@@ -135,16 +130,14 @@ def _run_case(
             raise ValueError("intervention did not fire")
         after = backend.refresh_observation()["agentview_image"]
         immediate_positions = {
-            entity: _entity_position(backend, entity)
-            for entity, _ in physical_entities
+            entity: _entity_position(backend, entity) for entity, _ in physical_entities
         }
         if physical_entities:
             for _ in range(settle_steps):
                 backend.sim.step()
         after = backend.refresh_observation()["agentview_image"]
         settled_positions = {
-            entity: _entity_position(backend, entity)
-            for entity, _ in physical_entities
+            entity: _entity_position(backend, entity) for entity, _ in physical_entities
         }
         settling = settle_metrics(immediate_positions, settled_positions)
         baseline_settling = settle_metrics(
@@ -191,9 +184,7 @@ def _run_case(
             support_geoms = _entity_geom_ids(backend, support)
             partners = _contact_partners(backend, entity)
             unexpected = partners - baseline_contacts[entity] - support_geoms
-            support_contact_required = bool(
-                baseline_contacts[entity] & support_geoms
-            )
+            support_contact_required = bool(baseline_contacts[entity] & support_geoms)
             supported = bool(partners & support_geoms)
             contacts[entity] = {
                 "support_entity": support,
@@ -208,8 +199,7 @@ def _run_case(
             max_excess_displacement <= max_settle_displacement_m
             and max_excess_vertical_drop <= max_vertical_drop_m
             and all(
-                contact["support_valid"]
-                and not contact["unexpected_contact_geom_ids"]
+                contact["support_valid"] and not contact["unexpected_contact_geom_ids"]
                 for contact in contacts.values()
             )
             and bool(np.all(np.isfinite(backend.sim.data.qpos)))
@@ -220,17 +210,16 @@ def _run_case(
             "scenario_id": case["scenario"]["scenario_id"],
             "scenario_sha256": _scenario_sha256(case),
             "change_type": case["scenario"].get("change_type"),
-            "intervention_draw_id": case["scenario"].get(
-                "randomization", {}
-            ).get("draw_id"),
+            "intervention_draw_id": case["scenario"]
+            .get("randomization", {})
+            .get("draw_id"),
             "task_description": task_description,
             "setup_event_count": len(setup_events),
             "operation": case["scenario"]["change"]["operation"],
             "mean_absolute_raw_pixel_delta": _pixel_mad(before, after),
             "post_image_mean": image_mean,
             "post_image_std": image_std,
-            "image_valid": image_mean >= min_image_mean
-            and image_std >= min_image_std,
+            "image_valid": image_mean >= min_image_mean and image_std >= min_image_std,
             "settling": settling,
             "baseline_settling": baseline_settling,
             "excess_settling_by_entity": excess_settling_by_entity,
@@ -296,9 +285,7 @@ def main() -> int:
                     "post-intervention image failed visibility thresholds"
                 )
             if not row["physics_valid"]:
-                validation_errors.append(
-                    "post-intervention physics validation failed"
-                )
+                validation_errors.append("post-intervention physics validation failed")
             row["validation_errors"] = validation_errors
             row["passed"] = not validation_errors
             rows.append(row)
@@ -315,9 +302,9 @@ def main() -> int:
                     "scenario_id": case["scenario"]["scenario_id"],
                     "scenario_sha256": _scenario_sha256(case),
                     "change_type": case["scenario"].get("change_type"),
-                    "intervention_draw_id": case["scenario"].get(
-                        "randomization", {}
-                    ).get("draw_id"),
+                    "intervention_draw_id": case["scenario"]
+                    .get("randomization", {})
+                    .get("draw_id"),
                     "passed": False,
                     "validation_errors": ["preflight exception: %s" % exc],
                 }

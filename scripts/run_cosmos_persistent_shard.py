@@ -9,12 +9,14 @@ from pathlib import Path
 from typing import Any, Dict
 
 import numpy as np
+
 # LIBERO-Plus sensor-noise variants use this NumPy 1.x dtype alias.
 if not hasattr(np, "float_"):
     np.float_ = np.float64
 
 from libero_max.cosmos_integration import CosmosInterventionEnv, retain_action_prefix
 from libero_max.manifest import load_manifest
+from libero_max.substrate import load_case_task
 from summarize_cosmos_paired_smoke import summarize_pair
 
 
@@ -66,9 +68,7 @@ def main() -> int:
         parser.error("--max-cases must be positive")
 
     manifest = load_manifest(args.manifest)
-    query_interval = int(
-        args.query_interval or manifest["protocol"]["query_interval"]
-    )
+    query_interval = int(args.query_interval or manifest["protocol"]["query_interval"])
     manifest = json.loads(json.dumps(manifest))
     manifest["protocol"]["query_interval"] = query_interval
     args.output_root.mkdir(parents=True, exist_ok=True)
@@ -90,9 +90,7 @@ def main() -> int:
     )
 
     asset_dir = args.asset_dir.resolve()
-    t5_path = (
-        args.t5_embeddings or asset_dir / "libero_t5_embeddings.pkl"
-    ).resolve()
+    t5_path = (args.t5_embeddings or asset_dir / "libero_t5_embeddings.pkl").resolve()
     cfg = run_libero_eval.PolicyEvalConfig(
         config="cosmos_predict2_2b_480p_libero__inference_only",
         ckpt_path=str(asset_dir / "Cosmos-Policy-LIBERO-Predict2-2B.pt"),
@@ -155,11 +153,7 @@ def main() -> int:
 
         try:
             suite_name = case["task_suite_name"]
-            if suite_name not in suite_cache:
-                suite_cache[suite_name] = benchmark.get_benchmark_dict()[suite_name]()
-            suite = suite_cache[suite_name]
-            task = suite.get_task(case["task_index"])
-            initial_states = suite.get_task_init_states(case["task_index"])
+            task, initial_states = load_case_task(case, benchmark, suite_cache)
             initial_state = initial_states[case["init_state_index"]]
             cfg.task_suite_name = suite_name
             cfg.seed = int(case["policy_seed"])
@@ -207,9 +201,7 @@ def main() -> int:
                     elif "task_label_or_embedding" in call_kwargs:
                         call_kwargs = dict(call_kwargs)
                         call_kwargs["task_label_or_embedding"] = instruction
-                    policy_step = max(
-                        0, wrapped.total_env_steps - wrapped.warmup_steps
-                    )
+                    policy_step = max(0, wrapped.total_env_steps - wrapped.warmup_steps)
                     replay = (
                         arm == "intervention"
                         and not wrapped.runtime.applied
@@ -220,9 +212,7 @@ def main() -> int:
                             raise RuntimeError(
                                 "control trace missing query step %d" % policy_step
                             )
-                        result = _model_result_from_replay(
-                            control_queries[policy_step]
-                        )
+                        result = _model_result_from_replay(control_queries[policy_step])
                         source = "control_replay"
                     else:
                         result = original_get_action(*call_args, **call_kwargs)
@@ -262,7 +252,9 @@ def main() -> int:
                 },
             )
             done_path.touch()
-            print("[%d/%d] %s completed" % (ordinal, len(selected), case_id), flush=True)
+            print(
+                "[%d/%d] %s completed" % (ordinal, len(selected), case_id), flush=True
+            )
         except Exception as exc:
             failures.append(case_id)
             _write_json(
@@ -276,7 +268,10 @@ def main() -> int:
                 },
             )
             (case_dir / "FAILED").touch()
-            print("[%d/%d] %s failed: %s" % (ordinal, len(selected), case_id, exc), flush=True)
+            print(
+                "[%d/%d] %s failed: %s" % (ordinal, len(selected), case_id, exc),
+                flush=True,
+            )
     return 1 if failures else 0
 
 

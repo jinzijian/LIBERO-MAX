@@ -53,6 +53,34 @@
             "minimum": 1,
             "maximum": 5
           },
+          "substrate_variant": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "benchmark",
+              "category",
+              "bddl_file",
+              "init_states_file",
+              "language",
+              "source_revision"
+            ],
+            "properties": {
+              "benchmark": {"const": "LIBERO-PRO"},
+              "category": {"type": "string", "minLength": 1},
+              "bddl_file": {
+                "type": "string",
+                "minLength": 6,
+                "pattern": "^(?!/)(?!.*(?:^|/)\\.\\.(?:/|$)).*\\.bddl$"
+              },
+              "init_states_file": {
+                "type": "string",
+                "minLength": 13,
+                "pattern": "^(?!/)(?!.*(?:^|/)\\.\\.(?:/|$)).*\\.pruned_init$"
+              },
+              "language": {"type": "string", "minLength": 1},
+              "source_revision": {"type": "string", "minLength": 1}
+            }
+          },
           "dynamic_phase": {"type": "string", "minLength": 1},
           "scenario": {"$ref": "scenario.schema.json"}
         }

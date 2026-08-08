@@ -12,6 +12,7 @@ import numpy as np
 
 from libero_max.cosmos_integration import CosmosInterventionEnv
 from libero_max.scenario import load_scenarios, validate_scenario_collection
+from libero_max.substrate import load_case_task
 
 
 MAX_STEPS = {
@@ -41,6 +42,7 @@ def _noise_seed(policy_seed: int, query_index: int) -> int:
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--scenario", type=Path, required=True)
+    parser.add_argument("--case", type=Path)
     parser.add_argument("--arm", choices=("control", "intervention"), required=True)
     parser.add_argument("--suite", choices=tuple(MAX_STEPS), required=True)
     parser.add_argument("--task-index", type=int, required=True)
@@ -82,9 +84,17 @@ def main() -> int:
             query["policy_step"]: query["actions"]
             for query in rows[0].get("policy_queries", [])
         }
-    suite = benchmark.get_benchmark_dict()[args.suite]()
-    task = suite.get_task(args.task_index)
-    initial_states = suite.get_task_init_states(args.task_index)
+    case = (
+        json.loads(args.case.read_text(encoding="utf-8"))
+        if args.case is not None
+        else {
+            "task_suite_name": args.suite,
+            "task_index": args.task_index,
+        }
+    )
+    if case["task_suite_name"] != args.suite or case["task_index"] != args.task_index:
+        raise ValueError("--case task identity disagrees with --suite/--task-index")
+    task, initial_states = load_case_task(case, benchmark)
     if not 0 <= args.init_state_index < len(initial_states):
         raise IndexError("init-state index is out of range")
     env, task_description = get_libero_env(task, "cosmos", resolution=256)
@@ -116,14 +126,10 @@ def main() -> int:
         total_limit = MAX_STEPS[args.suite] + wrapped.warmup_steps
         for total_step in range(total_limit):
             if total_step < wrapped.warmup_steps:
-                observation, _, _, _ = wrapped.step(
-                    get_libero_dummy_action("cosmos")
-                )
+                observation, _, _, _ = wrapped.step(get_libero_dummy_action("cosmos"))
                 continue
             if not action_plan:
-                image = np.ascontiguousarray(
-                    observation["agentview_image"][::-1, ::-1]
-                )
+                image = np.ascontiguousarray(observation["agentview_image"][::-1, ::-1])
                 wrist = np.ascontiguousarray(
                     observation["robot0_eye_in_hand_image"][::-1, ::-1]
                 )
@@ -134,9 +140,7 @@ def main() -> int:
                     image_tools.resize_with_pad(wrist, 224, 224)
                 )
                 instruction = wrapped.runtime.current_instruction
-                policy_step = max(
-                    0, wrapped.total_env_steps - wrapped.warmup_steps
-                )
+                policy_step = max(0, wrapped.total_env_steps - wrapped.warmup_steps)
                 replay = (
                     args.arm == "intervention"
                     and not wrapped.runtime.applied
@@ -148,9 +152,7 @@ def main() -> int:
                             "control trace is missing pre-event query step %d"
                             % policy_step
                         )
-                    actions = np.asarray(
-                        control_queries[policy_step], dtype=np.float32
-                    )
+                    actions = np.asarray(control_queries[policy_step], dtype=np.float32)
                     source = "control_replay"
                 else:
                     request = {

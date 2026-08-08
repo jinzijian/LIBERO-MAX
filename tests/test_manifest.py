@@ -21,7 +21,9 @@ class ManifestTest(unittest.TestCase):
     def test_duplicate_case_id_is_rejected(self):
         broken = copy.deepcopy(self.manifest)
         broken["cases"][1]["case_id"] = broken["cases"][0]["case_id"]
-        self.assertTrue(any("duplicate case_id" in error for error in validate_manifest(broken)))
+        self.assertTrue(
+            any("duplicate case_id" in error for error in validate_manifest(broken))
+        )
 
     def test_physical_track_rejects_intent_scenario(self):
         broken = copy.deepcopy(self.manifest)
@@ -30,7 +32,9 @@ class ManifestTest(unittest.TestCase):
         scenario["change"] = {"operation": "cancel_instruction"}
         scenario["expected_response_mode"] = "stop"
         errors = validate_manifest(broken)
-        self.assertTrue(any("physical_completion only supports" in error for error in errors))
+        self.assertTrue(
+            any("physical_completion only supports" in error for error in errors)
+        )
 
     def test_trigger_must_align_to_query_interval(self):
         broken = copy.deepcopy(self.manifest)
@@ -61,7 +65,28 @@ class ManifestTest(unittest.TestCase):
         self.assertEqual(validate_manifest(enriched), [])
         enriched["cases"][0]["substrate_difficulty"] = 6
         self.assertTrue(
-            any("substrate_difficulty" in error for error in validate_manifest(enriched))
+            any(
+                "substrate_difficulty" in error for error in validate_manifest(enriched)
+            )
+        )
+
+    def test_pro_variant_paths_must_be_relative_and_source_locked(self):
+        enriched = copy.deepcopy(self.manifest)
+        enriched["cases"][0]["substrate_variant"] = {
+            "benchmark": "LIBERO-PRO",
+            "category": "semantic",
+            "bddl_file": "libero_goal_lan/task.bddl",
+            "init_states_file": "libero_goal_lan/task.pruned_init",
+            "language": "open the cabinet's middle drawer",
+            "source_revision": "c86fc3b",
+        }
+        self.assertEqual(validate_manifest(enriched), [])
+        enriched["cases"][0]["substrate_variant"]["bddl_file"] = "../task.bddl"
+        self.assertTrue(
+            any(
+                "safe relative .bddl path" in error
+                for error in validate_manifest(enriched)
+            )
         )
 
 

@@ -53,13 +53,16 @@ def main() -> int:
             if stale.exists():
                 stale.unlink()
         scenario_path = case_dir / "scenario.json"
+        case_path = case_dir / "case.json"
         _write_json(scenario_path, case["scenario"])
+        _write_json(case_path, case)
         environment = dict(os.environ)
         environment.update(
             {
                 "GPU_ID": str(args.gpu_id),
                 "OUTPUT_ROOT": str(case_dir),
                 "SCENARIO_FILE": str(scenario_path),
+                "CASE_FILE": str(case_path),
                 "SUITE": case["task_suite_name"],
                 "TASK_INDEX": str(case["task_index"]),
                 "INIT_STATE_INDEX": str(case["init_state_index"]),

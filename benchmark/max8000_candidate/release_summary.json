@@ -1,0 +1,26 @@
+{
+  "base_pairs": 5600,
+  "benchmark_id": "libero-max-pro-hard-2400",
+  "benchmark_version": "3.0.0-candidate",
+  "change_types": 8,
+  "display_name": "LIBERO-MAX-8000",
+  "draws_per_change": 2,
+  "excluded_upstream_categories": {
+    "environment": "the pinned public dataset revision does not contain complete environment BDDL/init artifacts",
+    "runtime_object_move": "already changes the world during execution and would confound the MAX intervention-time comparison"
+  },
+  "joint_cells": 160,
+  "matched_pairs": 2400,
+  "pairs_per_joint_cell": [
+    15
+  ],
+  "pro_categories": 10,
+  "pro_hard_pairs": 2400,
+  "rejected_candidate_configurations": 0,
+  "release_gate": "real-MuJoCo preflight required before freeze",
+  "rollouts_per_model": 4800,
+  "source_revision": "c86fc3b8293185a6f373677018ff3e37f8391602",
+  "status": "candidate",
+  "total_pairs": 8000,
+  "total_rollouts_per_model": 16000
+}

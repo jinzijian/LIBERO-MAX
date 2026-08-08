@@ -37,7 +37,16 @@ CASE_OPTIONAL_FIELDS = {
     "task_name",
     "substrate_category",
     "substrate_difficulty",
+    "substrate_variant",
     "dynamic_phase",
+}
+SUBSTRATE_VARIANT_FIELDS = {
+    "benchmark",
+    "category",
+    "bddl_file",
+    "init_states_file",
+    "language",
+    "source_revision",
 }
 
 
@@ -51,6 +60,16 @@ def _is_integer(value: Any) -> bool:
 
 def _nonempty_string(value: Any) -> bool:
     return isinstance(value, str) and bool(value.strip())
+
+
+def _safe_relative_path(value: Any, suffix: str) -> bool:
+    if not _nonempty_string(value) or not value.endswith(suffix):
+        return False
+    normalized = value.replace("\\", "/")
+    parts = normalized.split("/")
+    return not normalized.startswith("/") and all(
+        part not in {"", ".", ".."} for part in parts
+    )
 
 
 def _field_errors(
@@ -118,9 +137,7 @@ def validate_manifest(data: Any) -> List[str]:
         if not isinstance(case, dict):
             errors.append("%s must be a JSON object" % label)
             continue
-        errors.extend(
-            _field_errors(case, CASE_FIELDS, label, CASE_OPTIONAL_FIELDS)
-        )
+        errors.extend(_field_errors(case, CASE_FIELDS, label, CASE_OPTIONAL_FIELDS))
         case_id = case.get("case_id")
         if not _nonempty_string(case_id):
             errors.append("%s.case_id must be a non-empty string" % label)
@@ -160,6 +177,43 @@ def validate_manifest(data: Any) -> List[str]:
                     "%s.substrate_difficulty must be null or 1 through 5" % label
                 )
 
+        variant = case.get("substrate_variant")
+        if variant is not None:
+            if not isinstance(variant, dict):
+                errors.append("%s.substrate_variant must be a JSON object" % label)
+            else:
+                errors.extend(
+                    _field_errors(
+                        variant,
+                        SUBSTRATE_VARIANT_FIELDS,
+                        "%s.substrate_variant" % label,
+                    )
+                )
+                if variant.get("benchmark") != "LIBERO-PRO":
+                    errors.append(
+                        "%s.substrate_variant.benchmark must be LIBERO-PRO" % label
+                    )
+                for field in ("category", "language", "source_revision"):
+                    if field in variant and not _nonempty_string(variant[field]):
+                        errors.append(
+                            "%s.substrate_variant.%s must be a non-empty string"
+                            % (label, field)
+                        )
+                if "bddl_file" in variant and not _safe_relative_path(
+                    variant["bddl_file"], ".bddl"
+                ):
+                    errors.append(
+                        "%s.substrate_variant.bddl_file must be a safe relative .bddl path"
+                        % label
+                    )
+                if "init_states_file" in variant and not _safe_relative_path(
+                    variant["init_states_file"], ".pruned_init"
+                ):
+                    errors.append(
+                        "%s.substrate_variant.init_states_file must be a safe relative .pruned_init path"
+                        % label
+                    )
+
         scenario = case.get("scenario")
         scenario_errors = validate_scenario(scenario)
         errors.extend("%s.scenario: %s" % (label, error) for error in scenario_errors)
@@ -188,8 +242,7 @@ def validate_manifest(data: Any) -> List[str]:
                 "before_place",
             }:
                 errors.append(
-                    "%s physical track requires a supported online trigger"
-                    % label
+                    "%s physical track requires a supported online trigger" % label
                 )
             elif (
                 trigger["type"] == "fixed_step"

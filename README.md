@@ -126,9 +126,38 @@ case; each GPU runs one matched pair at a time. Aggregation retains terminal
 simulator errors, and mismatched pairs block finalization rather than being
 silently converted into model failures.
 
-## LIBERO-MAX-5600 on LIBERO-Plus
+## LIBERO-MAX-8000 candidate
 
-The single official physical benchmark is **LIBERO-MAX-5600**: 5,600 matched
+The next physical release adds a source-locked **MAX-PRO-Hard-2400** subset to
+the released Base-5600:
+
+- **MAX-Base-5600:** the existing balanced LIBERO-Plus dynamic track;
+- **MAX-PRO-Hard-2400:** 10 LIBERO-PRO substrate categories x 8 MAX changes x
+  2 frozen draws x 15 pairs per joint cell;
+- **LIBERO-MAX-8000:** 8,000 matched pairs, or 16,000 rollouts per model.
+
+The PRO control and intervention arms use the same perturbed BDDL, init state,
+instruction, policy seed, and pre-event action chunks. Their only paired
+difference is whether the MAX event fires after execution begins. Results must
+report Base-5600 and PRO-Hard-2400 separately before any combined aggregate.
+
+The candidate is pinned to the public LIBERO-PRO dataset revision
+`c86fc3b8293185a6f373677018ff3e37f8391602`. It contains 400 distinct PRO task
+variants; the 2,400 pairs cross those variants with different dynamic events,
+draws, and frozen init states. Upstream `runtime_object_move` is excluded
+because it already changes the world mid-execution, and the environment track
+is deferred because complete BDDL/init artifacts are absent from the pinned
+revision.
+
+The generated candidate lives in
+[`benchmark/max8000_candidate`](benchmark/max8000_candidate). It must not be
+called a released benchmark until all 2,400 PRO-Hard configurations pass the
+real-MuJoCo preflight and the freeze audit. See
+[`docs/MAX_PRO_HARD_DESIGN.md`](docs/MAX_PRO_HARD_DESIGN.md).
+
+## Released MAX-Base-5600 on LIBERO-Plus
+
+The currently released physical benchmark is **LIBERO-MAX-5600**: 5,600 matched
 control/intervention pairs, or 11,200 rollouts per model. It is a deterministic
 balanced subset of the 10,030 LIBERO-Plus tasks:
 
@@ -157,7 +186,7 @@ Every physical-track result therefore reports three distinct views:
 
 | View | Denominator | Meaning |
 | --- | ---: | --- |
-| End-to-end control/change | All 5,600 planned cases | Overall policy capability, including failures before intervention |
+| End-to-end control/change | All planned cases in the reported track | Overall policy capability, including failures before intervention |
 | Trigger coverage | Triggered cases / 5,600 | How often the policy reached a state in which adaptation could be tested |
 | Trigger-conditioned adaptation | Valid triggered pairs only | Behavior change after an intervention actually occurred |
 
