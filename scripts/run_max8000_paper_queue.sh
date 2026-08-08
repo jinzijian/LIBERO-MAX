@@ -323,7 +323,8 @@ export LIBERO_CONFIG_PATH="$DEPS_DIR/libero-pro-config"
 export PYTHONPATH="$DEPS_DIR/robosuite-1.4.0:$LIBERO_OVERLAY:$DEPS_DIR/cosmos-policy/.venv/lib/python3.10/site-packages:$DEPS_DIR/.venv-libero/lib/python3.10/site-packages:$LIBERO_IMPL_DIR:$DEPS_DIR/cosmos-policy:$PROJECT_DIR/src:$PROJECT_DIR"
 MUJOCO_GL=egl PYOPENGL_PLATFORM=egl MUJOCO_EGL_DEVICE_ID=0 \
   "$PYTHON" scripts/render_benchmark_media.py "$PRO_MANIFEST" \
-    --preflight "$PRO_PREFLIGHT" --output-dir "$FINAL_ROOT/media" \
+    --preflight "$PRO_PREFLIGHT" --resolution 320 \
+    --output-dir "$FINAL_ROOT/media" \
     >"$FINAL_ROOT/logs/render-media.log"
 replay_case="$(select_cosmos_replay_case "$FINAL_ROOT/runs/cosmos_pro_2400")"
 log "Render audited Cosmos replay case=$replay_case"

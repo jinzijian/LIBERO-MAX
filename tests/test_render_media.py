@@ -15,6 +15,14 @@ class RenderMediaSelectionTest(unittest.TestCase):
         self.assertIn('"illumination_switch"', source)
         self.assertIn('"obstacle_insertion"', source)
 
+    def test_locked_media_resolution_avoids_corrupt_egl_buffers(self):
+        source = SCRIPT.read_text(encoding="utf-8")
+        self.assertIn('default=320', source)
+        self.assertIn('validated 320 px limit', source)
+        self.assertIn('"render_resolution": args.resolution', source)
+        self.assertIn('"neighbor_delta_before"', source)
+        self.assertIn('"neighbor_delta_after"', source)
+
 
 if __name__ == "__main__":
     unittest.main()

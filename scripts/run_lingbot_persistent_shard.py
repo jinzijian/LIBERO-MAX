@@ -260,8 +260,15 @@ def main() -> int:
                                     if not np.allclose(
                                         predicted, actions, rtol=0.0, atol=1e-6
                                     ):
+                                        absolute_error = np.abs(predicted - actions)
                                         raise RuntimeError(
-                                            "LingBot pre-event replay prediction drifted"
+                                            "LingBot pre-event replay prediction drifted "
+                                            "at policy_step=%d max_abs=%.9g mean_abs=%.9g"
+                                            % (
+                                                policy_step,
+                                                float(absolute_error.max()),
+                                                float(absolute_error.mean()),
+                                            )
                                         )
                                     source = "control_replay"
                                 else:

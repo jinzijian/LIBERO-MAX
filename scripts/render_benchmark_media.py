@@ -17,7 +17,7 @@ from libero.libero import benchmark
 
 from cosmos_policy.experiments.robot.libero.libero_utils import get_libero_env
 from libero_max.libero_backend import LiberoMujocoBackend
-from libero_max.media_validation import validate_render
+from libero_max.media_validation import mean_neighbor_delta, validate_render
 from libero_max.pro_runtime import wrap_case_env
 from libero_max.runtime import InterventionRuntime, TriggerContext
 from libero_max.substrate import load_case_task
@@ -161,8 +161,13 @@ def main() -> None:
     parser.add_argument("--output-dir", type=Path, required=True)
     parser.add_argument("--case-id", action="append", default=[])
     parser.add_argument("--limit", type=int, default=8)
-    parser.add_argument("--resolution", type=int, default=384)
+    # The locked MuJoCo/EGL runtime produces corrupted off-screen buffers at
+    # 384 px on the paper worker. 320 px is the largest resolution validated
+    # on that runtime and remains comfortably above the policy input size.
+    parser.add_argument("--resolution", type=int, default=320)
     args = parser.parse_args()
+    if not 64 <= args.resolution <= 320:
+        parser.error("--resolution must be between 64 and the validated 320 px limit")
 
     manifest = json.loads(args.manifest.read_text(encoding="utf-8"))
     by_id = {case["case_id"]: case for case in manifest["cases"]}
@@ -211,6 +216,9 @@ def main() -> None:
                 "substrate_category": category,
                 "task_description": rendered["task_description"],
                 "gif": gif_path.name,
+                "render_resolution": args.resolution,
+                "neighbor_delta_before": mean_neighbor_delta(rendered["before"]),
+                "neighbor_delta_after": mean_neighbor_delta(rendered["after"]),
                 "substrate_runtime": rendered["substrate_runtime"],
             }
         )
