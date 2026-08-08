@@ -26,6 +26,7 @@ def build_section(paper_root: Path) -> str:
         )
     )
     main_table = _read(paper_root / "tables/main/main_results.md")
+    track_table = _read(paper_root / "tables/tracks/main_results.md")
     comparison_table = _read(paper_root / "tables/model_comparison/main_results.md")
     return "\n".join(
         [
@@ -49,6 +50,15 @@ def build_section(paper_root: Path) -> str:
             main_table,
             "",
             "![Full-denominator control and changed success](results/max8000/figures/main/overall_success.png)",
+            "",
+            "### Base versus PRO-Hard difficulty",
+            "",
+            "The disjoint Base and PRO-Hard tracks are shown separately so the "
+            "added LIBERO-PRO substrate difficulty is not hidden by the combined "
+            "MAX-8000 average. These differences are descriptive rather than "
+            "paired significance tests.",
+            "",
+            track_table,
             "",
             "### Frozen q16 cross-model comparison",
             "",

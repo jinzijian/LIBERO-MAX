@@ -11,12 +11,14 @@ class UpdateReadmePaperResultsTest(unittest.TestCase):
         with tempfile.TemporaryDirectory() as raw_root:
             root = Path(raw_root)
             (root / "tables/main").mkdir(parents=True)
+            (root / "tables/tracks").mkdir(parents=True)
             (root / "tables/model_comparison").mkdir(parents=True)
             (root / "human_review").mkdir()
             (root / "experiment_status.json").write_text(
                 json.dumps({"paper_experiments_complete": True})
             )
             (root / "tables/main/main_results.md").write_text("| main |\n")
+            (root / "tables/tracks/main_results.md").write_text("| tracks |\n")
             (root / "tables/model_comparison/main_results.md").write_text(
                 "| compare |\n"
             )
@@ -32,6 +34,8 @@ class UpdateReadmePaperResultsTest(unittest.TestCase):
             self.assertIn("MAX8000_RESULTS.md", section)
             self.assertIn("cosmos-rollout-replay.gif", section)
             self.assertIn("intervention-overview.png", section)
+            self.assertIn("Base versus PRO-Hard difficulty", section)
+            self.assertIn("| tracks |", section)
             self.assertIn("42 cases", section)
             self.assertIn("top 10", section)
 
