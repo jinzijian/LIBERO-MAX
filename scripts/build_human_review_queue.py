@@ -51,7 +51,13 @@ def _load_model_controls(specs: Iterable[str]) -> Dict[str, Dict[str, bool]]:
         if "=" not in spec:
             raise ValueError("--run must use MODEL=RUN_ROOT")
         model, raw_root = spec.split("=", 1)
-        path = Path(raw_root) / "paired_results.jsonl"
+        root = Path(raw_root)
+        end_to_end_path = root / "end_to_end_results.jsonl"
+        path = (
+            end_to_end_path
+            if end_to_end_path.exists()
+            else root / "paired_results.jsonl"
+        )
         for line in path.read_text(encoding="utf-8").splitlines():
             if not line.strip():
                 continue
