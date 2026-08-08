@@ -31,6 +31,7 @@ class UpdateReadmePaperResultsTest(unittest.TestCase):
             self.assertIn("LaTeX", section)
             self.assertIn("MAX8000_RESULTS.md", section)
             self.assertIn("cosmos-rollout-replay.gif", section)
+            self.assertIn("intervention-overview.png", section)
             self.assertIn("42 cases", section)
             self.assertIn("top 10", section)
 

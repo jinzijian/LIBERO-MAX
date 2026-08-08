@@ -65,6 +65,8 @@ def build_section(paper_root: Path) -> str:
             "These are deterministic real-MuJoCo before/after previews, not model "
             "success claims.",
             "",
+            "![Eight real-MuJoCo intervention previews](assets/media/intervention-overview.png)",
+            "",
             "| Lighting | Camera | Visual theme | Sensor noise |",
             "| --- | --- | --- | --- |",
             "| ![Lighting switch](assets/media/illumination-switch.gif) | ![Camera shift](assets/media/camera-shift.gif) | ![Visual theme](assets/media/visual-theme-switch.gif) | ![Sensor noise](assets/media/sensor-noise-onset.gif) |",
