@@ -1,6 +1,6 @@
 # MAX-PRO-Hard-2400 design
 
-Status: physical preflight complete; runtime publication pending
+Status: version 3.0.0 frozen; physical preflight and runtime publication gates complete
 
 Screening round 1 executed all 2,400 configurations: 2,156 passed and 244
 were rejected by feasibility gates. After a complete audited second round,
@@ -160,7 +160,18 @@ bash scripts/run_max_pro_preflight.sh \
   artifacts/max8000/pro_preflight
 ```
 
-The complete passing report is now stored at
-`benchmark/max8000_candidate/pro_physical_preflight.json`. The remaining
-version 3.0.0 freeze blocker is publication or vendoring of the pinned
-PRO-aware runtime.
+The complete passing report is stored at
+`benchmark/max8000_candidate/pro_physical_preflight.json`. The pinned runtime
+commit is publicly retrievable, and the freeze audit has promoted the exact
+candidate to `benchmark/max8000/` as version 3.0.0. Reproduce the freeze with:
+
+```bash
+PYTHONPATH=src python scripts/freeze_libero_max_8000.py \
+  --base-manifest benchmark/max5600/libero_max_5600.json \
+  --pro-catalog benchmark/max8000_candidate/pro_task_catalog.json \
+  --pro-manifest benchmark/max8000_candidate/libero_max_pro_hard_2400.json \
+  --model-comparison benchmark/max8000_candidate/libero_max_pro_model_comparison_800.json \
+  --pro-preflight benchmark/max8000_candidate/pro_physical_preflight.json \
+  --intent benchmark/max5600/intent_96.json \
+  --output-dir benchmark/max8000
+```

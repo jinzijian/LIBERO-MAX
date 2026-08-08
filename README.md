@@ -126,10 +126,10 @@ case; each GPU runs one matched pair at a time. Aggregation retains terminal
 simulator errors, and mismatched pairs block finalization rather than being
 silently converted into model failures.
 
-## LIBERO-MAX-8000 candidate
+## LIBERO-MAX-8000 release
 
-The next physical release adds a source-locked **MAX-PRO-Hard-2400** subset to
-the released Base-5600:
+Version 3.0.0 adds a source-locked **MAX-PRO-Hard-2400** subset to the released
+Base-5600:
 
 - **MAX-Base-5600:** the existing balanced LIBERO-Plus dynamic track;
 - **MAX-PRO-Hard-2400:** 10 LIBERO-PRO substrate categories x 8 MAX changes x
@@ -152,13 +152,16 @@ because it already changes the world mid-execution, and the environment track
 is deferred because complete BDDL/init artifacts are absent from the pinned
 revision.
 
-The generated candidate lives in
+The frozen release lives in [`benchmark/max8000`](benchmark/max8000), with
+construction provenance retained under
 [`benchmark/max8000_candidate`](benchmark/max8000_candidate). Its real-MuJoCo
-preflight now passes **2,400/2,400** configurations while preserving every
-balanced cell and strong draw. It must not be called a released benchmark
-until the pinned PRO-aware runtime is published or vendored and the freeze
-audit succeeds. See
-[`docs/MAX_PRO_HARD_DESIGN.md`](docs/MAX_PRO_HARD_DESIGN.md).
+preflight passes **2,400/2,400** configurations while preserving every balanced
+cell and strong draw. The source-locked PRO-aware runtime is publicly
+retrievable at the recorded commit, and the version 3.0.0 freeze checksums are
+verified in CI. See [`docs/MAX_PRO_HARD_DESIGN.md`](docs/MAX_PRO_HARD_DESIGN.md)
+for dataset construction and
+[`docs/MAX8000_EXPERIMENT_MATRIX.md`](docs/MAX8000_EXPERIMENT_MATRIX.md) for
+the frozen paper evaluation and publication gates.
 
 ## Released MAX-Base-5600 on LIBERO-Plus
 
@@ -187,13 +190,18 @@ retained as `trigger_unreached` / `pre_intervention_failure`: it contributes a
 failure to the full end-to-end denominator but is not treated as evidence
 about post-change adaptation.
 
-Every physical-track result therefore reports three distinct views:
+Every physical-track result therefore reports four distinct views:
 
 | View | Denominator | Meaning |
 | --- | ---: | --- |
 | End-to-end control/change | All planned cases in the reported track | Overall policy capability, including failures before intervention |
 | Trigger coverage | Triggered cases / 5,600 | How often the policy reached a state in which adaptation could be tested |
-| Trigger-conditioned adaptation | Valid triggered pairs only | Behavior change after an intervention actually occurred |
+| Response-query coverage | Cases with a paired post-event policy query / 5,600 | How often the event occurred early enough for the fixed-commitment policy to observe it |
+| Response-conditioned adaptation | Valid post-event-query pairs only | Behavior change after the intervention could enter a policy query |
+
+An intervention that fires after the last policy query remains a
+full-denominator model/horizon outcome. It is not repaired, dropped, or
+assigned a fabricated post-event action difference.
 
 Infrastructure failures remain missing until repaired. They are neither
 dropped from the benchmark nor charged to the policy. Consequently,

@@ -1,6 +1,7 @@
 # LIBERO-MAX-8000 candidate artifacts
 
-This directory contains a deterministic candidate, not a frozen release.
+This directory preserves the deterministic candidate and construction audit
+used to create the frozen version 3.0.0 release in `benchmark/max8000/`.
 
 - `pro_source_lock.json`: upstream code/data revisions and category boundary;
 - `pro_task_catalog.json`: 400 selected LIBERO-PRO task variants;
@@ -14,7 +15,9 @@ This directory contains a deterministic candidate, not a frozen release.
   per-case PRO component audits and pre/post visibility checks;
 - `SHA256SUMS`: checksums for the deterministic candidate artifacts.
 
-All 2,400 PRO-Hard configurations now pass real-MuJoCo preflight. The candidate
-is promoted to `benchmark/max8000/` only after the PRO-aware config runtime is
-published or vendored and the version 3.0.0 freeze audit succeeds. See
-`docs/MAX_PRO_HARD_DESIGN.md`.
+All 2,400 PRO-Hard configurations pass real-MuJoCo preflight. The tested
+PRO-aware runtime is public at commit
+`2b910b5b5f53016bef9907632f6f840f1ce2229c` on
+`refs/heads/codex/pr1-bddl-robustness` of the upstream LIBERO-PRO repository.
+The version 3.0.0 freeze audit therefore promotes these exact artifacts without
+resampling or replacing any case. See `docs/MAX_PRO_HARD_DESIGN.md`.

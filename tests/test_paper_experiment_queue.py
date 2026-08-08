@@ -12,6 +12,7 @@ class PaperExperimentQueueTest(unittest.TestCase):
         self.assertIn("build_infrastructure_repair_manifest.py", source)
         self.assertIn("trigger-unreached", source)
         self.assertIn("response_query_unreached", source)
+        self.assertIn("benchmark/max8000/libero_max_8000.json", source)
         self.assertIn("build_paper_tables.py", source)
         self.assertIn("build_paper_figures.py", source)
         self.assertIn("tables/ablation", source)

@@ -15,9 +15,9 @@ COSMOS_PID_FILE="${COSMOS_PID_FILE:-$PROJECT_DIR/artifacts/max8000/cosmos_pro_ha
 OPENPI_SYNC_PID_FILE="${OPENPI_SYNC_PID_FILE:-$PROJECT_DIR/artifacts/max5600/openpi_uv_sync.pid}"
 
 BASE_MANIFEST="$PROJECT_DIR/benchmark/max5600/libero_max_5600.json"
-PRO_MANIFEST="$PROJECT_DIR/benchmark/max8000_candidate/libero_max_pro_hard_2400.json"
-COMBINED_MANIFEST="$PROJECT_DIR/benchmark/max8000_candidate/libero_max_8000.json"
-COMPARISON_MANIFEST="$PROJECT_DIR/benchmark/max8000_candidate/libero_max_pro_model_comparison_800.json"
+PRO_MANIFEST="$PROJECT_DIR/benchmark/max8000/libero_max_pro_hard_2400.json"
+COMBINED_MANIFEST="$PROJECT_DIR/benchmark/max8000/libero_max_8000.json"
+COMPARISON_MANIFEST="$PROJECT_DIR/benchmark/max8000/libero_max_pro_model_comparison_800.json"
 BASE_PREFLIGHT="$PROJECT_DIR/benchmark/max5600/physical_preflight.json"
 PRO_PREFLIGHT="$PROJECT_DIR/benchmark/max8000_candidate/pro_physical_preflight.json"
 BASE_T5="$DEPS_DIR/cosmos-assets/Cosmos-Policy-LIBERO-Predict2-2B/libero_plus_t5_embeddings.pkl"

@@ -24,10 +24,10 @@
   "pro_categories": 10,
   "pro_hard_pairs": 2400,
   "rejected_candidate_configurations": 1710,
-  "release_gate": "publish or vendor the pinned PRO-aware runtime before freeze",
+  "release_gate": "satisfied: pinned PRO-aware runtime is public at refs/heads/codex/pr1-bddl-robustness",
   "rollouts_per_model": 4800,
   "source_revision": "c86fc3b8293185a6f373677018ff3e37f8391602",
-  "status": "candidate_runtime_publication_pending",
+  "status": "ready_for_version_3.0.0_freeze",
   "total_pairs": 8000,
   "total_rollouts_per_model": 16000
 }

@@ -1,0 +1,16 @@
+{
+  "base_pairs": 5600,
+  "benchmark_id": "libero-max-8000",
+  "benchmark_version": "3.0.0",
+  "change_types": 8,
+  "display_name": "LIBERO-MAX-8000",
+  "intent_matched_pairs": 96,
+  "matched_pairs": 8000,
+  "model_comparison_pairs": 800,
+  "pro_categories": 10,
+  "pro_hard_pairs": 2400,
+  "pro_preflight_passed": 2400,
+  "pro_source_revision": "c86fc3b8293185a6f373677018ff3e37f8391602",
+  "rollouts_per_model": 16000,
+  "status": "released"
+}
