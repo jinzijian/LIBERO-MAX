@@ -68,6 +68,26 @@ def summarize_pair(control, intervention):
     )
     if not pre_change_action_chunks_match:
         raise ValueError("control/intervention action chunks differ before change")
+    input_digest_fields = ("policy_image_sha256", "sim_state_sha256")
+    pre_change_policy_inputs_measured = bool(pre_change_steps) and all(
+        all(field in control_queries[step] and field in intervention_queries[step]
+            for field in input_digest_fields)
+        for step in pre_change_steps
+    )
+    pre_change_policy_inputs_match = (
+        None
+        if not pre_change_policy_inputs_measured
+        else all(
+            all(
+                control_queries[step][field]
+                == intervention_queries[step][field]
+                for field in input_digest_fields
+            )
+            for step in pre_change_steps
+        )
+    )
+    if pre_change_policy_inputs_match is False:
+        raise ValueError("control/intervention policy inputs differ before change")
     response_steps = sorted(
         step
         for step in set(control_queries) & set(intervention_queries)
@@ -103,6 +123,8 @@ def summarize_pair(control, intervention):
         "intervention_policy_step": event_step,
         "mean_absolute_raw_pixel_delta": event["mean_absolute_raw_pixel_delta"],
         "pre_change_action_chunks_match": pre_change_action_chunks_match,
+        "pre_change_policy_inputs_measured": pre_change_policy_inputs_measured,
+        "pre_change_policy_inputs_match": pre_change_policy_inputs_match,
         "pre_change_query_steps": pre_change_steps,
         "response_query_reached": response_query_reached,
         "policy_response_query_step": response_step,

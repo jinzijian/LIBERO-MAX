@@ -12,12 +12,20 @@ MODULE = importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(MODULE)
 
 
-def query(step, digest, value):
-    return {
+def query(step, digest, value, input_digest=None):
+    result = {
         "policy_step": step,
         "action_chunk_sha256": digest,
         "actions": [[value, value + 1.0]],
     }
+    if input_digest is not None:
+        result.update(
+            {
+                "policy_image_sha256": {"agentview": input_digest},
+                "sim_state_sha256": input_digest,
+            }
+        )
+    return result
 
 
 def row(arm, success, queries, events):
@@ -41,6 +49,28 @@ def row(arm, success, queries, events):
 
 
 class CosmosSummaryTest(unittest.TestCase):
+    def test_rejects_pre_change_policy_input_mismatch_when_measured(self):
+        control = row(
+            "control",
+            False,
+            [query(0, "a", 0.0, "input-a")],
+            [],
+        )
+        intervention = row(
+            "intervention",
+            False,
+            [query(0, "a", 0.0, "input-b")],
+            [
+                {
+                    "cosmos_query_boundary_step": 16,
+                    "mean_absolute_raw_pixel_delta": 2.0,
+                }
+            ],
+        )
+
+        with self.assertRaisesRegex(ValueError, "policy inputs differ"):
+            MODULE.summarize_pair(control, intervention)
+
     def test_proximity_event_maps_to_next_policy_query(self):
         control = row(
             "control",
