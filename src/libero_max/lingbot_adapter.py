@@ -1,11 +1,30 @@
-"""Pure action-layout helpers for the LingBot-VA benchmark adapter."""
+"""Pure action-layout and paired-input helpers for the LingBot-VA adapter."""
 
+import hashlib
 from typing import Any
 
 import numpy as np
 
 
 DUMMY_ACTION = np.asarray([0, 0, 0, 0, 0, 0, -1], dtype=np.float32)
+
+
+def lingbot_policy_input_digests(images: Any, sim_state: Any) -> dict:
+    """Hash the exact policy images and MuJoCo state at one query boundary."""
+
+    if not isinstance(images, dict) or not images:
+        raise ValueError("LingBot policy images must be a non-empty mapping")
+    image_hashes = {}
+    for key, value in sorted(images.items()):
+        array = np.ascontiguousarray(value)
+        if array.ndim != 3:
+            raise ValueError("LingBot policy images must be rank-3 arrays")
+        image_hashes[key] = hashlib.sha256(array.tobytes()).hexdigest()
+    state = np.ascontiguousarray(np.asarray(sim_state))
+    return {
+        "policy_image_sha256": image_hashes,
+        "sim_state_sha256": hashlib.sha256(state.tobytes()).hexdigest(),
+    }
 
 
 def flatten_lingbot_actions(native: Any, query_index: int) -> np.ndarray:

@@ -19,7 +19,11 @@ import numpy as np
 
 from libero_max.cosmos_integration import CosmosInterventionEnv
 from libero_max.env_factory import create_libero_env_with_retry
-from libero_max.lingbot_adapter import DUMMY_ACTION, flatten_lingbot_actions
+from libero_max.lingbot_adapter import (
+    DUMMY_ACTION,
+    flatten_lingbot_actions,
+    lingbot_policy_input_digests,
+)
 from libero_max.manifest import load_manifest
 from libero_max.pro_runtime import wrap_case_env
 from libero_max.substrate import load_case_task, variant_path
@@ -147,6 +151,8 @@ def main() -> int:
                 initial_state = initial_states[case["init_state_index"]]
                 seed = int(case["policy_seed"])
                 rows = {}
+                control_native_queries = {}
+                control_input_digests = {}
                 for arm in ("control", "intervention"):
                     arm_dir = case_dir / arm
                     arm_dir.mkdir(parents=True, exist_ok=True)
@@ -230,19 +236,11 @@ def main() -> int:
                                     0,
                                     wrapped.total_env_steps - wrapped.warmup_steps,
                                 )
-                                generator_seed = _noise_seed(seed, query_index)
-                                torch.manual_seed(generator_seed)
-                                np.random.seed(generator_seed)
-                                native = np.asarray(
-                                    model.infer(
-                                        {
-                                            "obs": _extract_observation(observation),
-                                            "prompt": instruction,
-                                        }
-                                    )["action"],
-                                    dtype=np.float32,
+                                policy_observation = _extract_observation(observation)
+                                input_digests = lingbot_policy_input_digests(
+                                    policy_observation,
+                                    wrapped.sim.get_state().flatten(),
                                 )
-                                predicted = flatten_lingbot_actions(native, query_index)
                                 replay = (
                                     arm == "intervention"
                                     and not wrapped.runtime.applied
@@ -254,29 +252,60 @@ def main() -> int:
                                             "control trace missing query step %d"
                                             % policy_step
                                         )
+                                    if policy_step not in control_native_queries:
+                                        raise RuntimeError(
+                                            "control native cache missing query step %d"
+                                            % policy_step
+                                        )
+                                    if input_digests != control_input_digests.get(
+                                        policy_step
+                                    ):
+                                        raise RuntimeError(
+                                            "LingBot pre-event policy inputs drifted "
+                                            "at policy_step=%d" % policy_step
+                                        )
+                                    # The paired evaluator replays both the
+                                    # physical action chunk and LingBot's
+                                    # native cache tensor. Recomputing this
+                                    # tensor is not bitwise deterministic on
+                                    # the released CUDA stack even when the
+                                    # MuJoCo state and both RGB inputs are
+                                    # byte-identical.
+                                    native = control_native_queries[
+                                        policy_step
+                                    ].copy()
                                     actions = np.asarray(
                                         control_queries[policy_step], dtype=np.float32
                                     )
-                                    if not np.allclose(
-                                        predicted, actions, rtol=0.0, atol=1e-6
-                                    ):
-                                        absolute_error = np.abs(predicted - actions)
-                                        raise RuntimeError(
-                                            "LingBot pre-event replay prediction drifted "
-                                            "at policy_step=%d max_abs=%.9g mean_abs=%.9g"
-                                            % (
-                                                policy_step,
-                                                float(absolute_error.max()),
-                                                float(absolute_error.mean()),
-                                            )
-                                        )
                                     source = "control_replay"
                                 else:
-                                    actions = predicted
+                                    generator_seed = _noise_seed(seed, query_index)
+                                    torch.manual_seed(generator_seed)
+                                    np.random.seed(generator_seed)
+                                    native = np.asarray(
+                                        model.infer(
+                                            {
+                                                "obs": policy_observation,
+                                                "prompt": instruction,
+                                            }
+                                        )["action"],
+                                        dtype=np.float32,
+                                    )
+                                    actions = flatten_lingbot_actions(
+                                        native, query_index
+                                    )
                                     source = "model"
-                                wrapped.record_policy_query(
+                                    if arm == "control":
+                                        control_native_queries[
+                                            policy_step
+                                        ] = native.copy()
+                                        control_input_digests[
+                                            policy_step
+                                        ] = input_digests
+                                query = wrapped.record_policy_query(
                                     actions, instruction=instruction, source=source
                                 )
+                                query.update(input_digests)
                                 action_plan.extend(actions)
                                 native_for_cache = native
                                 query_index += 1

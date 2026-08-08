@@ -3,10 +3,30 @@ from pathlib import Path
 
 import numpy as np
 
-from libero_max.lingbot_adapter import DUMMY_ACTION, flatten_lingbot_actions
+from libero_max.lingbot_adapter import (
+    DUMMY_ACTION,
+    flatten_lingbot_actions,
+    lingbot_policy_input_digests,
+)
 
 
 class LingBotAdapterTest(unittest.TestCase):
+    def test_policy_input_digest_covers_images_and_sim_state(self):
+        images = {
+            "agentview": np.zeros((4, 4, 3), dtype=np.uint8),
+            "wrist": np.ones((4, 4, 3), dtype=np.uint8),
+        }
+        state = np.asarray([1.0, 2.0], dtype=np.float64)
+        first = lingbot_policy_input_digests(images, state)
+        repeated = lingbot_policy_input_digests(images, state)
+        changed = lingbot_policy_input_digests(
+            {**images, "wrist": np.zeros((4, 4, 3), dtype=np.uint8)}, state
+        )
+
+        self.assertEqual(first, repeated)
+        self.assertNotEqual(first, changed)
+        self.assertIn("sim_state_sha256", first)
+
     def test_flattens_native_frame_action_layout(self):
         native = np.arange(7 * 4 * 4, dtype=np.float32).reshape(7, 4, 4)
         flat = flatten_lingbot_actions(native, query_index=1)

@@ -58,8 +58,14 @@ def main() -> int:
         "physical_gpus": gpus,
         "workers": len(gpus),
         "query_interval": manifest["protocol"]["query_interval"],
-        "deterministic": True,
+        "deterministic": False,
+        "cuda_recomputation_bitwise_deterministic": False,
         "control_replay_before_event": True,
+        "native_cache_replay_before_event": True,
+        "paired_input_contract": (
+            "byte-identical policy images and MuJoCo state at every pre-event "
+            "query, with control action and native-cache replay"
+        ),
         "native_cache_chunk": "4 video frames x 4 actions",
         "attention_backend": "torch SDPA",
         "bootstrap": "first conditioned frame replaced by four LIBERO no-ops",
