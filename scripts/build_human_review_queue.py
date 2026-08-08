@@ -258,6 +258,10 @@ def main() -> None:
                 "zero of three is a benchmark-defect candidate, not automatic "
                 "proof of infeasibility"
             ),
+            "secondary_review_rule": (
+                "every zero-of-three benchmark-defect candidate requires an "
+                "independent second reviewer before any benchmark change"
+            ),
         },
         "cases": selected,
     }
@@ -290,6 +294,9 @@ def main() -> None:
         "human_feasibility_label",
         "reviewer",
         "review_notes",
+        "secondary_reviewer",
+        "secondary_review_status",
+        "secondary_review_notes",
     ]
     with (args.output_dir / "human_review_queue.csv").open(
         "w", newline="", encoding="utf-8"
@@ -316,6 +323,9 @@ def main() -> None:
                     "human_feasibility_label": "",
                     "reviewer": "",
                     "review_notes": "",
+                    "secondary_reviewer": "",
+                    "secondary_review_status": "",
+                    "secondary_review_notes": "",
                 }
             )
     markdown = [
@@ -324,7 +334,8 @@ def main() -> None:
         payload["interpretation"],
         "Protocol: three teleoperation attempts per case; one success is "
         "positive feasibility evidence, while 0/3 requires simulator and "
-        "expert review before any benchmark change.",
+        "expert review. Every 0/3 defect candidate then requires an "
+        "independent second reviewer before any benchmark change.",
         "",
         "| Rank | Case | Score | Substrate | Change | Risk signals |",
         "| ---: | --- | ---: | --- | --- | --- |",

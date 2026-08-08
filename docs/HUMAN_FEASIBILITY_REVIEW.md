@@ -31,8 +31,9 @@ whether the simulator remained valid, and whether the original goal completed.
   protocol. Changes must be versioned; historical results are never silently
   rewritten.
 
-The generated CSV contains blank attempt, success, label, reviewer, and notes
-columns for the review team. A successful model control is retained as
+The generated CSV contains blank attempt, success, label, primary-review,
+secondary-review, and notes columns for the review team. A successful model
+control is retained as
 counterevidence to base-task infeasibility; a successful model intervention is
 stronger counterevidence because it completes the exact changed episode.
 Neither replaces the direct positive check from a successful human
