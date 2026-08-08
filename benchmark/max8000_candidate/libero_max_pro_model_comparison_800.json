@@ -55909,7 +55909,7 @@
       "intervention"
     ],
     "profile": "pro-model-comparison",
-    "query_interval": 5,
+    "query_interval": 16,
     "scoring_track": "physical_completion",
     "selection_contract": "libero-max-pro-model-comparison-v1; 5 cases per substrate-category/change-type/draw cell; SHA-256 rank independent of model outcomes",
     "source_benchmark_commit": "c86fc3b8293185a6f373677018ff3e37f8391602",

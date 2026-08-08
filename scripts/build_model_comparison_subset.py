@@ -49,7 +49,7 @@ def main() -> None:
     parser.add_argument("source", type=Path)
     parser.add_argument("output", type=Path)
     parser.add_argument("--per-cell", type=int, default=5)
-    parser.add_argument("--query-interval", type=int, default=5)
+    parser.add_argument("--query-interval", type=int, default=16)
     args = parser.parse_args()
     source = load_manifest(args.source)
     selected = select_cases(source["cases"], args.per_cell)
