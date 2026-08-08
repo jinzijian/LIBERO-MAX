@@ -86,8 +86,9 @@ def build_section(paper_root: Path) -> str:
             "and [`docs/HUMAN_FEASIBILITY_REVIEW.md`](docs/HUMAN_FEASIBILITY_REVIEW.md)."
             % (review["candidate_count"], review["selected_count"]),
             "",
-            "Machine-readable summaries, full-denominator rows, confidence "
-            "interval tables, pairwise tests, figures, and SHA-256 checksums are "
+            "Machine-readable summaries, full-denominator rows, Markdown and "
+            "LaTeX confidence-interval tables, pairwise tests, figures, and "
+            "SHA-256 checksums are "
             "under [`results/max8000`](results/max8000).",
             END,
         ]
