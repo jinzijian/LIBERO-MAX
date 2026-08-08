@@ -8,7 +8,9 @@ import hashlib
 import json
 import os
 import random
+import sys
 import traceback
+import types
 from pathlib import Path
 from typing import Any, Dict
 
@@ -76,6 +78,18 @@ def main() -> int:
     import torch.distributed as dist
     from libero.libero import benchmark, get_libero_path
     from libero.libero.envs import OffScreenRenderEnv
+
+    # LingBot imports FlashAttention unconditionally even when the released
+    # server selects PyTorch SDPA. Provide an explicit unused sentinel instead
+    # of compiling a backend outside this run's locked configuration.
+    flash_stub = types.ModuleType("flash_attn")
+
+    def unavailable_flash_attention(*unused_args: Any, **unused_kwargs: Any) -> None:
+        raise RuntimeError("FlashAttention is disabled; LingBot uses torch SDPA")
+
+    flash_stub.flash_attn_func = unavailable_flash_attention
+    sys.modules.setdefault("flash_attn", flash_stub)
+
     from wan_va.configs import VA_CONFIGS
     from wan_va.distributed.util import init_distributed
     import wan_va.wan_va_server as server_module

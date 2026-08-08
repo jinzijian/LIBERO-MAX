@@ -43,6 +43,7 @@ def main() -> int:
         "deterministic": True,
         "control_replay_before_event": True,
         "native_cache_chunk": "4 video frames x 4 actions",
+        "attention_backend": "torch SDPA",
         "bootstrap": "first conditioned frame replaced by four LIBERO no-ops",
         "rollout_videos_disabled": True,
     }
