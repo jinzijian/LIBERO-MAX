@@ -10,6 +10,27 @@ class RenderStabilityError(RuntimeError):
     """Raised when a new off-screen context returns unstable camera buffers."""
 
 
+def disable_single_episode_hard_reset(env: Any) -> bool:
+    """Keep the factory-validated MuJoCo context for a one-episode evaluator.
+
+    Every LIBERO-MAX runner constructs a fresh environment for each paired arm
+    and executes exactly one episode before closing it.  LIBERO's default hard
+    reset would therefore rebuild the already-validated MjSim / EGL context for
+    no isolation benefit, and the locked worker stack can expose an
+    uninitialized camera buffer in that replacement context.
+    """
+
+    candidates = [env]
+    inner = getattr(env, "env", env)
+    if inner is not env:
+        candidates.append(inner)
+    for candidate in candidates:
+        if hasattr(candidate, "hard_reset"):
+            candidate.hard_reset = False
+            return True
+    return False
+
+
 def install_stable_camera_render(
     env: Any,
     maximum_attempts: int = 32,
@@ -222,6 +243,7 @@ def create_libero_env_with_retry(
         else:
             env, description = result
             try:
+                hard_reset_disabled = disable_single_episode_hard_reset(env)
                 stable_render = install_stable_camera_render(env)
                 render_qa = prime_offscreen_renderer(env)
             except RenderStabilityError:
@@ -232,6 +254,9 @@ def create_libero_env_with_retry(
                     raise
                 continue
             render_qa["stable_camera_render"] = stable_render
+            render_qa[
+                "single_episode_hard_reset_disabled"
+            ] = hard_reset_disabled
             render_qa["environment_attempt"] = attempt + 1
             try:
                 setattr(env, "libero_max_render_qa", render_qa)

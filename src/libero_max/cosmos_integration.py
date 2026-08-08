@@ -159,9 +159,9 @@ class CosmosInterventionEnv:
                     self._env.seed(self.policy_seed + attempt)
         if self.policy_seed is not None and hasattr(self._env, "seed"):
             self._env.seed(self.policy_seed)
-        # LIBERO hard reset replaces the underlying MjSim and its off-screen
-        # context, so the stable-render wrapper must be installed after every
-        # reset rather than only when the outer environment is constructed.
+        # Official runners disable LIBERO's redundant hard reset because each
+        # paired arm owns a fresh, single-episode environment. Keep this
+        # installation idempotent for compatible third-party wrappers.
         from .env_factory import install_stable_camera_render
 
         self._stable_camera_render_qa = install_stable_camera_render(self._env)

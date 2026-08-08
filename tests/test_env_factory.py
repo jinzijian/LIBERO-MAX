@@ -5,6 +5,7 @@ import numpy as np
 from libero_max.env_factory import (
     RenderStabilityError,
     create_libero_env_with_retry,
+    disable_single_episode_hard_reset,
     install_stable_camera_render,
     prime_offscreen_renderer,
 )
@@ -37,6 +38,16 @@ class _SequenceSim:
 
 
 class EnvFactoryTest(unittest.TestCase):
+    def test_disables_nested_hard_reset_for_single_episode_context(self):
+        inner = type("Inner", (), {"hard_reset": True})()
+        outer = type("Outer", (), {"env": inner})()
+
+        self.assertTrue(disable_single_episode_hard_reset(outer))
+        self.assertFalse(inner.hard_reset)
+
+    def test_reports_when_no_hard_reset_flag_exists(self):
+        self.assertFalse(disable_single_episode_hard_reset(object()))
+
     def test_camera_wrapper_flushes_stale_cross_camera_buffer(self):
         stale = np.ones((4, 4, 3), dtype=np.uint8)
         current = np.zeros((4, 4, 3), dtype=np.uint8)
@@ -93,6 +104,9 @@ class EnvFactoryTest(unittest.TestCase):
         self.assertTrue(bad.closed)
         self.assertIs(env, good)
         self.assertEqual(env.libero_max_render_qa["environment_attempt"], 2)
+        self.assertFalse(
+            env.libero_max_render_qa["single_episode_hard_reset_disabled"]
+        )
         self.assertEqual(seeds, [195, 196, 195])
 
     def test_primer_rejects_permanently_unstable_context(self):
