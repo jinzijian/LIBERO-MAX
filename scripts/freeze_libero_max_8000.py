@@ -24,6 +24,7 @@ def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--base-manifest", type=Path, required=True)
     parser.add_argument("--pro-catalog", type=Path, required=True)
+    parser.add_argument("--pro-source-lock", type=Path, required=True)
     parser.add_argument("--pro-manifest", type=Path, required=True)
     parser.add_argument("--model-comparison", type=Path, required=True)
     parser.add_argument("--pro-preflight", type=Path, required=True)
@@ -32,11 +33,18 @@ def main() -> int:
     args = parser.parse_args()
     base = json.loads(args.base_manifest.read_text(encoding="utf-8"))
     catalog = json.loads(args.pro_catalog.read_text(encoding="utf-8"))
+    source_lock = json.loads(args.pro_source_lock.read_text(encoding="utf-8"))
     pro = json.loads(args.pro_manifest.read_text(encoding="utf-8"))
     comparison = json.loads(args.model_comparison.read_text(encoding="utf-8"))
     preflight = json.loads(args.pro_preflight.read_text(encoding="utf-8"))
     intent = json.loads(args.intent.read_text(encoding="utf-8"))
     errors = audit_pro_hard_release(catalog, pro, preflight)
+    if source_lock.get("dataset_revision") != catalog.get("source_revision"):
+        errors.append("PRO source lock and catalog dataset revisions do not match")
+    if source_lock.get("status") != "release_gate_satisfied":
+        errors.append("PRO source lock release gate is not satisfied")
+    if not source_lock.get("pro_runtime_revision_tested"):
+        errors.append("PRO source lock lacks the tested runtime revision")
     errors.extend(
         "model comparison manifest: %s" % error
         for error in validate_manifest(comparison)
@@ -93,6 +101,7 @@ def main() -> int:
         "libero_max_8000.json": _json_bytes(frozen_combined),
         "libero_max_pro_hard_2400.json": _json_bytes(frozen_pro),
         "pro_task_catalog.json": _json_bytes(catalog),
+        "pro_source_lock.json": _json_bytes(source_lock),
         "pro_physical_preflight.json": _json_bytes(preflight),
         "intent_96.json": _json_bytes(frozen_intent),
         "libero_max_pro_model_comparison_800.json": _json_bytes(

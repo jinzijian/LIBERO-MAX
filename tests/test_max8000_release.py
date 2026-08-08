@@ -7,7 +7,6 @@ from pathlib import Path
 
 ROOT = Path(__file__).parents[1]
 RELEASE = ROOT / "benchmark" / "max8000"
-CANDIDATE = ROOT / "benchmark" / "max8000_candidate"
 
 
 class Max8000ReleaseTest(unittest.TestCase):
@@ -20,9 +19,7 @@ class Max8000ReleaseTest(unittest.TestCase):
         comparison = json.loads(
             (RELEASE / "libero_max_pro_model_comparison_800.json").read_text()
         )
-        source_lock = json.loads(
-            (CANDIDATE / "pro_source_lock.json").read_text()
-        )
+        source_lock = json.loads((RELEASE / "pro_source_lock.json").read_text())
 
         self.assertEqual(summary["status"], "released")
         self.assertEqual(summary["benchmark_version"], "3.0.0")
@@ -59,7 +56,7 @@ class Max8000ReleaseTest(unittest.TestCase):
         for line in (RELEASE / "SHA256SUMS").read_text().splitlines():
             digest, name = line.split("  ", 1)
             entries.append((digest, name))
-        self.assertEqual(len(entries), 7)
+        self.assertEqual(len(entries), 8)
         for expected, name in entries:
             digest = hashlib.sha256((RELEASE / name).read_bytes()).hexdigest()
             self.assertEqual(digest, expected, name)

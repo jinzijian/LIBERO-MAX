@@ -126,6 +126,7 @@ PYTHONPATH=src python scripts/build_libero_pro_catalog.py \
 PYTHONPATH=src python scripts/build_libero_max_8000.py \
   --base-manifest benchmark/max5600/libero_max_5600.json \
   --pro-catalog benchmark/max8000_candidate/pro_task_catalog.json \
+  --pro-source-lock benchmark/max8000_candidate/pro_source_lock.json \
   --pro-output benchmark/max8000_candidate/libero_max_pro_hard_2400.json \
   --combined-output benchmark/max8000_candidate/libero_max_8000.json \
   --summary benchmark/max8000_candidate/release_summary.json
