@@ -21,13 +21,13 @@ def _load_trace(path: Path) -> Dict[str, Any]:
         if line.strip()
     ]
     if len(rows) != 1:
-        raise ValueError("%s must contain exactly one row, found %d" % (path, len(rows)))
+        raise ValueError(
+            "%s must contain exactly one row, found %d" % (path, len(rows))
+        )
     return rows[0]
 
 
-def _capture_outcome(
-    outcomes: Dict[str, bool], case_id: str, value: Any
-) -> None:
+def _capture_outcome(outcomes: Dict[str, bool], case_id: str, value: Any) -> None:
     if isinstance(value, bool):
         outcomes[case_id] = value
 
@@ -141,9 +141,16 @@ def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("root", type=Path)
     parser.add_argument("--manifest", type=Path)
+    parser.add_argument(
+        "--output-dir",
+        type=Path,
+        help="write derived results here while reading case traces from ROOT",
+    )
     args = parser.parse_args()
     manifest_path = args.manifest or args.root / "manifest.json"
     manifest = load_manifest(manifest_path)
+    output_dir = args.output_dir or args.root
+    output_dir.mkdir(parents=True, exist_ok=True)
     records: List[Dict[str, Any]] = []
     missing: List[str] = []
     invalid: Dict[str, List[str]] = {}
@@ -162,9 +169,7 @@ def main() -> int:
                 try:
                     intervention = _load_trace(intervention_trace)
                     control = _load_trace(control_trace)
-                    _capture_outcome(
-                        control_outcomes, case_id, control.get("success")
-                    )
+                    _capture_outcome(control_outcomes, case_id, control.get("success"))
                     _capture_outcome(
                         intervention_outcomes,
                         case_id,
@@ -185,9 +190,7 @@ def main() -> int:
             continue
         try:
             paired = _load_json(summary_path)
-            _capture_outcome(
-                control_outcomes, case_id, paired.get("control_success")
-            )
+            _capture_outcome(control_outcomes, case_id, paired.get("control_success"))
             _capture_outcome(
                 intervention_outcomes,
                 case_id,
@@ -222,9 +225,7 @@ def main() -> int:
                         "intervention_draw_id": case["scenario"]["randomization"][
                             "draw_id"
                         ],
-                        "intervention_seed": case["scenario"]["randomization"][
-                            "seed"
-                        ],
+                        "intervention_seed": case["scenario"]["randomization"]["seed"],
                     }
                     if "randomization" in case["scenario"]
                     else {}
@@ -261,20 +262,16 @@ def main() -> int:
                     "intent_response" if intent else "libero_goal_completion"
                 ),
                 "intervention_event_step": event["cosmos_query_boundary_step"],
-                "policy_response_query_step": paired[
-                    "policy_response_query_step"
-                ],
+                "policy_response_query_step": paired["policy_response_query_step"],
                 "open_loop_exposure_steps": paired["open_loop_exposure_steps"],
                 "mean_absolute_raw_pixel_delta": event.get(
                     "mean_absolute_raw_pixel_delta"
                 ),
-                "post_event_action_chunk_mad": paired[
-                    "post_event_action_chunk_mad"
-                ],
+                "post_event_action_chunk_mad": paired["post_event_action_chunk_mad"],
             }
         )
 
-    results_path = args.root / "paired_results.jsonl"
+    results_path = output_dir / "paired_results.jsonl"
     results_path.write_text(
         "".join(json.dumps(row, sort_keys=True) + "\n" for row in records),
         encoding="utf-8",
@@ -324,7 +321,9 @@ def main() -> int:
         "protocol": manifest["protocol"],
         "coverage": coverage,
         "end_to_end_metrics": end_to_end_metrics,
-        "metrics": None if metrics is None else {
+        "metrics": None
+        if metrics is None
+        else {
             "overall": metrics["overall"],
             "by_change_family": metrics["by_change_family"],
             "by_change_type": metrics.get("by_change_type", {}),
@@ -338,9 +337,10 @@ def main() -> int:
         },
         "measurement_notes": {
             "end_to_end_scoring": (
-                "all 5,600 frozen cases remain in the denominator; "
+                "all %s frozen cases remain in the denominator; "
                 "trigger-unreached episodes are retained as pre-intervention "
                 "policy failures, while infrastructure errors remain missing"
+                % len(manifest["cases"])
             ),
             "conditional_adaptation": (
                 "metrics.* is conditioned on a valid intervention event and "
@@ -358,8 +358,10 @@ def main() -> int:
             ),
         },
     }
-    output = args.root / "benchmark_summary.json"
-    output.write_text(json.dumps(report, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    output = output_dir / "benchmark_summary.json"
+    output.write_text(
+        json.dumps(report, indent=2, sort_keys=True) + "\n", encoding="utf-8"
+    )
     print(json.dumps(report, indent=2, sort_keys=True))
     return 0 if coverage["complete"] else 1
 
