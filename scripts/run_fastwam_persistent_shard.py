@@ -95,6 +95,7 @@ def main() -> int:
         "EVALUATION.replan_steps=%d" % query_interval,
         "EVALUATION.visualize_future_video=false",
         "EVALUATION.use_action_ensembler=false",
+        "model.redirect_common_files=false",
         "seed=%d" % policy_seed,
         "mixed_precision=bf16",
     ]
