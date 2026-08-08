@@ -57,6 +57,30 @@ def _paired_delta_ci(differences: List[int], samples: int = 5000) -> Any:
     ]
 
 
+def _holm_adjust(p_values: List[Any]) -> List[Any]:
+    """Return Holm-Bonferroni adjusted p-values, preserving missing entries."""
+
+    indexed = sorted(
+        (float(value), index)
+        for index, value in enumerate(p_values)
+        if value is not None
+    )
+    adjusted: List[Any] = [None] * len(p_values)
+    running = 0.0
+    total = len(indexed)
+    for rank, (value, index) in enumerate(indexed):
+        running = max(running, min(1.0, (total - rank) * value))
+        adjusted[index] = running
+    return adjusted
+
+
+def _response_coverage(records: List[Dict[str, Any]]) -> float:
+    return sum(
+        bool(record.get("response_query_reached", record.get("trigger_reached", True)))
+        for record in records
+    ) / len(records)
+
+
 def _parse_run(value: str) -> Tuple[str, Path]:
     if "=" not in value:
         raise argparse.ArgumentTypeError("runs must use MODEL=ROOT")
@@ -269,8 +293,8 @@ def main() -> None:
     )
 
     type_lines = [
-        "| Model | Change type | n | Trigger | Control | Change | Delta |",
-        "| --- | --- | ---: | ---: | ---: | ---: | ---: |",
+        "| Model | Change type | n | Trigger | Response | Control | Change | Delta |",
+        "| --- | --- | ---: | ---: | ---: | ---: | ---: | ---: |",
     ]
     for run in runs:
         for change_type in type_names:
@@ -283,7 +307,7 @@ def main() -> None:
                 continue
             metrics = _binary_metrics(rows)
             type_lines.append(
-                "| %s | %s | %d | %s | %s | %s | %s |"
+                "| %s | %s | %d | %s | %s | %s | %s | %s |"
                 % (
                     run["name"],
                     change_type,
@@ -291,6 +315,7 @@ def main() -> None:
                     _percent(
                         sum(record["trigger_reached"] for record in rows) / len(rows)
                     ),
+                    _percent(_response_coverage(rows)),
                     _percent(metrics["control"]),
                     _percent(metrics["intervention"]),
                     _percent(metrics["delta"]),
@@ -302,8 +327,8 @@ def main() -> None:
 
     severity_names = ["low", "medium", "high"]
     severity_lines = [
-        "| Model | Severity | n | Trigger | Control | Change | Delta |",
-        "| --- | --- | ---: | ---: | ---: | ---: | ---: |",
+        "| Model | Severity | n | Trigger | Response | Control | Change | Delta |",
+        "| --- | --- | ---: | ---: | ---: | ---: | ---: | ---: |",
     ]
     for run in runs:
         for severity in severity_names:
@@ -316,7 +341,7 @@ def main() -> None:
                 continue
             metrics = _binary_metrics(rows)
             severity_lines.append(
-                "| %s | %s | %d | %s | %s | %s | %s |"
+                "| %s | %s | %d | %s | %s | %s | %s | %s |"
                 % (
                     run["name"],
                     severity,
@@ -324,6 +349,7 @@ def main() -> None:
                     _percent(
                         sum(record["trigger_reached"] for record in rows) / len(rows)
                     ),
+                    _percent(_response_coverage(rows)),
                     _percent(metrics["control"]),
                     _percent(metrics["intervention"]),
                     _percent(metrics["delta"]),
@@ -444,8 +470,8 @@ def main() -> None:
     )
 
     substrate_lines = [
-        "| Model | Substrate category | n | Trigger | Control | Change | Delta |",
-        "| --- | --- | ---: | ---: | ---: | ---: | ---: |",
+        "| Model | Substrate category | n | Trigger | Response | Control | Change | Delta |",
+        "| --- | --- | ---: | ---: | ---: | ---: | ---: | ---: |",
     ]
     for run in runs:
         records = [
@@ -459,7 +485,7 @@ def main() -> None:
             ]
             metrics = _binary_metrics(rows)
             substrate_lines.append(
-                "| %s | %s | %d | %s | %s | %s | %s |"
+                "| %s | %s | %d | %s | %s | %s | %s | %s |"
                 % (
                     run["name"],
                     category,
@@ -467,6 +493,7 @@ def main() -> None:
                     _percent(
                         sum(record["trigger_reached"] for record in rows) / len(rows)
                     ),
+                    _percent(_response_coverage(rows)),
                     _percent(metrics["control"]),
                     _percent(metrics["intervention"]),
                     _percent(metrics["delta"]),
@@ -474,6 +501,59 @@ def main() -> None:
             )
     (args.output_dir / "by_substrate_category.md").write_text(
         "\n".join(substrate_lines) + "\n", encoding="utf-8"
+    )
+
+    macro_rows = []
+    macro_lines = [
+        "| Model | Categories | Macro trigger | Macro response | Macro control | Macro change | Macro delta |",
+        "| --- | ---: | ---: | ---: | ---: | ---: | ---: |",
+    ]
+    for run in runs:
+        records = [
+            record
+            for record in run["end_to_end"]
+            if record.get("substrate_category") is not None
+        ]
+        categories = sorted({record["substrate_category"] for record in records})
+        groups = [
+            [record for record in records if record["substrate_category"] == category]
+            for category in categories
+        ]
+        if not groups:
+            continue
+        group_metrics = [_binary_metrics(group) for group in groups]
+        row = {
+            "model": run["name"],
+            "categories": len(groups),
+            "trigger": sum(
+                sum(bool(record.get("trigger_reached", True)) for record in group)
+                / len(group)
+                for group in groups
+            )
+            / len(groups),
+            "response": sum(_response_coverage(group) for group in groups)
+            / len(groups),
+            "control": sum(metric["control"] for metric in group_metrics)
+            / len(groups),
+            "intervention": sum(
+                metric["intervention"] for metric in group_metrics
+            )
+            / len(groups),
+            "delta": sum(metric["delta"] for metric in group_metrics) / len(groups),
+        }
+        macro_rows.append(row)
+        macro_lines.append(
+            "| {model} | {categories} | {trigger} | {response} | {control} | {intervention} | {delta} |".format(
+                **row,
+                trigger=_percent(row["trigger"]),
+                response=_percent(row["response"]),
+                control=_percent(row["control"]),
+                intervention=_percent(row["intervention"]),
+                delta=_percent(row["delta"]),
+            )
+        )
+    (args.output_dir / "category_macro.md").write_text(
+        "\n".join(macro_lines) + "\n", encoding="utf-8"
     )
 
     diagnostic_lines = [
@@ -594,35 +674,49 @@ def main() -> None:
                     ),
                 }
             )
+    for key in ("mcnemar_p", "control_mcnemar_p"):
+        adjusted = _holm_adjust([row[key] for row in comparisons])
+        for row, value in zip(comparisons, adjusted):
+            row[key + "_holm"] = value
     comparison_lines = [
-        "| Comparison | Common pairs | Right - left (95% CI) | Left-only | Right-only | McNemar p |",
-        "| --- | ---: | ---: | ---: | ---: | ---: |",
+        "| Comparison | Common pairs | Right - left (95% CI) | Left-only | Right-only | McNemar p | Holm p |",
+        "| --- | ---: | ---: | ---: | ---: | ---: | ---: |",
     ]
     for row in comparisons:
         p_value = row["mcnemar_p"]
         comparison_lines.append(
-            "| {left} vs {right} | {common_pairs} | {delta} {ci} | {left_only_success} | {right_only_success} | {p} |".format(
+            "| {left} vs {right} | {common_pairs} | {delta} {ci} | {left_only_success} | {right_only_success} | {p} | {p_holm} |".format(
                 **row,
                 delta=_percent(row["right_minus_left"]),
                 ci=_interval(row["right_minus_left_95ci"]),
                 p="--" if p_value is None else "%.4g" % p_value,
+                p_holm=(
+                    "--"
+                    if row["mcnemar_p_holm"] is None
+                    else "%.4g" % row["mcnemar_p_holm"]
+                ),
             )
         )
     (args.output_dir / "model_comparison.md").write_text(
         "\n".join(comparison_lines) + "\n", encoding="utf-8"
     )
     control_comparison_lines = [
-        "| Comparison | Common pairs | Control right - left (95% CI) | Left-only | Right-only | McNemar p |",
-        "| --- | ---: | ---: | ---: | ---: | ---: |",
+        "| Comparison | Common pairs | Control right - left (95% CI) | Left-only | Right-only | McNemar p | Holm p |",
+        "| --- | ---: | ---: | ---: | ---: | ---: | ---: |",
     ]
     for row in comparisons:
         p_value = row["control_mcnemar_p"]
         control_comparison_lines.append(
-            "| {left} vs {right} | {common_pairs} | {delta} {ci} | {control_left_only_success} | {control_right_only_success} | {p} |".format(
+            "| {left} vs {right} | {common_pairs} | {delta} {ci} | {control_left_only_success} | {control_right_only_success} | {p} | {p_holm} |".format(
                 **row,
                 delta=_percent(row["control_right_minus_left"]),
                 ci=_interval(row["control_right_minus_left_95ci"]),
                 p="--" if p_value is None else "%.4g" % p_value,
+                p_holm=(
+                    "--"
+                    if row["control_mcnemar_p_holm"] is None
+                    else "%.4g" % row["control_mcnemar_p_holm"]
+                ),
             )
         )
     (args.output_dir / "control_repeatability.md").write_text(
@@ -645,7 +739,11 @@ def main() -> None:
     )
     (args.output_dir / "results.json").write_text(
         json.dumps(
-            {"main": main_rows, "model_comparisons": comparisons},
+            {
+                "main": main_rows,
+                "category_macro": macro_rows,
+                "model_comparisons": comparisons,
+            },
             indent=2,
             sort_keys=True,
         )

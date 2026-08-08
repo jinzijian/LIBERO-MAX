@@ -43,9 +43,11 @@ Every physical run publishes:
 2. paired robustness delta and paired outcome decomposition;
 3. trigger coverage and post-event response-query coverage separately;
 4. response-conditioned paired delta with bootstrap confidence interval;
-5. exact McNemar test from intervention regressions and recoveries;
+5. exact McNemar test from intervention regressions and recoveries, with Holm
+   correction across the six four-model comparisons;
 6. breakdowns by event, severity, draw, task suite, and PRO substrate;
-7. paired model comparisons on the exact common case IDs.
+7. both full micro-averages and unweighted substrate-category macro-averages;
+8. paired model comparisons on the exact common case IDs.
 
 Infrastructure or trace-integrity gaps remain missing and block publication.
 `trigger_unreached` is retained as a pre-intervention policy failure.

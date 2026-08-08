@@ -105,6 +105,15 @@ class PaperTablesTest(unittest.TestCase):
             self.assertIn(r"\begin{table*}[t]", latex)
             self.assertIn(r"physical\_completion", latex)
             self.assertIn(r"\label{tab:libero-max-main-results}", latex)
+            macro = (output / "category_macro.md").read_text(encoding="utf-8")
+            self.assertIn("Macro response", macro)
+
+    def test_holm_adjustment_is_monotone_and_preserves_missing(self):
+        adjusted = build_paper_tables._holm_adjust([0.04, None, 0.01, 0.2])
+        self.assertEqual(adjusted[1], None)
+        self.assertAlmostEqual(adjusted[2], 0.03)
+        self.assertAlmostEqual(adjusted[0], 0.08)
+        self.assertAlmostEqual(adjusted[3], 0.2)
 
 
 if __name__ == "__main__":
