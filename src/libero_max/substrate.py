@@ -11,6 +11,22 @@ def variant_path(root: str, relative: str) -> Path:
     return Path(root).joinpath(*parts)
 
 
+def _load_trusted_initial_states(torch_module: Any, path: Path) -> Any:
+    """Load a source-locked LIBERO-PRO initial-state artifact.
+
+    PyTorch 2.6 changed ``torch.load`` to default to ``weights_only=True``.
+    These benchmark files contain NumPy arrays rather than model weights, so
+    the restricted loader rejects them. Their SHA-256 digests are locked in
+    the release provenance; explicitly use the legacy loader for this trusted
+    local artifact while retaining compatibility with older PyTorch releases.
+    """
+
+    try:
+        return torch_module.load(path, weights_only=False)
+    except TypeError:
+        return torch_module.load(path)
+
+
 def load_case_task(
     case: Dict[str, Any],
     benchmark: Any,
@@ -60,5 +76,5 @@ def load_case_task(
         bddl_file=relative_bddl.name,
         init_states_file=PurePosixPath(variant["init_states_file"]).name,
     )
-    initial_states = torch.load(init_path)
+    initial_states = _load_trusted_initial_states(torch, init_path)
     return task, initial_states

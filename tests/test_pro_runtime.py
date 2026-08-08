@@ -6,6 +6,7 @@ from unittest.mock import patch
 import numpy as np
 
 from libero_max.pro_runtime import EXPECTED_PRO_COMPONENTS, _adapt_flattened_state
+from libero_max.substrate import _load_trusted_initial_states
 
 
 class _State:
@@ -17,6 +18,28 @@ class _State:
 
 
 class ProRuntimeStateAdapterTest(unittest.TestCase):
+    def test_trusted_initial_state_loader_supports_new_and_old_torch(self):
+        calls = []
+
+        class NewTorch:
+            @staticmethod
+            def load(path, **kwargs):
+                calls.append((path, kwargs))
+                return "new"
+
+        path = Path("locked-init-state.pt")
+        self.assertEqual(_load_trusted_initial_states(NewTorch, path), "new")
+        self.assertEqual(calls, [(path, {"weights_only": False})])
+
+        class OldTorch:
+            @staticmethod
+            def load(path, **kwargs):
+                if kwargs:
+                    raise TypeError("unexpected keyword")
+                return "old"
+
+        self.assertEqual(_load_trusted_initial_states(OldTorch, path), "old")
+
     def test_every_released_pro_category_has_an_explicit_runtime_contract(self):
         self.assertEqual(len(EXPECTED_PRO_COMPONENTS), 10)
         self.assertEqual(
