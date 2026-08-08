@@ -101,6 +101,10 @@ class PaperTablesTest(unittest.TestCase):
             table = (output / "main_results.md").read_text(encoding="utf-8")
             self.assertIn("2/2 (100.0)", table)
             self.assertIn("1/2 (50.0)", table)
+            latex = (output / "main_results.tex").read_text(encoding="utf-8")
+            self.assertIn(r"\begin{table*}[t]", latex)
+            self.assertIn(r"physical\_completion", latex)
+            self.assertIn(r"\label{tab:libero-max-main-results}", latex)
 
 
 if __name__ == "__main__":

@@ -66,6 +66,70 @@ def _parse_run(value: str) -> Tuple[str, Path]:
     return name, Path(root)
 
 
+def _latex_escape(value: str) -> str:
+    replacements = {
+        "\\": r"\textbackslash{}",
+        "&": r"\&",
+        "%": r"\%",
+        "$": r"\$",
+        "#": r"\#",
+        "_": r"\_",
+        "{": r"\{",
+        "}": r"\}",
+    }
+    return "".join(replacements.get(character, character) for character in value)
+
+
+def _markdown_table_to_latex(path: Path) -> None:
+    """Write a paper-ready booktabs fragment next to a generated Markdown table."""
+
+    lines = [line.strip() for line in path.read_text(encoding="utf-8").splitlines()]
+    lines = [line for line in lines if line.startswith("|") and line.endswith("|")]
+    if len(lines) < 2:
+        return
+
+    def cells(line: str) -> List[str]:
+        return [cell.strip() for cell in line.strip("|").split("|")]
+
+    header = cells(lines[0])
+    separators = cells(lines[1])
+    if len(header) != len(separators):
+        raise ValueError("malformed Markdown table: %s" % path)
+    alignment = "".join(
+        "r" if separator.endswith(":") else "l" for separator in separators
+    )
+    body = [cells(line) for line in lines[2:]]
+    if any(len(row) != len(header) for row in body):
+        raise ValueError("inconsistent Markdown table width: %s" % path)
+    label = "tab:libero-max-%s" % path.stem.replace("_", "-")
+    latex = [
+        r"\begin{table*}[t]",
+        r"\centering",
+        r"\small",
+        r"\resizebox{\textwidth}{!}{%",
+        r"\begin{tabular}{%s}" % alignment,
+        r"\toprule",
+        " & ".join(_latex_escape(cell) for cell in header) + r" \\",
+        r"\midrule",
+    ]
+    latex.extend(
+        " & ".join(_latex_escape(cell.replace("`", "")) for cell in row) + r" \\"
+        for row in body
+    )
+    latex.extend(
+        [
+            r"\bottomrule",
+            r"\end{tabular}%",
+            r"}",
+            r"\caption{LIBERO-MAX %s.}" % _latex_escape(path.stem.replace("_", " ")),
+            r"\label{%s}" % label,
+            r"\end{table*}",
+            "",
+        ]
+    )
+    path.with_suffix(".tex").write_text("\n".join(latex), encoding="utf-8")
+
+
 def _binary_metrics(records: List[Dict[str, Any]]) -> Dict[str, Any]:
     total = len(records)
     if not total:
@@ -588,6 +652,8 @@ def main() -> None:
         + "\n",
         encoding="utf-8",
     )
+    for table_path in sorted(args.output_dir.glob("*.md")):
+        _markdown_table_to_latex(table_path)
 
 
 if __name__ == "__main__":

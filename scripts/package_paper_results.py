@@ -47,6 +47,7 @@ def main() -> None:
         args.paper_root,
         (
             "tables/**/*.md",
+            "tables/**/*.tex",
             "tables/**/*.json",
             "human_review/*.md",
             "human_review/*.json",

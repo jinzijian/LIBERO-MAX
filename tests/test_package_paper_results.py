@@ -30,6 +30,7 @@ class PackagePaperResultsTest(unittest.TestCase):
             (run / "end_to_end_results.jsonl").write_text("{}\n")
             (run / "raw_trace.bin").write_bytes(b"large trace")
             (table / "main_results.md").write_text("table")
+            (table / "main_results.tex").write_text("\\begin{table}\n")
             (review / "human_review_queue.csv").write_text("case_id\n")
             (figure / "overall_success.png").write_bytes(b"PNG")
             (media_source / "preview.gif").write_bytes(b"GIF89a")
@@ -53,6 +54,7 @@ class PackagePaperResultsTest(unittest.TestCase):
             self.assertTrue((output / "SHA256SUMS").exists())
             self.assertFalse((output / "runs/model/raw_trace.bin").exists())
             self.assertTrue((output / "figures/main/overall_success.png").exists())
+            self.assertTrue((output / "tables/main/main_results.tex").exists())
             self.assertTrue((media / "preview.gif").exists())
             self.assertFalse((media / "preview.trace.jsonl").exists())
 
