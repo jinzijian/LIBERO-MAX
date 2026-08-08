@@ -18,6 +18,8 @@ class PaperExperimentQueueTest(unittest.TestCase):
         self.assertIn("render_benchmark_media.py", source)
         self.assertIn("render_rollout_replay.py", source)
         self.assertIn("PAPER_QUEUE_DONE", source)
+        self.assertIn("LIBERO-plus", source)
+        self.assertIn("LIBERO-PRO", source)
 
 
 if __name__ == "__main__":

@@ -79,7 +79,11 @@ launch_cosmos_pro() {
 }
 
 launch_pi_base() {
-  GPUS="$GPUS" QUERY_INTERVAL=5 \
+  LIBERO_IMPL_DIR="$DEPS_DIR/LIBERO-plus" \
+    LIBERO_OVERLAY="$DEPS_DIR/libero-plus-python-overlay" \
+    LIBERO_CONFIG_PATH="$DEPS_DIR/libero-plus-config" \
+    PYTHONPATH="$DEPS_DIR/robosuite-1.4.0:$DEPS_DIR/libero-plus-python-overlay:$DEPS_DIR/cosmos-policy/.venv/lib/python3.10/site-packages:$DEPS_DIR/.venv-libero/lib/python3.10/site-packages:$DEPS_DIR/LIBERO-plus:$DEPS_DIR/cosmos-policy:$PROJECT_DIR/src" \
+    GPUS="$GPUS" QUERY_INTERVAL=5 \
     bash scripts/run_openpi_persistent_benchmark.sh "$1" "$2"
 }
 
