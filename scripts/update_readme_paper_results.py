@@ -34,7 +34,10 @@ def build_section(paper_root: Path) -> str:
             "",
             "All headline rates below use the full frozen denominator. A policy "
             "that never reaches the proximity trigger remains an end-to-end "
-            "failure; trigger-conditioned metrics are diagnostics only. "
+            "failure. A trigger reached too late for the next policy query is "
+            "also retained in that denominator but is not imputed into the "
+            "response-conditioned diagnostic. Trigger and response-query "
+            "coverage are therefore reported separately. "
             "Infrastructure gaps block publication and are never charged to a model.",
             "",
             "### MAX-8000 main evaluation",
