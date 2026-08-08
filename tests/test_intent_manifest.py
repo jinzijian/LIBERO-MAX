@@ -1,5 +1,4 @@
 import json
-import tempfile
 import unittest
 from pathlib import Path
 
@@ -33,7 +32,7 @@ class IntentManifestTest(unittest.TestCase):
         spec = importlib.util.spec_from_file_location("build_intent_v1_manifest", path)
         module = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(module)
-        catalog = json.loads((ROOT / "artifacts/libero_task_catalog_v1.json").read_text())
+        catalog = json.loads((ROOT / "benchmark/v1/task_catalog.json").read_text())
         self.assertEqual(module.build_manifest(catalog), module.build_manifest(catalog))
 
 
