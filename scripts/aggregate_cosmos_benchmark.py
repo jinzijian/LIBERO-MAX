@@ -330,6 +330,38 @@ def main() -> int:
         "".join(json.dumps(row, sort_keys=True) + "\n" for row in records),
         encoding="utf-8",
     )
+    end_to_end_records = []
+    for case in manifest["cases"]:
+        case_id = case["case_id"]
+        if case_id not in control_outcomes or case_id not in intervention_outcomes:
+            continue
+        reasons = terminal_invalid.get(case_id, [])
+        end_to_end_records.append(
+            {
+                "pair_id": case_id,
+                "control_correct": control_outcomes[case_id],
+                "intervention_correct": intervention_outcomes[case_id],
+                "trigger_reached": "trigger_unreached" not in reasons,
+                "terminal_status": (
+                    "trigger_unreached"
+                    if "trigger_unreached" in reasons
+                    else "triggered"
+                ),
+                "change_type": case["scenario"].get("change_type"),
+                "change_family": case["scenario"]["change_family"],
+                "severity": case["scenario"]["severity"],
+                "intervention_draw_id": case["scenario"]
+                .get("randomization", {})
+                .get("draw_id"),
+                "task_suite_name": case["task_suite_name"],
+                "substrate_category": case.get("substrate_category"),
+                "timing_bucket": case.get("timing_bucket"),
+            }
+        )
+    (output_dir / "end_to_end_results.jsonl").write_text(
+        "".join(json.dumps(row, sort_keys=True) + "\n" for row in end_to_end_records),
+        encoding="utf-8",
+    )
     metrics = summarize_results(records) if records else None
     end_to_end_metrics = summarize_end_to_end_outcomes(
         len(manifest["cases"]), control_outcomes, intervention_outcomes

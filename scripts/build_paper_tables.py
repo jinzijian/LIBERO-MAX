@@ -37,8 +37,7 @@ def _mcnemar(left_only: int, right_only: int) -> Any:
     if discordant == 0:
         return None
     tail = sum(
-        math.comb(discordant, index)
-        for index in range(min(left_only, right_only) + 1)
+        math.comb(discordant, index) for index in range(min(left_only, right_only) + 1)
     ) / (2**discordant)
     return min(1.0, 2.0 * tail)
 
@@ -95,7 +94,23 @@ def main() -> None:
         if not coverage.get("execution_complete", coverage.get("complete", False)):
             raise ValueError("%s is not execution-complete" % name)
         records = _load_jsonl(root / "paired_results.jsonl")
-        runs.append({"name": name, "root": root, "summary": summary, "records": records})
+        end_to_end_path = root / "end_to_end_results.jsonl"
+        end_to_end = (
+            _load_jsonl(end_to_end_path)
+            if end_to_end_path.exists()
+            else [{**record, "trigger_reached": True} for record in records]
+        )
+        if len(end_to_end) != coverage["planned"]:
+            raise ValueError("%s lacks complete end-to-end result rows" % name)
+        runs.append(
+            {
+                "name": name,
+                "root": root,
+                "summary": summary,
+                "records": records,
+                "end_to_end": end_to_end,
+            }
+        )
 
     args.output_dir.mkdir(parents=True, exist_ok=True)
     main_rows = []
@@ -103,7 +118,9 @@ def main() -> None:
         {
             change_type
             for run in runs
-            for change_type in run["summary"]["metrics"]["by_change_type"]
+            for record in run["end_to_end"]
+            for change_type in [record.get("change_type")]
+            if change_type is not None
         }
     )
     for run in runs:
@@ -116,6 +133,12 @@ def main() -> None:
         planned = coverage["planned"]
         valid = coverage["completed"]
         triggered = valid
+        full_differences = [
+            int(record["intervention_correct"]) - int(record["control_correct"])
+            for record in run["end_to_end"]
+        ]
+        full_regressions = sum(value == -1 for value in full_differences)
+        full_recoveries = sum(value == 1 for value in full_differences)
         main_rows.append(
             {
                 "model": run["name"],
@@ -127,20 +150,12 @@ def main() -> None:
                 "intervention_accuracy": end_to_end["intervention"][
                     "accuracy_on_planned"
                 ],
-                "paired_delta": end_to_end[
-                    "paired_robustness_delta_on_planned"
-                ],
+                "paired_delta": end_to_end["paired_robustness_delta_on_planned"],
                 "conditional_paired_delta": metrics["paired_robustness_delta"],
-                "paired_delta_95ci": metrics[
-                    "paired_robustness_delta_95ci_bootstrap"
-                ],
-                "regressions": end_to_end["outcome_table"][
-                    "regression_under_change"
-                ],
-                "recoveries": end_to_end["outcome_table"][
-                    "intervention_side_gain"
-                ],
-                "mcnemar_p": metrics["mcnemar_exact_two_sided_p"],
+                "paired_delta_95ci": metrics["paired_robustness_delta_95ci_bootstrap"],
+                "regressions": full_regressions,
+                "recoveries": full_recoveries,
+                "mcnemar_p": _mcnemar(full_regressions, full_recoveries),
             }
         )
 
@@ -167,42 +182,66 @@ def main() -> None:
     )
 
     type_lines = [
-        "| Model | " + " | ".join(type_names) + " |",
-        "| --- | " + " | ".join("---:" for _ in type_names) + " |",
+        "| Model | Change type | n | Trigger | Control | Change | Delta |",
+        "| --- | --- | ---: | ---: | ---: | ---: | ---: |",
     ]
     for run in runs:
-        blocks = run["summary"]["metrics"]["by_change_type"]
-        type_lines.append(
-            "| %s | %s |"
-            % (
-                run["name"],
-                " | ".join(
-                    _percent(blocks.get(name, {}).get("scenario_aware_outcome_accuracy"))
-                    for name in type_names
-                ),
+        for change_type in type_names:
+            rows = [
+                record
+                for record in run["end_to_end"]
+                if record.get("change_type") == change_type
+            ]
+            if not rows:
+                continue
+            metrics = _binary_metrics(rows)
+            type_lines.append(
+                "| %s | %s | %d | %s | %s | %s | %s |"
+                % (
+                    run["name"],
+                    change_type,
+                    metrics["n"],
+                    _percent(
+                        sum(record["trigger_reached"] for record in rows) / len(rows)
+                    ),
+                    _percent(metrics["control"]),
+                    _percent(metrics["intervention"]),
+                    _percent(metrics["delta"]),
+                )
             )
-        )
     (args.output_dir / "by_change_type.md").write_text(
         "\n".join(type_lines) + "\n", encoding="utf-8"
     )
 
     severity_names = ["low", "medium", "high"]
     severity_lines = [
-        "| Model | " + " | ".join(severity_names) + " |",
-        "| --- | " + " | ".join("---:" for _ in severity_names) + " |",
+        "| Model | Severity | n | Trigger | Control | Change | Delta |",
+        "| --- | --- | ---: | ---: | ---: | ---: | ---: |",
     ]
     for run in runs:
-        blocks = run["summary"]["metrics"]["by_severity"]
-        severity_lines.append(
-            "| %s | %s |"
-            % (
-                run["name"],
-                " | ".join(
-                    _percent(blocks.get(name, {}).get("scenario_aware_outcome_accuracy"))
-                    for name in severity_names
-                ),
+        for severity in severity_names:
+            rows = [
+                record
+                for record in run["end_to_end"]
+                if record.get("severity") == severity
+            ]
+            if not rows:
+                continue
+            metrics = _binary_metrics(rows)
+            severity_lines.append(
+                "| %s | %s | %d | %s | %s | %s | %s |"
+                % (
+                    run["name"],
+                    severity,
+                    metrics["n"],
+                    _percent(
+                        sum(record["trigger_reached"] for record in rows) / len(rows)
+                    ),
+                    _percent(metrics["control"]),
+                    _percent(metrics["intervention"]),
+                    _percent(metrics["delta"]),
+                )
             )
-        )
     (args.output_dir / "by_severity.md").write_text(
         "\n".join(severity_lines) + "\n", encoding="utf-8"
     )
@@ -214,7 +253,7 @@ def main() -> None:
     for run in runs:
         records = [
             record
-            for record in run["records"]
+            for record in run["end_to_end"]
             if record.get("change_type") is not None
             and record.get("severity") is not None
         ]
@@ -253,7 +292,7 @@ def main() -> None:
     for run in runs:
         records = [
             record
-            for record in run["records"]
+            for record in run["end_to_end"]
             if record.get("change_type") is not None
             and record.get("intervention_draw_id") is not None
         ]
@@ -295,7 +334,7 @@ def main() -> None:
     for run in runs:
         records = [
             record
-            for record in run["records"]
+            for record in run["end_to_end"]
             if record.get("task_suite_name") is not None
         ]
         for suite in sorted({record["task_suite_name"] for record in records}):
@@ -315,6 +354,39 @@ def main() -> None:
             )
     (args.output_dir / "by_suite.md").write_text(
         "\n".join(suite_lines) + "\n", encoding="utf-8"
+    )
+
+    substrate_lines = [
+        "| Model | Substrate category | n | Trigger | Control | Change | Delta |",
+        "| --- | --- | ---: | ---: | ---: | ---: | ---: |",
+    ]
+    for run in runs:
+        records = [
+            record
+            for record in run["end_to_end"]
+            if record.get("substrate_category") is not None
+        ]
+        for category in sorted({record["substrate_category"] for record in records}):
+            rows = [
+                record for record in records if record["substrate_category"] == category
+            ]
+            metrics = _binary_metrics(rows)
+            substrate_lines.append(
+                "| %s | %s | %d | %s | %s | %s | %s |"
+                % (
+                    run["name"],
+                    category,
+                    metrics["n"],
+                    _percent(
+                        sum(record["trigger_reached"] for record in rows) / len(rows)
+                    ),
+                    _percent(metrics["control"]),
+                    _percent(metrics["intervention"]),
+                    _percent(metrics["delta"]),
+                )
+            )
+    (args.output_dir / "by_substrate_category.md").write_text(
+        "\n".join(substrate_lines) + "\n", encoding="utf-8"
     )
 
     diagnostic_lines = [
@@ -350,8 +422,7 @@ def main() -> None:
                     "--"
                     if not action_mads
                     else _percent(
-                        sum(value > 1e-8 for value in action_mads)
-                        / len(action_mads)
+                        sum(value > 1e-8 for value in action_mads) / len(action_mads)
                     )
                 ),
                 coverage["measured"],
@@ -365,14 +436,16 @@ def main() -> None:
 
     comparisons = []
     for left_index, left in enumerate(runs):
-        left_records = {record["pair_id"]: record for record in left["records"]}
+        left_records = {record["pair_id"]: record for record in left["end_to_end"]}
         for right in runs[left_index + 1 :]:
             if (
                 left["summary"]["protocol"]["scoring_track"]
                 != right["summary"]["protocol"]["scoring_track"]
             ):
                 continue
-            right_records = {record["pair_id"]: record for record in right["records"]}
+            right_records = {
+                record["pair_id"]: record for record in right["end_to_end"]
+            }
             common = sorted(set(left_records) & set(right_records))
             differences = [
                 int(right_records[key]["intervention_correct"])
@@ -427,8 +500,7 @@ def main() -> None:
                     "robustness_right_minus_left": (
                         None
                         if not robustness_differences
-                        else sum(robustness_differences)
-                        / len(robustness_differences)
+                        else sum(robustness_differences) / len(robustness_differences)
                     ),
                     "robustness_right_minus_left_95ci": _paired_delta_ci(
                         robustness_differences
