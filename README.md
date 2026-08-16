@@ -5,7 +5,7 @@
 **A paired benchmark for dynamic robustness during robot execution**
 
 [![Paper](https://img.shields.io/badge/Paper-coming%20soon-6B7280?style=flat-square)](#citation)
-[![Dataset](https://img.shields.io/badge/Dataset-v3.0.0-3B82F6?style=flat-square)](benchmark/max8000)
+[![Dataset](https://img.shields.io/badge/Dataset-available-3B82F6?style=flat-square)](benchmark/max8000)
 [![Dynamic cases](https://img.shields.io/badge/Dynamic%20cases-8%2C000-14532D?style=flat-square)](#benchmark)
 [![Models](https://img.shields.io/badge/Evaluated%20models-5-C2410C?style=flat-square)](#main-results)
 [![Website](https://img.shields.io/badge/Website-project%20page-14532D?style=flat-square)](https://yunbeizhang.github.io/LIBERO-MAX/)
@@ -35,7 +35,7 @@ prefix before the change.
   **VLA-JEPA**, expanding the main comparison to five frozen policies.
 - **2026-08-12:** Completed full evaluations for **π0.5**, **Cosmos-Policy**,
   and **Fast-WAM**.
-- **2026-08-07:** Released **LIBERO-MAX v3.0.0**, containing 8,000 dynamic
+- **2026-08-07:** Released the **LIBERO-MAX dataset**, containing 8,000 dynamic
   cases across eight online change types.
 - **Coming soon:** Paper PDF and BibTeX.
 
@@ -203,7 +203,7 @@ The paper PDF and verified BibTeX entry will be added with the manuscript
 release. Until then, please cite the repository and dataset release:
 
 ```text
-LIBERO-MAX v3.0.0
+LIBERO-MAX Dataset
 LIBERO-MAX: Do Robot Policies Adapt When the World Changes?
 https://github.com/yunbeizhang/LIBERO-MAX
 ```

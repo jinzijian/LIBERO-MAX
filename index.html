@@ -14,7 +14,64 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&amp;display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="site.css">
+  <style>
+:root {
+  --bg: #ffffff; --fg: #2c2c2c; --muted: #6b7280; --soft: #f7f7f5;
+  --line: #e5e7eb; --line-strong: #6b7280; --blue: #3b82f6;
+  --red: #ef4444; --orange: #c2410c; --green: #14532d;
+  --green-soft: #edf5ef; --purple: #41007f; --header: rgba(255,255,255,.94);
+  --inverse: #2c2c2c; --inverse-fg: #ffffff;
+  --serif: "Iowan Old Style", "Apple Garamond", Baskerville, "Times New Roman", serif;
+  --mono: "Space Mono", "SFMono-Regular", Consolas, monospace;
+}
+html[data-theme="dark"] {
+  --bg:#111210; --fg:#f4f4f0; --muted:#aaa6a0; --soft:#1b1c19;
+  --line:#383a36; --line-strong:#bbbdb7; --blue:#60a5fa; --red:#f87171;
+  --orange:#f97316; --green:#73a787; --green-soft:#17261b; --purple:#b48adb;
+  --header:rgba(17,18,16,.94); --inverse:#f4f4f0; --inverse-fg:#171814;
+}
+@media (prefers-color-scheme: dark) {
+  html:not([data-theme="light"]) {
+    --bg:#111210; --fg:#f4f4f0; --muted:#aaa6a0; --soft:#1b1c19;
+    --line:#383a36; --line-strong:#bbbdb7; --blue:#60a5fa; --red:#f87171;
+    --orange:#f97316; --green:#73a787; --green-soft:#17261b; --purple:#b48adb;
+    --header:rgba(17,18,16,.94); --inverse:#f4f4f0; --inverse-fg:#171814;
+  }
+}
+*,*::before,*::after{box-sizing:border-box} html{scroll-behavior:smooth;scroll-padding-top:88px}
+body{margin:0;background:var(--bg);color:var(--fg);font-family:var(--serif);font-size:17px;line-height:1.65;text-rendering:optimizeLegibility;-webkit-font-smoothing:antialiased}
+img{display:block;max-width:100%} a{color:inherit;text-decoration:none} a:focus-visible,button:focus-visible{outline:3px solid rgba(59,130,246,.45);outline-offset:4px}
+.visually-hidden{position:absolute!important;width:1px!important;height:1px!important;padding:0!important;margin:-1px!important;overflow:hidden!important;clip:rect(0,0,0,0)!important;white-space:nowrap!important;border:0!important}
+.shell{width:min(1180px,calc(100% - 64px));margin:0 auto}.skip-link{position:fixed;top:-80px;left:20px;z-index:300;padding:10px 14px;color:var(--inverse-fg);background:var(--inverse);font-family:var(--mono);font-size:12px}.skip-link:focus{top:14px}
+.site-header{position:sticky;top:0;z-index:100;background:var(--header);border-bottom:1px solid var(--line);backdrop-filter:blur(14px)}
+.nav{min-height:78px;display:flex;align-items:center;justify-content:space-between;gap:24px}
+.brand,.nav-links,.eyebrow,.section-index,.section-kicker,.panel-label,.metric-label,.event-copy span,.lineage-node>span,.node-links,.figure-note span,.button,.footer-links,.footer-note{font-family:var(--mono)}
+.brand{font-family:var(--mono);font-size:19px;font-weight:700;letter-spacing:-.04em}.brand::before{content:"";display:inline-block;width:10px;height:10px;margin-right:10px;background:var(--green)}
+.nav-links{display:flex;align-items:center;gap:3px;font-size:12px}.nav-links a{padding:8px 9px;border:1px solid transparent}.nav-links a:hover{background:var(--soft);border-color:var(--line-strong)}
+.nav-links .nav-code{color:var(--inverse-fg);background:var(--inverse);border-color:var(--inverse)}.theme-toggle{width:38px;height:38px;padding:0;color:var(--fg);background:transparent;border:1px solid transparent;cursor:pointer}.theme-toggle:hover{background:var(--soft);border-color:var(--line-strong)}.theme-glyph{font-size:22px}
+.hero{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(270px,.5fr);gap:clamp(52px,8vw,110px);align-items:end;padding:94px 0 72px}
+.hero-showcase{display:block;padding:46px 0 82px}.hero-artwork{overflow:hidden;background:#f8f7f2;border:1px solid var(--line-strong)}.hero-artwork img{width:100%;height:auto}.hero-support{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(320px,.65fr);gap:clamp(48px,7vw,90px);align-items:start;padding-top:30px}.hero-showcase .hero-summary{max-width:760px;margin-bottom:24px;font-size:18px}.hero-showcase .eyebrow{margin-bottom:9px;color:var(--green);font-weight:700}
+.eyebrow,.section-kicker{margin:0 0 18px;color:var(--muted);font-size:12px;letter-spacing:.05em}h1,h2,h3,h4,p{margin-top:0}
+h1{max-width:900px;margin-bottom:28px;font-size:clamp(44px,6.5vw,82px);font-weight:500;line-height:1.02;letter-spacing:-.055em}.hero-summary{max-width:790px;margin-bottom:30px;color:var(--fg);font-size:20px;line-height:1.6}.hero-summary strong{color:var(--green)}
+.hero-actions{display:flex;flex-wrap:wrap;gap:10px}.button{display:inline-flex;align-items:center;min-height:42px;padding:9px 14px;border:1px solid var(--line-strong);font-size:12px}.button:hover{background:var(--soft)}.button-primary{color:var(--inverse-fg);background:var(--inverse);border-color:var(--inverse)}.button-primary:hover{color:var(--fg);background:var(--bg)}.button-muted{color:var(--muted);border-color:var(--line)}
+.hero-metrics{border-top:7px solid var(--green)}.metric{display:grid;grid-template-columns:110px 1fr;gap:18px;align-items:baseline;padding:18px 0;border-bottom:1px solid var(--line)}.metric-value{font-family:var(--mono);font-size:26px;font-weight:700;letter-spacing:-.05em}.metric-label{color:var(--muted);font-size:10px;line-height:1.5;text-transform:uppercase}
+.overview{padding-bottom:92px}.figure-frame{overflow:hidden;background:#fff;border:1px solid var(--line)}.figure-frame img{width:100%}.figure-note{display:flex;gap:16px;margin:12px 0 0;color:var(--muted);font-size:14px}.figure-note span{color:var(--green);font-size:11px}
+.section{padding:92px 0;border-top:1px solid var(--line)}.section-head{display:grid;grid-template-columns:62px minmax(0,1fr) minmax(250px,.55fr);gap:28px;align-items:start;margin-bottom:52px}.section-index{color:var(--muted);font-size:12px}.section-kicker{margin-bottom:5px}.section-head h2,.reproduce-grid h2{margin-bottom:0;font-size:clamp(34px,4.5vw,58px);font-weight:500;line-height:1.06;letter-spacing:-.045em}.section-note{margin:0;color:var(--muted);font-size:15px}
+.comparison{display:grid;grid-template-columns:minmax(0,.85fr) 54px minmax(0,1.15fr);align-items:stretch;margin-bottom:82px}.comparison-panel{padding:28px;border:1px solid var(--line-strong)}.comparison-panel h3{max-width:530px;margin-bottom:30px;font-size:28px;font-weight:500;line-height:1.15}.comparison-panel>p:last-child{margin:24px 0 0;font-size:15px}.panel-label{font-size:11px;font-weight:700}.static-panel{border-top:7px solid var(--purple)}.dynamic-panel{border-top:7px solid var(--green)}.static-panel .panel-label{color:var(--purple)}.dynamic-panel .panel-label{color:var(--green)}.comparison-arrow{display:grid;place-items:center;color:var(--line-strong);font-size:34px}
+.timeline{display:flex;align-items:center;gap:8px}.timeline-step{padding:7px 9px;border:1px solid var(--line);font-family:var(--mono);font-size:10px;text-transform:uppercase}.timeline-arrow{color:var(--muted)}.event-arrow{color:var(--red);font-weight:700}.active-purple{color:var(--purple);border-color:var(--purple)}.active-red{color:var(--red);border-color:var(--red)}.active-green{color:var(--green);border-color:var(--green)}
+.event-heading{display:flex;align-items:end;justify-content:space-between;gap:24px;margin-bottom:26px}.event-heading h3{margin:0;font-size:34px;font-weight:500;letter-spacing:-.035em}.event-heading>p{margin:0;color:var(--muted);font-family:var(--mono);font-size:11px}
+.event-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));border-top:1px solid var(--line);border-left:1px solid var(--line)}.event-card{display:grid;grid-template-columns:minmax(150px,.88fr) minmax(0,1.12fr);min-height:190px;border-right:1px solid var(--line);border-bottom:1px solid var(--line)}.event-card img{width:100%;height:100%;min-height:190px;object-fit:cover}.event-copy{padding:22px;border-top:6px solid var(--line-strong)}.event-copy span{color:var(--muted);font-size:9px;font-weight:700}.event-copy h4{margin:9px 0 8px;font-size:22px;font-weight:600;line-height:1.1}.event-copy p{margin:0;color:var(--muted);font-size:14px;line-height:1.5}.family-geometry .event-copy{border-top-color:var(--orange)}.family-observation .event-copy{border-top-color:var(--blue)}.family-appearance .event-copy{border-top-color:var(--green)}.family-path .event-copy{border-top-color:var(--purple)}
+.results-section{background:var(--soft)}.finding-band{display:grid;grid-template-columns:minmax(230px,.65fr) minmax(0,1.35fr);gap:36px;align-items:center;padding:34px;color:var(--inverse-fg);background:var(--inverse)}.finding-range{font-family:var(--mono);font-size:clamp(40px,6vw,70px);font-weight:700;letter-spacing:-.07em}.finding-band p{margin:0;font-size:19px}
+.results-layout{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(230px,.6fr);gap:46px;align-items:center;margin:54px 0}.table-wrap{overflow-x:auto}table{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums}th,td{padding:14px 12px;border-bottom:1px solid var(--line);text-align:right}th{border-top:2px solid var(--line-strong);color:var(--fg);font-family:var(--mono);font-size:10px;text-transform:uppercase}th:first-child,th:nth-child(2),td:first-child,td:nth-child(2){text-align:left}tbody tr:nth-child(even){background:var(--bg)}td{font-size:15px}td:last-child{color:var(--red);font-family:var(--mono);font-weight:700}.results-copy{margin:0;font-size:19px;line-height:1.55}.result-figure{margin-bottom:70px}.analysis-block{display:grid;grid-template-columns:minmax(260px,.55fr) minmax(0,1.45fr);gap:48px;align-items:center}.analysis-block h3{margin-bottom:20px;font-size:34px;font-weight:500;line-height:1.12}.analysis-block p{color:var(--muted)}.heatmap-frame{background:#fff}
+.lineage-flow{display:grid;grid-template-columns:minmax(210px,.75fr) 44px minmax(300px,1.05fr) 44px minmax(230px,.8fr);align-items:center}.lineage-node{min-height:210px;padding:24px;background:var(--bg);border:1px solid var(--line-strong);border-top-width:7px}.lineage-node>span{font-size:9px;font-weight:700}.lineage-node h3{margin:14px 0 10px;font-family:var(--mono);font-size:25px;letter-spacing:-.05em}.lineage-node p{margin-bottom:20px;color:var(--muted);font-size:14px}.libero-node{border-top-color:var(--blue)}.plus-node{min-height:0;border-top-color:var(--orange)}.pro-node{min-height:0;border-top-color:var(--purple)}.max-node{border-color:var(--green);border-top-color:var(--green);background:var(--green-soft)}.source-stack{display:grid;gap:14px}.flow-arrow{color:var(--green);font-size:32px;text-align:center}.node-links{display:flex;gap:14px;font-size:10px}.node-links a,.acknowledgement a{color:var(--blue);text-decoration:underline;text-underline-offset:4px}.acknowledgement{max-width:920px;margin:42px auto 0;padding-top:26px;border-top:1px solid var(--line);text-align:center}
+.construction-figure{background:#fff}.construction-summary{display:grid;grid-template-columns:minmax(0,1.25fr) auto;gap:40px;align-items:center;margin-top:24px;padding:24px 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}.construction-summary p{max-width:850px;margin:0;font-size:17px}.construction-summary strong{color:var(--green)}
+.reproduce-section{color:var(--inverse-fg);background:var(--inverse)}.reproduce-grid{display:grid;grid-template-columns:minmax(0,.72fr) minmax(400px,1.28fr);gap:70px;align-items:center}.reproduce-grid .section-index,.reproduce-grid .section-kicker{color:#b9b9b5}.reproduce-grid p{max-width:500px;color:#d2d2ce}.reproduce-grid .button{color:var(--inverse-fg);border-color:#777771}.reproduce-grid .button-primary{color:var(--fg);background:var(--bg);border-color:var(--bg)}pre{overflow-x:auto;margin:0;padding:30px;color:#ededeb;background:#1a1a1a;border:1px solid #5d5d59;font-family:var(--mono);font-size:12px;line-height:1.9}pre span{color:#93c5fd}
+.citation-section{border-top:0}.citation-head{margin-bottom:34px}.citation-card{border:1px solid var(--line-strong);background:var(--soft)}.citation-toolbar{display:flex;align-items:center;justify-content:space-between;gap:24px;min-height:52px;padding:9px 14px;border-bottom:1px solid var(--line-strong);font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.06em}.copy-bibtex{min-height:32px;padding:6px 11px;color:var(--inverse-fg);background:var(--inverse);border:1px solid var(--inverse);font-family:var(--mono);font-size:10px;cursor:pointer}.copy-bibtex:hover{color:var(--fg);background:var(--bg)}.citation-card pre{color:var(--fg);background:var(--bg);border:0;font-size:13px;line-height:1.75}.citation-card code{font-family:inherit}
+footer{padding:45px 0;border-top:1px solid var(--line)}.footer-grid{display:grid;grid-template-columns:1fr auto;gap:28px;align-items:start}.footer-grid strong{font-family:var(--mono)}.footer-grid p{margin:4px 0 0;color:var(--muted)}.footer-links{display:flex;gap:18px;font-size:11px}.footer-note{grid-column:1/-1;font-size:10px}
+@media(max-width:980px){.nav-links a:not(.nav-code){display:none}.hero{grid-template-columns:1fr}.hero-support{grid-template-columns:1fr}.hero-metrics{display:grid;grid-template-columns:repeat(3,1fr)}.metric{display:block;padding-right:18px}.metric-label{display:block;margin-top:5px}.section-head{grid-template-columns:50px 1fr}.section-note{grid-column:2}.comparison{grid-template-columns:1fr}.comparison-arrow{min-height:54px;transform:rotate(90deg)}.lineage-flow{grid-template-columns:1fr;gap:14px}.flow-arrow{transform:rotate(90deg)}.lineage-node{min-height:0}.construction-summary{grid-template-columns:1fr}.results-layout,.analysis-block,.reproduce-grid{grid-template-columns:1fr}}
+@media(max-width:720px){.shell{width:min(100% - 34px,1180px)}.nav{min-height:68px}.hero{padding:64px 0 52px}.hero-showcase{padding-top:28px}.hero-support{gap:34px;padding-top:24px}h1{font-size:45px}.hero-summary{font-size:18px}.hero-metrics{grid-template-columns:1fr}.metric{display:grid;grid-template-columns:110px 1fr}.overview{padding-bottom:58px}.section{padding:64px 0}.section-head{grid-template-columns:1fr;margin-bottom:36px}.section-note{grid-column:auto}.event-heading{align-items:start;flex-direction:column}.event-grid{grid-template-columns:1fr}.event-card{grid-template-columns:42% 58%}.timeline{flex-wrap:wrap}.finding-band{grid-template-columns:1fr}.finding-range{font-size:45px}.figure-note{display:block}.figure-note span{display:block;margin-bottom:4px}.footer-grid{grid-template-columns:1fr}.footer-note{grid-column:auto}}
+@media(max-width:430px){.brand{font-size:16px}.nav-code{display:none}h1{font-size:39px}.hero-actions{align-items:stretch;flex-direction:column}.button{justify-content:center}.event-card{grid-template-columns:1fr}.event-card img{min-height:220px}.comparison-panel{padding:22px}.comparison-panel h3{font-size:24px}th,td{padding:11px 8px;font-size:12px}pre{padding:20px;font-size:10px}.citation-toolbar{align-items:flex-start;flex-direction:column;padding:13px}.copy-bibtex{width:100%}}
+  </style>
   <script>
     try {
       const savedTheme = localStorage.getItem("libero-max-theme");
@@ -28,7 +85,7 @@
     <div class="shell nav">
       <a class="brand" href="#top" aria-label="LIBERO-MAX home">LIBERO-MAX</a>
       <nav class="nav-links" aria-label="Main navigation">
-        <a href="#benchmark">benchmark</a><a href="#results">results</a><a href="#lineage">lineage</a><a href="#reproduce">reproduce</a>
+        <a href="#benchmark">benchmark</a><a href="#results">results</a><a href="#lineage">lineage</a><a href="#reproduce">reproduce</a><a href="#citation">cite</a>
         <a class="nav-code" href="https://github.com/yunbeizhang/LIBERO-MAX" target="_blank" rel="noreferrer">code ↗</a>
         <button class="theme-toggle" type="button" aria-label="Toggle color theme" title="Toggle color theme"><span class="theme-glyph" aria-hidden="true">◐</span></button>
       </nav>
@@ -36,27 +93,27 @@
   </header>
 
   <main id="main">
-    <section class="hero shell" id="top">
-      <div class="hero-copy">
-        <p class="eyebrow">DYNAMIC ROBUSTNESS FOR ROBOT POLICIES · 2026</p>
-        <h1>Do robot policies adapt<br>when the world changes?</h1>
-        <p class="hero-summary"><strong>LIBERO-MAX</strong> changes the environment after a robot has already begun acting. Every Dynamic rollout is matched to a Base control with the same task, reset, policy seed, and action prefix.</p>
-        <div class="hero-actions" aria-label="Project links">
-          <a class="button button-primary" href="https://github.com/yunbeizhang/LIBERO-MAX" target="_blank" rel="noreferrer">View code ↗</a>
-          <a class="button" href="https://github.com/yunbeizhang/LIBERO-MAX/tree/main/benchmark/max8000" target="_blank" rel="noreferrer">Get dataset ↗</a>
-          <span class="button button-muted" aria-disabled="true">Paper coming soon</span>
-        </div>
+    <section class="hero hero-showcase shell" id="top">
+      <h1 class="visually-hidden">LIBERO-MAX: Do robot policies adapt when the world changes?</h1>
+      <div class="hero-artwork">
+        <img src="assets/hero/liberomax_hero_embedded.svg" alt="LIBERO-MAX overview showing a robot acting before a small external world change occurs and the policy must adapt">
       </div>
-      <aside class="hero-metrics" aria-label="Benchmark scale">
-        <div class="metric"><span class="metric-value">8,000</span><span class="metric-label">matched Base / Dynamic pairs</span></div>
-        <div class="metric"><span class="metric-value">16,000</span><span class="metric-label">scored rollouts per checkpoint</span></div>
-        <div class="metric"><span class="metric-value">8</span><span class="metric-label">online event types</span></div>
-      </aside>
-    </section>
-
-    <section class="overview shell" aria-label="Benchmark overview figure">
-      <div class="figure-frame"><img src="assets/figures/benchmark_overview.png" alt="LIBERO-MAX benchmark overview showing static and dynamic robustness and eight online event types"></div>
-      <p class="figure-note"><span>FIG. 01</span> Static benchmarks shift the world at reset. LIBERO-MAX changes it during execution.</p>
+      <div class="hero-support">
+        <div class="hero-copy">
+          <p class="eyebrow">DYNAMIC ROBUSTNESS FOR ROBOT POLICIES · 2026</p>
+          <p class="hero-summary"><strong>LIBERO-MAX</strong> changes the environment after a robot has already begun acting. Every Dynamic rollout is matched to a Base control with the same task, reset, policy seed, and action prefix.</p>
+          <div class="hero-actions" aria-label="Project links">
+            <a class="button button-primary" href="https://github.com/yunbeizhang/LIBERO-MAX" target="_blank" rel="noreferrer">View code ↗</a>
+            <a class="button" href="https://github.com/yunbeizhang/LIBERO-MAX/tree/main/benchmark/max8000" target="_blank" rel="noreferrer">Get dataset ↗</a>
+            <span class="button button-muted" aria-disabled="true">Paper coming soon</span>
+          </div>
+        </div>
+        <aside class="hero-metrics" aria-label="Benchmark scale">
+          <div class="metric"><span class="metric-value">8,000</span><span class="metric-label">matched Base / Dynamic pairs</span></div>
+          <div class="metric"><span class="metric-value">16,000</span><span class="metric-label">scored rollouts per checkpoint</span></div>
+          <div class="metric"><span class="metric-value">8</span><span class="metric-label">online event types</span></div>
+        </aside>
+      </div>
     </section>
 
     <section class="section shell" id="benchmark">
@@ -104,16 +161,13 @@
       <div class="analysis-block"><div><p class="section-kicker">where policies break</p><h3>Failure is structured by event type.</h3><p>Relocation, viewpoint change, and sensor corruption reveal shared weaknesses. Appearance robustness still does not predict recovery from geometry changes.</p></div><div class="figure-frame heatmap-frame"><img src="assets/figures/change_type_breakdown.png" alt="Success-rate loss by policy and online event type" loading="lazy"></div></div>
     </div></section>
 
-    <section class="section shell" id="lineage">
-      <div class="section-head"><span class="section-index">03</span><div><p class="section-kicker">benchmark lineage</p><h2>Built on three public foundations.</h2></div><p class="section-note">MAX contributes the online-change protocol, paired controls, event runtime, and evaluation layer.</p></div>
-      <div class="lineage-flow">
-        <article class="lineage-node libero-node"><span>FOUNDATION</span><h3>LIBERO</h3><p>Tasks, demonstrations, simulator, and standard success predicates.</p><div class="node-links"><a href="https://arxiv.org/abs/2306.03310" target="_blank" rel="noreferrer">paper ↗</a><a href="https://github.com/Lifelong-Robot-Learning/LIBERO" target="_blank" rel="noreferrer">code ↗</a></div></article>
-        <span class="flow-arrow" aria-hidden="true">→</span>
-        <div class="source-stack"><article class="lineage-node plus-node"><span>5,600 SOURCE CASES</span><h3>LIBERO-Plus</h3><p>Static visual, scene, and observation variations.</p><div class="node-links"><a href="https://arxiv.org/abs/2510.13626" target="_blank" rel="noreferrer">paper ↗</a><a href="https://github.com/sylvestf/LIBERO-plus" target="_blank" rel="noreferrer">code ↗</a></div></article><article class="lineage-node pro-node"><span>2,400 SOURCE CASES</span><h3>LIBERO-PRO</h3><p>Static semantic, geometric, and visual substrate variations.</p><div class="node-links"><a href="https://arxiv.org/abs/2510.03827" target="_blank" rel="noreferrer">paper ↗</a><a href="https://github.com/Zxy-MLlab/LIBERO-PRO" target="_blank" rel="noreferrer">code ↗</a></div></article></div>
-        <span class="flow-arrow" aria-hidden="true">→</span>
-        <article class="lineage-node max-node"><span>DYNAMIC CONVERSION</span><h3>LIBERO-MAX</h3><p>One feasible change occurs after the shared action prefix.</p><div class="node-links"><a href="https://github.com/yunbeizhang/LIBERO-MAX/tree/main/benchmark/max8000" target="_blank" rel="noreferrer">dataset ↗</a><a href="https://github.com/yunbeizhang/LIBERO-MAX" target="_blank" rel="noreferrer">code ↗</a></div></article>
+    <section class="section construction-section shell" id="lineage">
+      <div class="section-head"><span class="section-index">03</span><div><p class="section-kicker">benchmark construction</p><h2>From static source cases to changes during execution.</h2></div><p class="section-note">LIBERO-MAX keeps the task substrate fixed, preserves the executed action prefix, and introduces one feasible change only after the robot begins acting.</p></div>
+      <div class="figure-frame construction-figure"><img src="assets/figures/benchmark_construction.png" alt="Construction of LIBERO-MAX from LIBERO tasks and selected Plus-derived and PRO-derived source cases"></div>
+      <div class="construction-summary">
+        <p><strong>8,000 source cases become 8,000 matched dynamic evaluations.</strong> The frozen track combines 5,600 Plus-derived and 2,400 PRO-derived cases, then moves the selected change from reset time into policy execution.</p>
+        <div class="hero-actions"><a class="button button-primary" href="https://github.com/yunbeizhang/LIBERO-MAX/tree/main/benchmark/max8000" target="_blank" rel="noreferrer">Explore MAX ↗</a><a class="button" href="https://github.com/yunbeizhang/LIBERO-MAX#benchmark-construction" target="_blank" rel="noreferrer">Read protocol ↗</a></div>
       </div>
-      <p class="acknowledgement">We thank the LIBERO, LIBERO-Plus, and LIBERO-PRO teams for releasing the task suites, datasets, and runtime code that make this benchmark possible. Upstream repositories remain external dependencies and retain their own licenses. <a href="https://github.com/yunbeizhang/LIBERO-MAX/blob/main/ACKNOWLEDGEMENTS.md" target="_blank" rel="noreferrer">Read the full provenance statement ↗</a></p>
     </section>
 
     <section class="section reproduce-section" id="reproduce"><div class="shell reproduce-grid">
@@ -126,9 +180,55 @@
 <span>$</span> make validate-max8000
 <span>$</span> make test</code></pre>
     </div></section>
+
+    <section class="section citation-section shell" id="citation">
+      <div class="section-head citation-head">
+        <span class="section-index">05</span>
+        <div><p class="section-kicker">citation</p><h2>Cite LIBERO-MAX.</h2></div>
+        <p class="section-note">This temporary entry identifies the repository and dataset release. We will replace it with the verified paper BibTeX when the manuscript is public.</p>
+      </div>
+      <div class="citation-card">
+        <div class="citation-toolbar"><span>BIBTEX · TEMPORARY</span><button class="copy-bibtex" type="button" data-copy-target="bibtex-entry">Copy BibTeX</button></div>
+        <pre id="bibtex-entry" aria-label="Temporary LIBERO-MAX BibTeX citation"><code>@misc{liberomax,
+  title        = {LIBERO-MAX: Do Robot Policies Adapt When the World Changes?},
+  howpublished = {\url{https://github.com/yunbeizhang/LIBERO-MAX}},
+  note         = {Dataset. Paper forthcoming.}
+}</code></pre>
+      </div>
+    </section>
   </main>
 
-  <footer><div class="shell footer-grid"><div><strong>LIBERO-MAX</strong><p>Dynamic robustness for robot policies.</p></div><div class="footer-links"><a href="https://github.com/yunbeizhang/LIBERO-MAX" target="_blank" rel="noreferrer">GitHub ↗</a><a href="#top">Back to top ↑</a></div><p class="footer-note">Dataset v3.0.0 · Paper coming soon</p></div></footer>
-  <script src="site.js"></script>
+  <footer><div class="shell footer-grid"><div><strong>LIBERO-MAX</strong><p>Dynamic robustness for robot policies.</p></div><div class="footer-links"><a href="#citation">BibTeX</a><a href="https://github.com/yunbeizhang/LIBERO-MAX" target="_blank" rel="noreferrer">GitHub ↗</a><a href="#top">Back to top ↑</a></div><p class="footer-note">Dataset · Paper coming soon</p></div></footer>
+  <script>
+(() => {
+  const root = document.documentElement;
+  const toggle = document.querySelector(".theme-toggle");
+  if (!toggle) return;
+  toggle.addEventListener("click", () => {
+    const current = root.dataset.theme;
+    const systemDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+    const next = current === "dark" || (!current && systemDark) ? "light" : "dark";
+    root.dataset.theme = next;
+    try { localStorage.setItem("libero-max-theme", next); } catch (error) { /* Optional. */ }
+  });
+})();
+
+(() => {
+  const button = document.querySelector(".copy-bibtex");
+  if (!button) return;
+  button.addEventListener("click", async () => {
+    const target = document.getElementById(button.dataset.copyTarget);
+    if (!target) return;
+    const originalLabel = button.textContent;
+    try {
+      await navigator.clipboard.writeText(target.innerText.trim());
+      button.textContent = "Copied";
+    } catch (error) {
+      button.textContent = "Select and copy";
+    }
+    window.setTimeout(() => { button.textContent = originalLabel; }, 1800);
+  });
+})();
+  </script>
 </body>
 </html>
