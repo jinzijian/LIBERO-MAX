@@ -1,0 +1,81 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://libero-max.org/schemas/result.schema.json",
+  "title": "LIBERO-MAX Paired Result",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "pair_id",
+    "scenario_id",
+    "seed",
+    "change_family",
+    "expected_response_mode",
+    "control_correct",
+    "intervention_correct",
+    "adaptation_latency_steps",
+    "safety_violations"
+  ],
+  "properties": {
+    "pair_id": {"type": "string", "minLength": 1},
+    "scenario_id": {"type": "string", "minLength": 1},
+    "seed": {"type": "integer", "minimum": 0},
+    "change_family": {
+      "enum": ["OBS", "GEO", "CLUTTER", "OBSTACLE", "OBS-NEW", "INTENT", "FEAS"]
+    },
+    "change_type": {
+      "enum": [
+        "illumination_switch",
+        "camera_shift",
+        "visual_theme_switch",
+        "sensor_noise_onset",
+        "target_relocation",
+        "receptacle_relocation",
+        "distractor_burst",
+        "obstacle_insertion",
+        "target_removal",
+        "receptacle_removal",
+        "instruction_target_update",
+        "instruction_receptacle_update",
+        "task_cancel"
+      ]
+    },
+    "intervention_draw_id": {"type": "integer", "minimum": 0},
+    "intervention_seed": {"type": "integer", "minimum": 0},
+    "expected_response_mode": {
+      "enum": [
+        "continue",
+        "replan",
+        "follow_update",
+        "clarify",
+        "stop",
+        "report_infeasible"
+      ]
+    },
+    "control_correct": {"type": "boolean"},
+    "intervention_correct": {"type": "boolean"},
+    "adaptation_latency_steps": {
+      "type": ["integer", "null"],
+      "minimum": 0
+    },
+    "safety_violations": {"type": ["integer", "null"], "minimum": 0},
+    "severity": {"enum": ["low", "medium", "high"]},
+    "timing_bucket": {"enum": ["early", "middle", "late"]},
+    "task_suite_name": {"type": "string", "minLength": 1},
+    "task_index": {"type": "integer", "minimum": 0},
+    "init_state_index": {"type": "integer", "minimum": 0},
+    "policy_seed": {"type": "integer", "minimum": 0},
+    "substrate_category": {"type": "string", "minLength": 1},
+    "substrate_difficulty": {
+      "type": ["integer", "null"],
+      "minimum": 1,
+      "maximum": 5
+    },
+    "dynamic_phase": {"type": "string", "minLength": 1},
+    "scoring_mode": {"type": "string", "minLength": 1},
+    "intervention_event_step": {"type": "integer", "minimum": 0},
+    "policy_response_query_step": {"type": "integer", "minimum": 0},
+    "open_loop_exposure_steps": {"type": "integer", "minimum": 0},
+    "mean_absolute_raw_pixel_delta": {"type": ["number", "null"], "minimum": 0},
+    "post_event_action_chunk_mad": {"type": ["number", "null"], "minimum": 0}
+  }
+}

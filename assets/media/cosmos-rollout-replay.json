@@ -1,0 +1,9 @@
+{
+  "captured_frames": 48,
+  "case_id": "pro-camera-view-angle-object-t00-i00-target_relocation-d0-p195",
+  "event_step": 31,
+  "replayed_action_sequence_sha256": "0f8167bef74675b891629609bbae2640b20c6b59553e024c756bac38f80f4d86",
+  "replayed_event_step": 31,
+  "source_run": "/vepfs/zijian/LIBERO-MAX/artifacts/max8000/paper_final/runs/cosmos_pro_2400",
+  "stride": 2
+}

@@ -1,0 +1,128 @@
+{
+  "benchmark_id": "cosmos-physical-pilot-v0.1",
+  "benchmark_version": "0.1.0",
+  "protocol": {
+    "arms": ["control", "intervention"],
+    "query_interval": 16,
+    "scoring_track": "physical_completion"
+  },
+  "cases": [
+    {
+      "case_id": "object0-init0-light-off005-prox018-seed195",
+      "task_suite_name": "libero_object",
+      "task_index": 0,
+      "init_state_index": 0,
+      "policy_seed": 195,
+      "timing_bucket": "middle",
+      "scenario": {
+        "scenario_id": "obs_light_off005_object0_prox018",
+        "base_task_id": "libero_object/task_0",
+        "seed": 0,
+        "change_family": "OBS",
+        "change_type": "illumination_switch",
+        "severity": "medium",
+        "trigger": {"type": "on_proximity", "value": "alphabet_soup_1", "distance_m": 0.18},
+        "change": {"operation": "set_lighting", "scale": 0.05},
+        "expected_response_mode": "continue",
+        "safety_constraints": []
+      }
+    },
+    {
+      "case_id": "object0-init0-light-on-prox018-seed195",
+      "task_suite_name": "libero_object",
+      "task_index": 0,
+      "init_state_index": 0,
+      "policy_seed": 195,
+      "timing_bucket": "middle",
+      "scenario": {
+        "scenario_id": "obs_light_on_object0_prox018",
+        "base_task_id": "libero_object/task_0",
+        "seed": 0,
+        "change_family": "OBS",
+        "change_type": "illumination_switch",
+        "severity": "medium",
+        "trigger": {"type": "on_proximity", "value": "alphabet_soup_1", "distance_m": 0.18},
+        "setup": [{"operation": "set_lighting", "scale": 0.05}],
+        "change": {"operation": "set_lighting", "scale": 20.0},
+        "expected_response_mode": "continue",
+        "safety_constraints": []
+      }
+    },
+    {
+      "case_id": "object0-init0-move-target-y006-prox018-seed195",
+      "task_suite_name": "libero_object",
+      "task_index": 0,
+      "init_state_index": 0,
+      "policy_seed": 195,
+      "timing_bucket": "middle",
+      "scenario": {
+        "scenario_id": "geo_move_target_y006_object0_prox018",
+        "base_task_id": "libero_object/task_0",
+        "seed": 0,
+        "change_family": "GEO",
+        "change_type": "target_relocation",
+        "severity": "low",
+        "trigger": {"type": "on_proximity", "value": "alphabet_soup_1", "distance_m": 0.18},
+        "change": {"operation": "move_object", "object": "alphabet_soup_1", "delta_position_m": [0.0, 0.06, 0.0]},
+        "expected_response_mode": "replan",
+        "safety_constraints": []
+      }
+    },
+    {
+      "case_id": "object0-init0-move-target-y012-prox018-seed195",
+      "task_suite_name": "libero_object",
+      "task_index": 0,
+      "init_state_index": 0,
+      "policy_seed": 195,
+      "timing_bucket": "middle",
+      "scenario": {
+        "scenario_id": "geo_move_target_y012_object0_prox018",
+        "base_task_id": "libero_object/task_0",
+        "seed": 0,
+        "change_family": "GEO",
+        "change_type": "target_relocation",
+        "severity": "medium",
+        "trigger": {"type": "on_proximity", "value": "alphabet_soup_1", "distance_m": 0.18},
+        "change": {"operation": "move_object", "object": "alphabet_soup_1", "delta_position_m": [0.0, 0.12, 0.0]},
+        "expected_response_mode": "replan",
+        "safety_constraints": []
+      }
+    },
+    {
+      "case_id": "object0-init0-distractor-burst5-prox018-seed195",
+      "task_suite_name": "libero_object",
+      "task_index": 0,
+      "init_state_index": 0,
+      "policy_seed": 195,
+      "timing_bucket": "middle",
+      "scenario": {
+        "scenario_id": "clutter_burst5_object0_prox018",
+        "base_task_id": "libero_object/task_0",
+        "seed": 0,
+        "change_family": "CLUTTER",
+        "change_type": "distractor_burst",
+        "severity": "high",
+        "trigger": {"type": "on_proximity", "value": "alphabet_soup_1", "distance_m": 0.18},
+        "setup": [
+          {"operation": "remove_object", "object": "salad_dressing_1", "offworld_position_m": [-2.0, 0.0, -5.0]},
+          {"operation": "remove_object", "object": "cream_cheese_1", "offworld_position_m": [-2.2, 0.0, -5.0]},
+          {"operation": "remove_object", "object": "milk_1", "offworld_position_m": [-2.4, 0.0, -5.0]},
+          {"operation": "remove_object", "object": "tomato_sauce_1", "offworld_position_m": [-2.6, 0.0, -5.0]},
+          {"operation": "remove_object", "object": "butter_1", "offworld_position_m": [-2.8, 0.0, -5.0]}
+        ],
+        "change": {
+          "operation": "insert_distractors",
+          "placements": [
+            {"object": "salad_dressing_1", "position_m": [-0.02, -0.05, 0.035]},
+            {"object": "cream_cheese_1", "position_m": [-0.10, 0.02, 0.0]},
+            {"object": "milk_1", "position_m": [0.02, 0.08, 0.035]},
+            {"object": "tomato_sauce_1", "position_m": [0.10, 0.0, 0.035]},
+            {"object": "butter_1", "position_m": [-0.16, -0.05, -0.005]}
+          ]
+        },
+        "expected_response_mode": "continue",
+        "safety_constraints": []
+      }
+    }
+  ]
+}

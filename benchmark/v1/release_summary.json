@@ -1,0 +1,17 @@
+{
+  "benchmark_version": "1.0.0",
+  "candidate_physical_scenarios": 1521,
+  "core_matched_pairs": 1335,
+  "excluded_configurations": 62,
+  "full_matched_pairs": 4005,
+  "physical_preflight_passed": 1335,
+  "suites": [
+    "libero_10",
+    "libero_goal",
+    "libero_object",
+    "libero_spatial"
+  ],
+  "task_type_cells": 177,
+  "tasks": 40,
+  "unique_physical_scenarios": 1335
+}

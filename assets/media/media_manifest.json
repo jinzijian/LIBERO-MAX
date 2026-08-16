@@ -1,0 +1,130 @@
+{
+  "cases": [
+    {
+      "case_id": "pro-task-10-t01-i02-illumination_switch-d1-p195",
+      "change_type": "illumination_switch",
+      "gif": "illumination-switch.gif",
+      "neighbor_delta_after": 5.690522193908691,
+      "neighbor_delta_before": 4.014052391052246,
+      "render_resolution": 320,
+      "substrate_category": "LIBERO-PRO/task",
+      "substrate_runtime": {
+        "applied_components": [],
+        "category": "task",
+        "state_adapter": "identity"
+      },
+      "task_description": "put both the alphabet soup and the butter in the basket"
+    },
+    {
+      "case_id": "pro-object-10-t03-i02-camera_shift-d1-p195",
+      "change_type": "camera_shift",
+      "gif": "camera-shift.gif",
+      "neighbor_delta_after": 2.479555130004883,
+      "neighbor_delta_before": 3.8665688037872314,
+      "render_resolution": 320,
+      "substrate_category": "LIBERO-PRO/object",
+      "substrate_runtime": {
+        "applied_components": [],
+        "category": "object",
+        "state_adapter": "identity"
+      },
+      "task_description": "put the black bowl in the bottom drawer of the cabinet and close it"
+    },
+    {
+      "case_id": "pro-object-shape-object-t04-i07-visual_theme_switch-d1-p195",
+      "change_type": "visual_theme_switch",
+      "gif": "visual-theme-switch.gif",
+      "neighbor_delta_after": 2.418325424194336,
+      "neighbor_delta_before": 4.2109880447387695,
+      "render_resolution": 320,
+      "substrate_category": "LIBERO-PRO/object_shape",
+      "substrate_runtime": {
+        "applied_components": [
+          "object_shape"
+        ],
+        "category": "object_shape",
+        "state_adapter": "identity"
+      },
+      "task_description": "Pick the ketchup and place it in the basket"
+    },
+    {
+      "case_id": "pro-initial-pose-position-angle-object-t06-i03-sensor_noise_onset-d1-p195",
+      "change_type": "sensor_noise_onset",
+      "gif": "sensor-noise-onset.gif",
+      "neighbor_delta_after": 34.70549774169922,
+      "neighbor_delta_before": 4.205430030822754,
+      "render_resolution": 320,
+      "substrate_category": "LIBERO-PRO/initial_pose_position_angle",
+      "substrate_runtime": {
+        "applied_components": [
+          "initial_pose"
+        ],
+        "category": "initial_pose_position_angle",
+        "state_adapter": "identity"
+      },
+      "task_description": "Pick the butter and place it in the basket"
+    },
+    {
+      "case_id": "pro-task-10-t00-i04-target_relocation-d0-p195",
+      "change_type": "target_relocation",
+      "gif": "target-relocation.gif",
+      "neighbor_delta_after": 4.150357723236084,
+      "neighbor_delta_before": 4.0556721687316895,
+      "render_resolution": 320,
+      "substrate_category": "LIBERO-PRO/task",
+      "substrate_runtime": {
+        "applied_components": [],
+        "category": "task",
+        "state_adapter": "identity"
+      },
+      "task_description": "put both the cream cheese and the tomato sauce in the basket"
+    },
+    {
+      "case_id": "pro-position-10-t07-i03-receptacle_relocation-d1-p195",
+      "change_type": "receptacle_relocation",
+      "gif": "receptacle-relocation.gif",
+      "neighbor_delta_after": 4.174018859863281,
+      "neighbor_delta_before": 3.7052526473999023,
+      "render_resolution": 320,
+      "substrate_category": "LIBERO-PRO/position",
+      "substrate_runtime": {
+        "applied_components": [],
+        "category": "position",
+        "state_adapter": "identity"
+      },
+      "task_description": "put both the alphabet soup and the cream cheese box in the basket"
+    },
+    {
+      "case_id": "pro-semantic-10-t00-i05-distractor_burst-d1-p195",
+      "change_type": "distractor_burst",
+      "gif": "distractor-burst.gif",
+      "neighbor_delta_after": 4.044956684112549,
+      "neighbor_delta_before": 3.526489019393921,
+      "render_resolution": 320,
+      "substrate_category": "LIBERO-PRO/semantic",
+      "substrate_runtime": {
+        "applied_components": [],
+        "category": "semantic",
+        "state_adapter": "identity"
+      },
+      "task_description": "place alphabet soup and tomato sauce into basket"
+    },
+    {
+      "case_id": "pro-object-texture-10-t02-i03-obstacle_insertion-d0-p195",
+      "change_type": "obstacle_insertion",
+      "gif": "obstacle-insertion.gif",
+      "neighbor_delta_after": 4.003350257873535,
+      "neighbor_delta_before": 3.4256644248962402,
+      "render_resolution": 320,
+      "substrate_category": "LIBERO-PRO/object_texture",
+      "substrate_runtime": {
+        "applied_components": [
+          "object_appearance"
+        ],
+        "category": "object_texture",
+        "state_adapter": "identity"
+      },
+      "task_description": "turn on the stove and put the moka pot on it"
+    }
+  ]
+}

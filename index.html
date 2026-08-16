@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>LIBERO-MAX | Dynamic Robustness for Robot Policies</title>
+  <meta name="description" content="LIBERO-MAX evaluates whether robot policies adapt when the world changes during task execution.">
+  <meta property="og:title" content="LIBERO-MAX: Do Robot Policies Adapt When the World Changes?">
+  <meta property="og:description" content="8,000 matched dynamic-change cases, eight event types, and five robot policies evaluated under changes during execution.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://yunbeizhang.github.io/LIBERO-MAX/">
+  <meta property="og:image" content="https://yunbeizhang.github.io/LIBERO-MAX/assets/og.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&amp;display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="site.css">
+  <script>
+    try {
+      const savedTheme = localStorage.getItem("libero-max-theme");
+      if (savedTheme === "light" || savedTheme === "dark") document.documentElement.dataset.theme = savedTheme;
+    } catch (error) { /* Use the system theme when storage is unavailable. */ }
+  </script>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+  <header class="site-header">
+    <div class="shell nav">
+      <a class="brand" href="#top" aria-label="LIBERO-MAX home">LIBERO-MAX</a>
+      <nav class="nav-links" aria-label="Main navigation">
+        <a href="#benchmark">benchmark</a><a href="#results">results</a><a href="#lineage">lineage</a><a href="#reproduce">reproduce</a>
+        <a class="nav-code" href="https://github.com/yunbeizhang/LIBERO-MAX" target="_blank" rel="noreferrer">code ↗</a>
+        <button class="theme-toggle" type="button" aria-label="Toggle color theme" title="Toggle color theme"><span class="theme-glyph" aria-hidden="true">◐</span></button>
+      </nav>
+    </div>
+  </header>
+
+  <main id="main">
+    <section class="hero shell" id="top">
+      <div class="hero-copy">
+        <p class="eyebrow">DYNAMIC ROBUSTNESS FOR ROBOT POLICIES · 2026</p>
+        <h1>Do robot policies adapt<br>when the world changes?</h1>
+        <p class="hero-summary"><strong>LIBERO-MAX</strong> changes the environment after a robot has already begun acting. Every Dynamic rollout is matched to a Base control with the same task, reset, policy seed, and action prefix.</p>
+        <div class="hero-actions" aria-label="Project links">
+          <a class="button button-primary" href="https://github.com/yunbeizhang/LIBERO-MAX" target="_blank" rel="noreferrer">View code ↗</a>
+          <a class="button" href="https://github.com/yunbeizhang/LIBERO-MAX/tree/main/benchmark/max8000" target="_blank" rel="noreferrer">Get dataset ↗</a>
+          <span class="button button-muted" aria-disabled="true">Paper coming soon</span>
+        </div>
+      </div>
+      <aside class="hero-metrics" aria-label="Benchmark scale">
+        <div class="metric"><span class="metric-value">8,000</span><span class="metric-label">matched Base / Dynamic pairs</span></div>
+        <div class="metric"><span class="metric-value">16,000</span><span class="metric-label">scored rollouts per checkpoint</span></div>
+        <div class="metric"><span class="metric-value">8</span><span class="metric-label">online event types</span></div>
+      </aside>
+    </section>
+
+    <section class="overview shell" aria-label="Benchmark overview figure">
+      <div class="figure-frame"><img src="assets/figures/benchmark_overview.png" alt="LIBERO-MAX benchmark overview showing static and dynamic robustness and eight online event types"></div>
+      <p class="figure-note"><span>FIG. 01</span> Static benchmarks shift the world at reset. LIBERO-MAX changes it during execution.</p>
+    </section>
+
+    <section class="section shell" id="benchmark">
+      <div class="section-head">
+        <span class="section-index">01</span>
+        <div><p class="section-kicker">the evaluation gap</p><h2>Same past. Changed present.</h2></div>
+        <p class="section-note">The paired design isolates the effect of an online change from initial task difficulty.</p>
+      </div>
+      <div class="comparison">
+        <article class="comparison-panel static-panel">
+          <p class="panel-label">STATIC ROBUSTNESS</p><h3>The shift is visible before action begins.</h3>
+          <div class="timeline" aria-label="Static robustness timeline"><span class="timeline-step active-purple">shift</span><span class="timeline-arrow">→</span><span class="timeline-step">observe</span><span class="timeline-arrow">→</span><span class="timeline-step">act</span></div>
+          <p>LIBERO-Plus and LIBERO-PRO test generalization from a shifted reset.</p>
+        </article>
+        <div class="comparison-arrow" aria-hidden="true">⇒</div>
+        <article class="comparison-panel dynamic-panel">
+          <p class="panel-label">DYNAMIC ROBUSTNESS</p><h3>The world changes after the policy commits.</h3>
+          <div class="timeline" aria-label="Dynamic robustness timeline"><span class="timeline-step">reset</span><span class="timeline-arrow">→</span><span class="timeline-step">act</span><span class="timeline-arrow event-arrow">→</span><span class="timeline-step active-red">change</span><span class="timeline-arrow">→</span><span class="timeline-step active-green">adapt</span></div>
+          <p>LIBERO-MAX tests detection, correction, and replanning during execution.</p>
+        </article>
+      </div>
+      <div class="event-heading"><div><p class="section-kicker">the frozen main track</p><h3>Eight ways the world can change</h3></div><p>1,000 matched cases per event type</p></div>
+      <div class="event-grid">
+        <article class="event-card family-geometry"><img src="assets/media/target-relocation.gif" alt="Target relocation animation" loading="lazy"><div class="event-copy"><span>GEOMETRY · 01</span><h4>Target relocation</h4><p>The manipulated object moves after approach.</p></div></article>
+        <article class="event-card family-geometry"><img src="assets/media/receptacle-relocation.gif" alt="Receptacle relocation animation" loading="lazy"><div class="event-copy"><span>GEOMETRY · 02</span><h4>Receptacle relocation</h4><p>The destination moves while the task stays feasible.</p></div></article>
+        <article class="event-card family-observation"><img src="assets/media/camera-shift.gif" alt="Camera shift animation" loading="lazy"><div class="event-copy"><span>OBSERVATION · 03</span><h4>Camera shift</h4><p>The viewpoint changes while the robot is acting.</p></div></article>
+        <article class="event-card family-observation"><img src="assets/media/sensor-noise-onset.gif" alt="Sensor corruption animation" loading="lazy"><div class="event-copy"><span>OBSERVATION · 04</span><h4>Sensor corruption</h4><p>Noise and occlusion begin after execution starts.</p></div></article>
+        <article class="event-card family-appearance"><img src="assets/media/illumination-switch.gif" alt="Illumination switch animation" loading="lazy"><div class="event-copy"><span>APPEARANCE · 05</span><h4>Illumination switch</h4><p>Scene lighting changes abruptly.</p></div></article>
+        <article class="event-card family-appearance"><img src="assets/media/visual-theme-switch.gif" alt="Visual theme switch animation" loading="lazy"><div class="event-copy"><span>APPEARANCE · 06</span><h4>Visual theme switch</h4><p>The scene appearance changes online.</p></div></article>
+        <article class="event-card family-appearance"><img src="assets/media/distractor-burst.gif" alt="Distractor burst animation" loading="lazy"><div class="event-copy"><span>CLUTTER · 07</span><h4>Distractor burst</h4><p>Five irrelevant objects enter the active support.</p></div></article>
+        <article class="event-card family-path"><img src="assets/media/obstacle-insertion.gif" alt="Obstacle insertion animation" loading="lazy"><div class="event-copy"><span>PATH · 08</span><h4>Obstacle insertion</h4><p>A new obstacle blocks the approach region.</p></div></article>
+      </div>
+    </section>
+
+    <section class="section results-section" id="results"><div class="shell">
+      <div class="section-head"><span class="section-index">02</span><div><p class="section-kicker">main result</p><h2>Every policy loses ground.</h2></div><p class="section-note">Full 8,000-pair evaluation. Success rate is measured over all 16,000 scored rollouts per checkpoint.</p></div>
+      <div class="finding-band"><span class="finding-range">13.9–21.1</span><p><strong>percentage-point drop</strong><br>under changes during execution across all five evaluated policies.</p></div>
+      <div class="results-layout">
+        <div class="table-wrap"><table><thead><tr><th>Family</th><th>Policy</th><th>Base</th><th>Dynamic</th><th>Gap</th></tr></thead><tbody>
+          <tr><td>VLA</td><td>π0.5</td><td>79.7</td><td>65.7</td><td>−13.9</td></tr><tr><td>VLA</td><td>OpenVLA-OFT</td><td>64.3</td><td>43.1</td><td>−21.1</td></tr><tr><td>VLA + WM</td><td>VLA-JEPA</td><td>73.5</td><td>54.3</td><td>−19.2</td></tr><tr><td>WAM</td><td>Cosmos-Policy</td><td>77.4</td><td>59.3</td><td>−18.2</td></tr><tr><td>WAM</td><td>Fast-WAM</td><td>42.0</td><td>24.0</td><td>−18.0</td></tr>
+        </tbody></table></div>
+        <p class="results-copy">High Base success does not guarantee adaptation after an online change. No architecture family dominates across all events, and each policy exposes a distinct failure profile.</p>
+      </div>
+      <div class="figure-frame result-figure"><img src="assets/figures/main_results.png" alt="Base and Dynamic success rates across five robot policies" loading="lazy"></div>
+      <div class="analysis-block"><div><p class="section-kicker">where policies break</p><h3>Failure is structured by event type.</h3><p>Relocation, viewpoint change, and sensor corruption reveal shared weaknesses. Appearance robustness still does not predict recovery from geometry changes.</p></div><div class="figure-frame heatmap-frame"><img src="assets/figures/change_type_breakdown.png" alt="Success-rate loss by policy and online event type" loading="lazy"></div></div>
+    </div></section>
+
+    <section class="section shell" id="lineage">
+      <div class="section-head"><span class="section-index">03</span><div><p class="section-kicker">benchmark lineage</p><h2>Built on three public foundations.</h2></div><p class="section-note">MAX contributes the online-change protocol, paired controls, event runtime, and evaluation layer.</p></div>
+      <div class="lineage-flow">
+        <article class="lineage-node libero-node"><span>FOUNDATION</span><h3>LIBERO</h3><p>Tasks, demonstrations, simulator, and standard success predicates.</p><div class="node-links"><a href="https://arxiv.org/abs/2306.03310" target="_blank" rel="noreferrer">paper ↗</a><a href="https://github.com/Lifelong-Robot-Learning/LIBERO" target="_blank" rel="noreferrer">code ↗</a></div></article>
+        <span class="flow-arrow" aria-hidden="true">→</span>
+        <div class="source-stack"><article class="lineage-node plus-node"><span>5,600 SOURCE CASES</span><h3>LIBERO-Plus</h3><p>Static visual, scene, and observation variations.</p><div class="node-links"><a href="https://arxiv.org/abs/2510.13626" target="_blank" rel="noreferrer">paper ↗</a><a href="https://github.com/sylvestf/LIBERO-plus" target="_blank" rel="noreferrer">code ↗</a></div></article><article class="lineage-node pro-node"><span>2,400 SOURCE CASES</span><h3>LIBERO-PRO</h3><p>Static semantic, geometric, and visual substrate variations.</p><div class="node-links"><a href="https://arxiv.org/abs/2510.03827" target="_blank" rel="noreferrer">paper ↗</a><a href="https://github.com/Zxy-MLlab/LIBERO-PRO" target="_blank" rel="noreferrer">code ↗</a></div></article></div>
+        <span class="flow-arrow" aria-hidden="true">→</span>
+        <article class="lineage-node max-node"><span>DYNAMIC CONVERSION</span><h3>LIBERO-MAX</h3><p>One feasible change occurs after the shared action prefix.</p><div class="node-links"><a href="https://github.com/yunbeizhang/LIBERO-MAX/tree/main/benchmark/max8000" target="_blank" rel="noreferrer">dataset ↗</a><a href="https://github.com/yunbeizhang/LIBERO-MAX" target="_blank" rel="noreferrer">code ↗</a></div></article>
+      </div>
+      <p class="acknowledgement">We thank the LIBERO, LIBERO-Plus, and LIBERO-PRO teams for releasing the task suites, datasets, and runtime code that make this benchmark possible. Upstream repositories remain external dependencies and retain their own licenses. <a href="https://github.com/yunbeizhang/LIBERO-MAX/blob/main/ACKNOWLEDGEMENTS.md" target="_blank" rel="noreferrer">Read the full provenance statement ↗</a></p>
+    </section>
+
+    <section class="section reproduce-section" id="reproduce"><div class="shell reproduce-grid">
+      <div><span class="section-index">04</span><p class="section-kicker">open benchmark</p><h2>Validate first.<br>Evaluate next.</h2><p>The frozen manifest, source revisions, integrity checks, evaluation launchers, and 203 automated tests are released with the benchmark.</p><div class="hero-actions"><a class="button button-primary" href="https://github.com/yunbeizhang/LIBERO-MAX#quick-start" target="_blank" rel="noreferrer">Full instructions ↗</a><a class="button" href="https://github.com/yunbeizhang/LIBERO-MAX/tree/main/tests" target="_blank" rel="noreferrer">Test coverage ↗</a></div></div>
+      <pre aria-label="LIBERO-MAX quick start"><code><span>$</span> git clone https://github.com/yunbeizhang/LIBERO-MAX.git
+<span>$</span> cd LIBERO-MAX
+<span>$</span> python3 -m venv .venv
+<span>$</span> source .venv/bin/activate
+<span>$</span> pip install -e .
+<span>$</span> make validate-max8000
+<span>$</span> make test</code></pre>
+    </div></section>
+  </main>
+
+  <footer><div class="shell footer-grid"><div><strong>LIBERO-MAX</strong><p>Dynamic robustness for robot policies.</p></div><div class="footer-links"><a href="https://github.com/yunbeizhang/LIBERO-MAX" target="_blank" rel="noreferrer">GitHub ↗</a><a href="#top">Back to top ↑</a></div><p class="footer-note">Dataset v3.0.0 · Paper coming soon</p></div></footer>
+  <script src="site.js"></script>
+</body>
+</html>

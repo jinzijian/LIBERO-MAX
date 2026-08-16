@@ -1,0 +1,17 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "libero-max"
+version = "0.1.0"
+description = "A paired benchmark for dynamic robustness during robot execution"
+readme = "README.md"
+requires-python = ">=3.9"
+dependencies = []
+
+[project.scripts]
+libero-max = "libero_max.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]

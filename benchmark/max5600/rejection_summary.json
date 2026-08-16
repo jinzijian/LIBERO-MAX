@@ -1,0 +1,145 @@
+{
+  "failed_attempt_count": 1221,
+  "sources": [
+    {
+      "failures": 172,
+      "file": "core_preflight.candidate.json",
+      "passed": 1228,
+      "planned": 1400,
+      "sha256": "2b4f1a7a84a5f5888fd859acb4d443eb9e557001d02e8d8266dd0a103d0728e2"
+    },
+    {
+      "failures": 0,
+      "file": "core_preflight.final.json",
+      "passed": 1400,
+      "planned": 1400,
+      "sha256": "3ea17a3e2b5b48fe28f1e10ba9da4df8256294f36dbe573461cfbaf3574f54bf"
+    },
+    {
+      "failures": 50,
+      "file": "core_preflight.repaired1.json",
+      "passed": 1350,
+      "planned": 1400,
+      "sha256": "429ddc5f1bd05fc4a3290ff1326f6f1dbda5f64efcb589da54c14a571293e0d1"
+    },
+    {
+      "failures": 55,
+      "file": "core_preflight.repaired2.json",
+      "passed": 1345,
+      "planned": 1400,
+      "sha256": "5c5454e1deace2e63987157220dcaf1b165af824914e88a7834b18a42cd685d1"
+    },
+    {
+      "failures": 49,
+      "file": "core_preflight.repaired3.json",
+      "passed": 1351,
+      "planned": 1400,
+      "sha256": "297d91314fd45ecb790848718ad0bf45f4478e3f23a6c8c4acd09a039af4f580"
+    },
+    {
+      "failures": 2,
+      "file": "smoke_preflight.json",
+      "passed": 6,
+      "planned": 8,
+      "sha256": "9d773c19be2f6dd942d987ca1ea5863bbebf11052e94566929ccd36a7a91da39"
+    },
+    {
+      "failures": 44,
+      "file": "physical_preflight.json",
+      "passed": 1356,
+      "planned": 1400,
+      "sha256": "9b69b1bc6089455b841377ab794b8c4d52cb95611d153cf598755640258887a6"
+    },
+    {
+      "failures": 9,
+      "file": "physical_preflight.json",
+      "passed": 1391,
+      "planned": 1400,
+      "sha256": "ddde4553bf0511beb422bcdab0a630fd9f7ae2e800de542a9a103cf69b3bcce9"
+    },
+    {
+      "failures": 3,
+      "file": "physical_preflight.json",
+      "passed": 1397,
+      "planned": 1400,
+      "sha256": "4f18aaaff028f45e0a78535e0680e64e79e32b5760b1a2dd4a2febfdc78cb2c9"
+    },
+    {
+      "failures": 0,
+      "file": "physical_preflight.json",
+      "passed": 4,
+      "planned": 4,
+      "sha256": "e4daed86b271bc138f07dcfebfd22c1a369d85807ef61b059f8a743d1e99fd21"
+    },
+    {
+      "failures": 0,
+      "file": "physical_preflight.json",
+      "passed": 1400,
+      "planned": 1400,
+      "sha256": "3ea17a3e2b5b48fe28f1e10ba9da4df8256294f36dbe573461cfbaf3574f54bf"
+    },
+    {
+      "failures": 466,
+      "file": "physical_preflight.json",
+      "passed": 9564,
+      "planned": 10030,
+      "sha256": "bdf1da6314348b8311fed5827e282bff3effed7dbc76bd0fcb590ea129a2401b"
+    },
+    {
+      "failures": 83,
+      "file": "physical_preflight.json",
+      "passed": 9947,
+      "planned": 10030,
+      "sha256": "94d45feae1b3a29500c8065212fe44f20323ca39c1ef76f6347d4de607d5b75a"
+    },
+    {
+      "failures": 18,
+      "file": "physical_preflight.json",
+      "passed": 2596,
+      "planned": 2614,
+      "sha256": "e574ab8b08c254cf0d0fe6535aaecbd0a52160f58f554d00a4bd5876c1196226"
+    },
+    {
+      "failures": 194,
+      "file": "physical_preflight.json",
+      "passed": 3385,
+      "planned": 3579,
+      "sha256": "69e44c5aeeb45c4793748229ad24ab0ea74ce38e44cbbd0f763f1789e6509c17"
+    },
+    {
+      "failures": 54,
+      "file": "physical_preflight.json",
+      "passed": 778,
+      "planned": 832,
+      "sha256": "b0a24b9f31ba7f88b233b0d84fedace9e6c10aa974a0066519e1d80976f7e721"
+    },
+    {
+      "failures": 16,
+      "file": "physical_preflight.json",
+      "passed": 95,
+      "planned": 111,
+      "sha256": "4aa365cedcc980a11e6b8a7236141c0a365c26348ed3d6e28d1ac6de44539b8b"
+    },
+    {
+      "failures": 5,
+      "file": "physical_preflight.json",
+      "passed": 24,
+      "planned": 29,
+      "sha256": "822d2ad16cc3214480397c8598032ee056124e594694aefe844f26fc731f44aa"
+    },
+    {
+      "failures": 1,
+      "file": "physical_preflight.json",
+      "passed": 7,
+      "planned": 8,
+      "sha256": "75cba00af2ac0ce302391fff5540f9002d3b37109005eb48ae0929f9d78160f6"
+    },
+    {
+      "failures": 0,
+      "file": "physical_preflight.json",
+      "passed": 1,
+      "planned": 1,
+      "sha256": "9dd70571c398a90616a8647c183eb0f04307985d4897282295ff31ec2b2f6979"
+    }
+  ]
+}

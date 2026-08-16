@@ -1,0 +1,27 @@
+{
+  "code_repository": "https://github.com/Zxy-MLlab/LIBERO-PRO",
+  "code_revision_inspected": "eafdb809426b13153aa1e4c42d6601844217dfec",
+  "dataset": "zhouxueyang/LIBERO-Pro",
+  "dataset_license": "CC-BY-4.0",
+  "dataset_revision": "c86fc3b8293185a6f373677018ff3e37f8391602",
+  "excluded_categories": {
+    "environment": "The pinned dataset revision does not contain complete environment BDDL/init artifacts.",
+    "runtime_object_move": "Already introduces a mid-execution change and would confound the MAX intervention-time comparison."
+  },
+  "included_categories": [
+    "semantic",
+    "object",
+    "position",
+    "task",
+    "visual_noise_glare",
+    "camera_view_angle",
+    "object_texture",
+    "view_occlusion",
+    "object_shape",
+    "initial_pose_position_angle"
+  ],
+  "pro_runtime_ref": "refs/heads/codex/pr1-bddl-robustness",
+  "pro_runtime_revision_tested": "2b910b5b5f53016bef9907632f6f840f1ce2229c",
+  "pro_runtime_status": "public source-locked dependency verified with git ls-remote",
+  "status": "release_gate_satisfied"
+}

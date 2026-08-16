@@ -1,0 +1,15 @@
+{
+  "scenario_id": "cosmos_libero_object_task0_camera_shift_chunk16",
+  "base_task_id": "libero_object/task_0",
+  "seed": 0,
+  "change_family": "OBS",
+  "severity": "medium",
+  "trigger": {"type": "fixed_step", "value": 16},
+  "change": {
+    "operation": "shift_camera",
+    "camera": "agentview",
+    "yaw_degrees": 12
+  },
+  "expected_response_mode": "continue",
+  "safety_constraints": ["no_forbidden_contact"]
+}

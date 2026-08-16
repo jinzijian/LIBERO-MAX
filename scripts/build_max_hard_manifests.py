@@ -1,0 +1,162 @@
+#!/usr/bin/env python3
+"""Build MAX-Hard Core and Full manifests from an audited Plus catalog."""
+
+import argparse
+import json
+import re
+from pathlib import Path
+
+from libero_max.hard import (
+    build_hard_manifests,
+    expand_rejected_by_physical_scene,
+    hard_manifest_summary,
+)
+
+
+CASE_ID_PATTERN = re.compile(
+    r"^(libero_(?:spatial|object|goal|10|90))-t(\d+)-"
+)
+
+
+def _rejected_configurations(paths, retry_change_types=()):
+    rejected = set()
+    retry_change_types = set(retry_change_types)
+    for path in paths:
+        report = json.loads(path.read_text(encoding="utf-8"))
+        for case in report.get("cases", []):
+            if case.get("passed"):
+                continue
+            # The first Plus audit exposed a NumPy-2 compatibility alias in
+            # upstream sensor-noise tasks. Those transitions were not tested,
+            # so do not treat them as an infeasible task/event configuration;
+            # the compatibility-fixed preflight must execute them again.
+            if any(
+                "np.float_" in error
+                for error in case.get("validation_errors", [])
+            ):
+                continue
+            match = CASE_ID_PATTERN.match(case.get("case_id", ""))
+            change_type = case.get("change_type")
+            if change_type in retry_change_types:
+                continue
+            if match is None or not isinstance(change_type, str):
+                raise ValueError(
+                    "cannot recover task/event key from failed case %r"
+                    % case.get("case_id")
+                )
+            rejected.add((match.group(1), int(match.group(2)), change_type))
+    return rejected
+
+
+def _write(path: Path, payload):
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(
+        json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8"
+    )
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser()
+    parser.add_argument("catalog", type=Path)
+    parser.add_argument("--core", type=Path, required=True)
+    parser.add_argument("--full", type=Path, required=True)
+    parser.add_argument("--summary", type=Path, required=True)
+    parser.add_argument(
+        "--frozen-core",
+        type=Path,
+        help="preserve an already preflighted Core while repairing Full",
+    )
+    parser.add_argument(
+        "--smoke",
+        type=Path,
+        help="optional eight-case manifest containing one case per event",
+    )
+    parser.add_argument(
+        "--retry-change-type",
+        action="append",
+        default=[],
+        help="ignore earlier failures for an event whose placement rule changed",
+    )
+    parser.add_argument(
+        "--reject-preflight",
+        type=Path,
+        action="append",
+        default=[],
+        help="exclude failed task/event configurations from a preflight report",
+    )
+    parser.add_argument(
+        "--force-reject-preflight",
+        type=Path,
+        action="append",
+        default=[],
+        help=(
+            "exclude failures from a preflight report even when its event is "
+            "listed by --retry-change-type"
+        ),
+    )
+    parser.add_argument(
+        "--expand-rejection-change-type",
+        action="append",
+        default=[],
+        help=(
+            "propagate rejected task/event configurations across Plus variants "
+            "with an identical physical scene signature"
+        ),
+    )
+    args = parser.parse_args()
+    catalog = json.loads(args.catalog.read_text(encoding="utf-8"))
+    rejected = _rejected_configurations(
+        args.reject_preflight, args.retry_change_type
+    )
+    rejected.update(_rejected_configurations(args.force_reject_preflight))
+    raw_rejected_count = len(rejected)
+    rejected = expand_rejected_by_physical_scene(
+        catalog["tasks"], rejected, args.expand_rejection_change_type
+    )
+    frozen_core = (
+        json.loads(args.frozen_core.read_text(encoding="utf-8"))
+        if args.frozen_core is not None
+        else None
+    )
+    core, full = build_hard_manifests(catalog, rejected, frozen_core=frozen_core)
+    summary = {
+        "core": hard_manifest_summary(core),
+        "full": hard_manifest_summary(full),
+        "core_is_exact_full_subset": {
+            case["case_id"] for case in core["cases"]
+        }.issubset({case["case_id"] for case in full["cases"]}),
+        "rejected_task_event_configurations": len(rejected),
+        "directly_rejected_task_event_configurations": raw_rejected_count,
+    }
+    _write(args.core, core)
+    _write(args.full, full)
+    _write(args.summary, summary)
+    if args.smoke is not None:
+        selected = {}
+        suite_priority = {
+            "libero_spatial": 0,
+            "libero_object": 1,
+            "libero_10": 2,
+            "libero_goal": 3,
+        }
+        smoke_candidates = sorted(
+            core["cases"],
+            key=lambda case: (
+                suite_priority.get(case["task_suite_name"], 99),
+                case.get("substrate_difficulty") or 99,
+                case["task_index"],
+            ),
+        )
+        for case in smoke_candidates:
+            selected.setdefault(case["scenario"]["change_type"], case)
+        smoke = dict(core)
+        smoke["benchmark_id"] = "libero-max-hard-smoke"
+        smoke["protocol"] = dict(core["protocol"], profile="smoke")
+        smoke["cases"] = [selected[event] for event in sorted(selected)]
+        _write(args.smoke, smoke)
+    print(json.dumps(summary, indent=2, sort_keys=True))
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

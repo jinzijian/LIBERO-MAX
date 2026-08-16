@@ -1,0 +1,104 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://libero-max.org/schemas/scenario.schema.json",
+  "title": "LIBERO-MAX Scenario",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "scenario_id",
+    "base_task_id",
+    "seed",
+    "change_family",
+    "severity",
+    "trigger",
+    "change",
+    "expected_response_mode",
+    "safety_constraints"
+  ],
+  "properties": {
+    "scenario_id": {"type": "string", "minLength": 1},
+    "base_task_id": {"type": "string", "minLength": 1},
+    "seed": {"type": "integer", "minimum": 0},
+    "change_family": {
+      "enum": ["OBS", "GEO", "CLUTTER", "OBSTACLE", "OBS-NEW", "INTENT", "FEAS"]
+    },
+    "change_type": {
+      "enum": [
+        "illumination_switch",
+        "camera_shift",
+        "visual_theme_switch",
+        "sensor_noise_onset",
+        "target_relocation",
+        "receptacle_relocation",
+        "distractor_burst",
+        "obstacle_insertion",
+        "target_removal",
+        "receptacle_removal",
+        "instruction_target_update",
+        "instruction_receptacle_update",
+        "task_cancel"
+      ]
+    },
+    "severity": {"enum": ["low", "medium", "high"]},
+    "trigger": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "value"],
+      "properties": {
+        "type": {
+          "enum": [
+            "after_grasp",
+            "before_grasp",
+            "before_place",
+            "after_subgoal",
+            "on_region_entry",
+            "on_proximity",
+            "progress_fraction",
+            "fixed_step"
+          ]
+        },
+        "value": {},
+        "distance_m": {"type": "number", "exclusiveMinimum": 0},
+        "target_entity": {"type": "string", "minLength": 1}
+      }
+    },
+    "change": {
+      "type": "object",
+      "required": ["operation"],
+      "properties": {"operation": {"type": "string", "minLength": 1}}
+    },
+    "setup": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["operation"],
+        "properties": {"operation": {"type": "string", "minLength": 1}}
+      }
+    },
+    "randomization": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["sampler", "draw_id", "seed"],
+      "properties": {
+        "sampler": {"type": "string", "minLength": 1},
+        "draw_id": {"type": "integer", "minimum": 0},
+        "seed": {"type": "integer", "minimum": 0}
+      }
+    },
+    "expected_response_mode": {
+      "enum": [
+        "continue",
+        "replan",
+        "follow_update",
+        "clarify",
+        "stop",
+        "report_infeasible"
+      ]
+    },
+    "safety_constraints": {
+      "type": "array",
+      "items": {"type": "string", "minLength": 1},
+      "uniqueItems": true
+    }
+  }
+}
