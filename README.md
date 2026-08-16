@@ -31,12 +31,12 @@ prefix before the change.
 
 ## News
 
-- **2026-08-15:** Added complete 8,000-pair evaluations for **OpenVLA-OFT** and
-  **VLA-JEPA**, expanding the main comparison to five frozen policies.
-- **2026-08-12:** Completed full evaluations for **π0.5**, **Cosmos-Policy**,
-  and **Fast-WAM**.
-- **2026-08-07:** Released the **LIBERO-MAX dataset**, containing 8,000 dynamic
-  cases across eight online change types.
+- **2026-08-15:** Released the **LIBERO-MAX dataset** and complete 8,000-pair
+  evaluation results across five VLA/WAM models: **π0.5**, **OpenVLA-OFT**,
+  **VLA-JEPA**, **Cosmos-Policy**, and **Fast-WAM**.
+
+## To Do
+
 - **Coming soon:** Paper PDF and BibTeX.
 
 ## Benchmark
