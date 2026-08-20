@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-PROJECT_DIR="${PROJECT_DIR:-/vepfs/zijian/LIBERO-MAX}"
-DEPS_DIR="${DEPS_DIR:-/vepfs/zijian/alter-wam-deps}"
+PROJECT_DIR="${PROJECT_DIR:-$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)}"
+DEPS_DIR="${DEPS_DIR:-$PROJECT_DIR/.deps}"
 PYTHON="${PYTHON:-$DEPS_DIR/cosmos-policy/.venv/bin/python}"
 BUILD_ROOT="${BUILD_ROOT:-$PROJECT_DIR/artifacts/libero_max_v1_release_build}"
 RELEASE_DIR="${RELEASE_DIR:-$PROJECT_DIR/benchmark/v1}"

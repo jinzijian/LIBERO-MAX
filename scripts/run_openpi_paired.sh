@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-PROJECT_DIR="${PROJECT_DIR:-/vepfs/zijian/LIBERO-MAX}"
-COSMOS_DEPS="${COSMOS_DEPS:-/vepfs/zijian/alter-wam-deps}"
+PROJECT_DIR="${PROJECT_DIR:-$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)}"
+COSMOS_DEPS="${COSMOS_DEPS:-$PROJECT_DIR/.deps}"
 OPENPI_DIR="${OPENPI_DIR:-$COSMOS_DEPS/openpi}"
 OPENPI_CLIENT_OVERLAY="${OPENPI_CLIENT_OVERLAY:-$COSMOS_DEPS/openpi-client-overlay}"
 CLIENT_PYTHON="${CLIENT_PYTHON:-$COSMOS_DEPS/cosmos-policy/.venv/bin/python}"

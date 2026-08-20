@@ -6,8 +6,8 @@ set -euo pipefail
 # before the frozen 800-case run. The main queue consumes the completion
 # markers and resumes partial roots if this process is interrupted.
 
-PROJECT_DIR="${PROJECT_DIR:-/vepfs/zijian/LIBERO-MAX}"
-DEPS_DIR="${DEPS_DIR:-/vepfs/zijian/alter-wam-deps}"
+PROJECT_DIR="${PROJECT_DIR:-$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)}"
+DEPS_DIR="${DEPS_DIR:-$PROJECT_DIR/.deps}"
 PYTHON="${PYTHON:-$DEPS_DIR/cosmos-policy/.venv/bin/python}"
 GPUS="${GPUS:-4,5,6,7}"
 SMOKE_GPU="${SMOKE_GPU:-${GPUS%%,*}}"

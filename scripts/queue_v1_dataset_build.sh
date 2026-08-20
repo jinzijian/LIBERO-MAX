@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-PROJECT_DIR="${PROJECT_DIR:-/vepfs/zijian/LIBERO-MAX}"
+PROJECT_DIR="${PROJECT_DIR:-$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)}"
 POLL_SECONDS="${POLL_SECONDS:-30}"
 IDLE_POLLS="${IDLE_POLLS:-10}"
 MAX_GPU_MEMORY_MIB="${MAX_GPU_MEMORY_MIB:-1000}"

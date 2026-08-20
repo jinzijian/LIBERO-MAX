@@ -5,8 +5,8 @@ set -euo pipefail
 # 800-case comparison remains a reusable frozen subset; it is composed with
 # an outcome-independent 1,600-case PRO complement rather than rerun.
 
-PROJECT_DIR="${PROJECT_DIR:-/vepfs/zijian/LIBERO-MAX}"
-DEPS_DIR="${DEPS_DIR:-/vepfs/zijian/alter-wam-deps}"
+PROJECT_DIR="${PROJECT_DIR:-$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)}"
+DEPS_DIR="${DEPS_DIR:-$PROJECT_DIR/.deps}"
 PYTHON="${PYTHON:-$DEPS_DIR/cosmos-policy/.venv/bin/python}"
 FINAL_ROOT="${FINAL_ROOT:-$PROJECT_DIR/artifacts/max8000/paper_final}"
 GPUS="${GPUS:-0,1,2,3}"

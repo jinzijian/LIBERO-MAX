@@ -1,8 +1,9 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-PROJECT_DIR="${PROJECT_DIR:-/vepfs/zijian/LIBERO-MAX}"
-PYTHON="${PYTHON:-/vepfs/zijian/alter-wam-deps/cosmos-policy/.venv/bin/python}"
+PROJECT_DIR="${PROJECT_DIR:-$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)}"
+DEPS_DIR="${DEPS_DIR:-$PROJECT_DIR/.deps}"
+PYTHON="${PYTHON:-$DEPS_DIR/cosmos-policy/.venv/bin/python}"
 MANIFEST="${MANIFEST:-$PROJECT_DIR/benchmark/max5600/libero_max_5600.json}"
 COSMOS_DELTA="${COSMOS_DELTA:-$PROJECT_DIR/artifacts/max5600/cosmos_policy_delta}"
 COSMOS_CORE="${COSMOS_CORE:-$PROJECT_DIR/artifacts/max_hard/cosmos_core_final}"

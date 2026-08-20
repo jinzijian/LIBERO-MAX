@@ -1,8 +1,9 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-PROJECT_DIR="${PROJECT_DIR:-/vepfs/zijian/LIBERO-MAX}"
-COSMOS_PYTHON="${COSMOS_PYTHON:-/vepfs/zijian/alter-wam-deps/cosmos-policy/.venv/bin/python}"
+PROJECT_DIR="${PROJECT_DIR:-$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)}"
+DEPS_DIR="${DEPS_DIR:-$PROJECT_DIR/.deps}"
+COSMOS_PYTHON="${COSMOS_PYTHON:-$DEPS_DIR/cosmos-policy/.venv/bin/python}"
 MANIFEST="${MANIFEST:-$PROJECT_DIR/examples/manifests/cosmos_physical_pilot_v0.1.json}"
 OUTPUT_ROOT="${OUTPUT_ROOT:-$PROJECT_DIR/artifacts/cosmos_physical_pilot_v0.1_seed195_20260803}"
 GPUS="${GPUS:-0,1,2,3,4}"

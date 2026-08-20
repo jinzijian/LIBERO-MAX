@@ -6,8 +6,8 @@ if (( $# != 2 )); then
   exit 2
 fi
 
-PROJECT_DIR="${PROJECT_DIR:-/vepfs/zijian/LIBERO-MAX}"
-DEPS_DIR="${DEPS_DIR:-/vepfs/zijian/alter-wam-deps}"
+PROJECT_DIR="${PROJECT_DIR:-$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)}"
+DEPS_DIR="${DEPS_DIR:-$PROJECT_DIR/.deps}"
 OPENPI_DIR="${OPENPI_DIR:-$DEPS_DIR/openpi}"
 OPENPI_PYTHON="${OPENPI_PYTHON:-$OPENPI_DIR/.venv/bin/python}"
 OPENPI_FALLBACK_PYTHON="${OPENPI_FALLBACK_PYTHON:-/tmp/openpi-venv/bin/python}"

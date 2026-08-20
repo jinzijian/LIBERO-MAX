@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-DEPS_DIR="${DEPS_DIR:-/vepfs/zijian/alter-wam-deps}"
+PROJECT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+DEPS_DIR="${DEPS_DIR:-$PROJECT_DIR/.deps}"
 ASSET_ROOT="${FASTWAM_BASE_ASSETS:-$DEPS_DIR/model-assets/fastwam-base}"
 WAN22_REVISION="921dbaf3f1674a56f47e83fb80a34bac8a8f203e"
 TOKENIZER_REVISION="37ec512624d61f7aa208f7ea8140a131f93afc9a"

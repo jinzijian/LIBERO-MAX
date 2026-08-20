@@ -2,7 +2,7 @@
 
 The tests are part of the benchmark release, not generated rollout data. They
 protect the frozen dataset and the evaluation contract from accidental changes.
-The suite currently contains 203 automated checks in five groups.
+The suite contains more than 200 automated checks in five groups.
 
 | Group | Representative files | What it protects | Keep in a public release? |
 | --- | --- | --- | --- |

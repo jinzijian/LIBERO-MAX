@@ -55,25 +55,49 @@ Subsequent calls return no event. Every successful event records:
 - backend-reported before/after state;
 - expected response mode.
 
-## Released evaluation adapters
+## Model adapter contract
 
-All five reported checkpoints use the same frozen manifest and paired replay
-contract. Model repositories and weights remain external and are supplied as
-explicit launcher arguments.
+A shard adapter is a Python entry point with this common interface:
+
+```text
+runner.py MANIFEST --output-root ROOT --shard-index I --num-shards N --resume [model arguments]
+```
+
+It must load cases with `cases[I::N]`, keep one policy instance resident, write
+one terminal `DONE` or `FAILED` marker per case, and preserve Base actions
+exactly before the event. Model repositories and weights remain external and
+are supplied as explicit arguments.
+
+`scripts/run_dynamic_benchmark.py` is model-agnostic. It splits cases by task
+suite, uses all GPUs visible to the process unless `--gpus` is supplied, and
+dynamically assigns work units to avoid idle devices near the end of a run.
+The scheduler changes resource allocation only; it does not change event
+timing, policy cadence, actions, or scoring.
+
+## Reference evaluation adapters
+
+The public adapters below exercise the same frozen manifest and paired replay
+contract used for the reported evaluations.
 
 | Model | Family | Multi-GPU launcher |
 | --- | --- | --- |
 | pi0.5 | VLA | `scripts/run_openpi_persistent_benchmark.sh` |
 | OpenVLA-OFT | VLA | `scripts/run_openvla_oft_persistent_benchmark.py` |
+| X-VLA | VLA | `scripts/run_xvla_persistent_shard.py` |
 | VLA-JEPA | VLA + WM | `scripts/run_vlajepa_persistent_benchmark.py` |
 | Cosmos-Policy | WAM | `scripts/run_cosmos_persistent_benchmark.py` |
 | Fast-WAM | WAM | `scripts/run_fastwam_persistent_benchmark.py` |
 
-Each launcher records the checkpoint path, source revision, runtime versions,
-GPU assignment, and query interval. Worker output is written per logical shard
-and can be resumed without re-evaluating completed cases. A publishable run
-must cover all 8,000 case IDs, contain a terminal outcome for both arms, and
-pass the exact replay checks before aggregation.
+Worker output is written per logical shard and can be resumed without
+re-evaluating completed cases. A publishable run must cover all 8,000 case IDs,
+contain a terminal outcome for both arms, record the checkpoint and native
+query cadence, and pass the exact replay checks before aggregation.
+
+When an installed `libero` wheel shadows a pinned LIBERO-Plus or LIBERO-PRO
+source checkout, prepend `scripts/libero_source_overlay` to `PYTHONPATH` and set
+`LIBERO_SOURCE_PACKAGE_ROOT` to that checkout's outer `libero` directory. The
+overlay changes import resolution only. It does not patch the simulator,
+benchmark cases, or upstream source code.
 
 ## Current MuJoCo operations
 

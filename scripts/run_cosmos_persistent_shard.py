@@ -22,7 +22,11 @@ from libero_max.pro_runtime import wrap_case_env
 from summarize_cosmos_paired_smoke import summarize_pair
 
 
-DEFAULT_DEPS = Path("/vepfs/zijian/alter-wam-deps")
+DEFAULT_DEPS = Path(
+    os.environ.get(
+        "LIBERO_MAX_DEPS", Path(__file__).resolve().parents[1] / ".deps"
+    )
+)
 
 
 def _write_json(path: Path, payload: Dict[str, Any]) -> None:

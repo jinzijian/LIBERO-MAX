@@ -290,9 +290,21 @@ def main() -> int:
         action="store_true",
         help="treat traces without a passed EGL initialization guard as infrastructure gaps",
     )
+    parser.add_argument(
+        "--query-interval",
+        type=int,
+        help=(
+            "override protocol.query_interval while validating an immutable "
+            "benchmark manifest under a checkpoint's native serving cadence"
+        ),
+    )
     args = parser.parse_args()
     manifest_path = args.manifest or args.root / "manifest.json"
     manifest = load_manifest(manifest_path)
+    if args.query_interval is not None:
+        if args.query_interval < 1:
+            parser.error("--query-interval must be positive")
+        manifest["protocol"]["query_interval"] = args.query_interval
     output_dir = args.output_dir or args.root
     output_dir.mkdir(parents=True, exist_ok=True)
     case_roots = [args.root, *args.case_root]

@@ -6,8 +6,8 @@ if (( $# != 2 )); then
   exit 2
 fi
 
-PROJECT_DIR="${PROJECT_DIR:-/vepfs/zijian/LIBERO-MAX}"
-DEPS_DIR="${DEPS_DIR:-/vepfs/zijian/alter-wam-deps}"
+PROJECT_DIR="${PROJECT_DIR:-$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)}"
+DEPS_DIR="${DEPS_DIR:-$PROJECT_DIR/.deps}"
 FASTWAM_ROOT="${FASTWAM_ROOT:-$DEPS_DIR/FastWAM}"
 PYTHON="${PYTHON:-$FASTWAM_ROOT/.venv/bin/python}"
 ACTIVE_SITE_PACKAGES="$("$PYTHON" -c 'import site; print(site.getsitepackages()[0])')"

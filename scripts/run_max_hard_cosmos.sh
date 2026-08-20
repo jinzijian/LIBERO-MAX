@@ -6,8 +6,8 @@ if (( $# != 2 )); then
   exit 2
 fi
 
-PROJECT_DIR="${PROJECT_DIR:-/vepfs/zijian/LIBERO-MAX}"
-DEPS_DIR="${DEPS_DIR:-/vepfs/zijian/alter-wam-deps}"
+PROJECT_DIR="${PROJECT_DIR:-$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)}"
+DEPS_DIR="${DEPS_DIR:-$PROJECT_DIR/.deps}"
 PYTHON="${PYTHON:-$DEPS_DIR/cosmos-policy/.venv/bin/python}"
 LIBERO_IMPL_DIR="${LIBERO_IMPL_DIR:-$DEPS_DIR/LIBERO-plus}"
 LIBERO_OVERLAY="${LIBERO_OVERLAY:-$DEPS_DIR/libero-plus-python-overlay}"

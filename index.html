@@ -6,7 +6,7 @@
   <title>LIBERO-MAX | Dynamic Robustness for Robot Policies</title>
   <meta name="description" content="LIBERO-MAX evaluates whether robot policies adapt when the world changes during task execution.">
   <meta property="og:title" content="LIBERO-MAX: Do Robot Policies Adapt When the World Changes?">
-  <meta property="og:description" content="8,000 matched dynamic-change cases, eight event types, and five robot policies evaluated under changes during execution.">
+  <meta property="og:description" content="8,000 matched dynamic-change cases, eight event types, and ten robot policies evaluated under changes during execution.">
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://yunbeizhang.github.io/LIBERO-MAX/">
   <meta property="og:image" content="https://yunbeizhang.github.io/LIBERO-MAX/assets/og.png">
@@ -150,14 +150,23 @@ footer{padding:45px 0;border-top:1px solid var(--line)}.footer-grid{display:grid
 
     <section class="section results-section" id="results"><div class="shell">
       <div class="section-head"><span class="section-index">02</span><div><p class="section-kicker">main result</p><h2>Every policy loses ground.</h2></div><p class="section-note">Full 8,000-pair evaluation. Success rate is measured over all 16,000 scored rollouts per checkpoint.</p></div>
-      <div class="finding-band"><span class="finding-range">13.9–21.1</span><p><strong>percentage-point drop</strong><br>under changes during execution across all five evaluated policies.</p></div>
+      <div class="finding-band"><span class="finding-range">13.4–24.9</span><p><strong>percentage-point drop</strong><br>under changes during execution across all ten evaluated policies.</p></div>
       <div class="results-layout">
         <div class="table-wrap"><table><thead><tr><th>Family</th><th>Policy</th><th>Base</th><th>Dynamic</th><th>Gap</th></tr></thead><tbody>
-          <tr><td>VLA</td><td>π0.5</td><td>79.7</td><td>65.7</td><td>−13.9</td></tr><tr><td>VLA</td><td>OpenVLA-OFT</td><td>64.3</td><td>43.1</td><td>−21.1</td></tr><tr><td>VLA + WM</td><td>VLA-JEPA</td><td>73.5</td><td>54.3</td><td>−19.2</td></tr><tr><td>WAM</td><td>Cosmos-Policy</td><td>77.4</td><td>59.3</td><td>−18.2</td></tr><tr><td>WAM</td><td>Fast-WAM</td><td>42.0</td><td>24.0</td><td>−18.0</td></tr>
+          <tr><td>VLA</td><td>π0.5</td><td>79.7</td><td>65.7</td><td>−13.9</td></tr>
+          <tr><td>VLA</td><td>OpenVLA-OFT</td><td>64.3</td><td>43.1</td><td>−21.1</td></tr>
+          <tr><td>VLA</td><td>X-VLA</td><td>62.6</td><td>37.7</td><td>−24.9</td></tr>
+          <tr><td>VLA</td><td>Xiaomi-Robotics-0</td><td>70.3</td><td>52.0</td><td>−18.3</td></tr>
+          <tr><td>VLA</td><td>MolmoAct2</td><td><strong>80.3</strong></td><td><strong>66.9</strong></td><td><strong>−13.4</strong></td></tr>
+          <tr><td>VLA + WM</td><td>VLA-JEPA</td><td>73.5</td><td>54.3</td><td>−19.2</td></tr>
+          <tr><td>WAM</td><td>Cosmos-Policy</td><td>77.4</td><td>59.3</td><td>−18.2</td></tr>
+          <tr><td>WAM</td><td>Fast-WAM</td><td>42.0</td><td>24.0</td><td>−18.0</td></tr>
+          <tr><td>WAM</td><td>HiMem-WAM</td><td>73.0</td><td>57.7</td><td>−15.3</td></tr>
+          <tr><td>WAM</td><td>Light-WAM</td><td>54.8</td><td>37.3</td><td>−17.5</td></tr>
         </tbody></table></div>
         <p class="results-copy">High Base success does not guarantee adaptation after an online change. No architecture family dominates across all events, and each policy exposes a distinct failure profile.</p>
       </div>
-      <div class="figure-frame result-figure"><img src="assets/figures/main_results.png" alt="Base and Dynamic success rates across five robot policies" loading="lazy"></div>
+      <div class="figure-frame result-figure"><img src="assets/figures/main_results.png" alt="Base and Dynamic success rates across ten robot policies" loading="lazy"></div>
       <div class="analysis-block"><div><p class="section-kicker">where policies break</p><h3>Failure is structured by event type.</h3><p>Relocation, viewpoint change, and sensor corruption reveal shared weaknesses. Appearance robustness still does not predict recovery from geometry changes.</p></div><div class="figure-frame heatmap-frame"><img src="assets/figures/change_type_breakdown.png" alt="Success-rate loss by policy and online event type" loading="lazy"></div></div>
     </div></section>
 
@@ -171,7 +180,7 @@ footer{padding:45px 0;border-top:1px solid var(--line)}.footer-grid{display:grid
     </section>
 
     <section class="section reproduce-section" id="reproduce"><div class="shell reproduce-grid">
-      <div><span class="section-index">04</span><p class="section-kicker">open benchmark</p><h2>Validate first.<br>Evaluate next.</h2><p>The frozen manifest, source revisions, integrity checks, evaluation launchers, and 203 automated tests are released with the benchmark.</p><div class="hero-actions"><a class="button button-primary" href="https://github.com/yunbeizhang/LIBERO-MAX#quick-start" target="_blank" rel="noreferrer">Full instructions ↗</a><a class="button" href="https://github.com/yunbeizhang/LIBERO-MAX/tree/main/tests" target="_blank" rel="noreferrer">Test coverage ↗</a></div></div>
+      <div><span class="section-index">04</span><p class="section-kicker">open benchmark</p><h2>Validate first.<br>Evaluate next.</h2><p>The frozen manifest, source revisions, integrity checks, evaluation launchers, and more than 200 automated tests are released with the benchmark.</p><div class="hero-actions"><a class="button button-primary" href="https://github.com/yunbeizhang/LIBERO-MAX#quick-start" target="_blank" rel="noreferrer">Full instructions ↗</a><a class="button" href="https://github.com/yunbeizhang/LIBERO-MAX/tree/main/tests" target="_blank" rel="noreferrer">Test coverage ↗</a></div></div>
       <pre aria-label="LIBERO-MAX quick start"><code><span>$</span> git clone https://github.com/yunbeizhang/LIBERO-MAX.git
 <span>$</span> cd LIBERO-MAX
 <span>$</span> python3 -m venv .venv

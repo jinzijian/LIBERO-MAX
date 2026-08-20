@@ -7,7 +7,7 @@
 [![Paper](https://img.shields.io/badge/Paper-coming%20soon-6B7280?style=flat-square)](#citation)
 [![Dataset](https://img.shields.io/badge/Dataset-available-3B82F6?style=flat-square)](benchmark/max8000)
 [![Dynamic cases](https://img.shields.io/badge/Dynamic%20cases-8%2C000-14532D?style=flat-square)](#benchmark)
-[![Models](https://img.shields.io/badge/Evaluated%20models-5-C2410C?style=flat-square)](#main-results)
+[![Models](https://img.shields.io/badge/Evaluated%20models-10-C2410C?style=flat-square)](#main-results)
 [![Website](https://img.shields.io/badge/Website-project%20page-14532D?style=flat-square)](https://yunbeizhang.github.io/LIBERO-MAX/)
 [![CI](https://img.shields.io/github/actions/workflow/status/yunbeizhang/LIBERO-MAX/ci.yml?branch=main&label=tests&style=flat-square)](https://github.com/yunbeizhang/LIBERO-MAX/actions/workflows/ci.yml)
 
@@ -31,6 +31,8 @@ prefix before the change.
 
 ## News
 
+- **2026-08-20:** Expanded the complete 8,000-pair evaluation to **ten**
+  VLA/WAM checkpoints and released a model-agnostic dynamic GPU scheduler.
 - **2026-08-15:** Released the **LIBERO-MAX dataset** and complete 8,000-pair
   evaluation results across five VLA/WAM models: **π0.5**, **OpenVLA-OFT**,
   **VLA-JEPA**, **Cosmos-Policy**, and **Fast-WAM**.
@@ -101,31 +103,40 @@ event trigger remains an end-to-end failure.
 
 | Family | Model | Base SR ↑ | Dynamic SR ↑ | Gap |
 | --- | --- | ---: | ---: | ---: |
-| VLA | π0.5 | **79.7** | **65.7** | **−13.9** |
+| VLA | π0.5 | 79.7 | 65.7 | −13.9 |
 | VLA | OpenVLA-OFT | 64.3 | 43.1 | −21.1 |
+| VLA | X-VLA | 62.6 | 37.7 | −24.9 |
+| VLA | Xiaomi-Robotics-0 | 70.3 | 52.0 | −18.3 |
+| VLA | MolmoAct2 | **80.3** | **66.9** | **−13.4** |
 | VLA + WM | VLA-JEPA | 73.5 | 54.3 | −19.2 |
 | WAM | Cosmos-Policy | 77.4 | 59.3 | −18.2 |
 | WAM | Fast-WAM | 42.0 | 24.0 | −18.0 |
+| WAM | HiMem-WAM | 73.0 | 57.7 | −15.3 |
+| WAM | Light-WAM | 54.8 | 37.3 | −17.5 |
 
 <p align="center">
-  <img src="assets/figures/main_results.png" width="95%" alt="Base and Dynamic success rates across five robot policies">
+  <img src="assets/figures/main_results.png" width="95%" alt="Base and Dynamic success rates across ten robot policies">
 </p>
 
-All five policies lose **13.9 to 21.1 success-rate points** when the world
+All ten policies lose **13.4 to 24.9 success-rate points** when the world
 changes during execution. No family dominates across all events. Relocation,
-camera shift, and sensor corruption expose the largest shared weaknesses.
+camera shift, and sensor corruption expose the largest shared weaknesses. The
+compact source data for the table and plots is available in
+[`assets/figures/main_results.json`](assets/figures/main_results.json).
 
 <p align="center">
   <img src="assets/figures/change_type_breakdown.png" width="100%" alt="Success-rate loss by model and online change type">
 </p>
 
-The released evaluation adapters cover two VLAs, one VLA with a world model,
-and two WAMs:
+The repository focuses on the benchmark contract rather than redistributing
+model implementations or weights. These reference adapters demonstrate the
+common shard interface used in the reported evaluations:
 
 | Model | Family | Evaluation launcher |
 | --- | --- | --- |
 | π0.5 | VLA | [`run_openpi_persistent_benchmark.sh`](scripts/run_openpi_persistent_benchmark.sh) |
 | OpenVLA-OFT | VLA | [`run_openvla_oft_persistent_benchmark.py`](scripts/run_openvla_oft_persistent_benchmark.py) |
+| X-VLA | VLA | [`run_xvla_persistent_shard.py`](scripts/run_xvla_persistent_shard.py) |
 | VLA-JEPA | VLA + WM | [`run_vlajepa_persistent_benchmark.py`](scripts/run_vlajepa_persistent_benchmark.py) |
 | Cosmos-Policy | WAM | [`run_cosmos_persistent_benchmark.py`](scripts/run_cosmos_persistent_benchmark.py) |
 | Fast-WAM | WAM | [`run_fastwam_persistent_benchmark.py`](scripts/run_fastwam_persistent_benchmark.py) |
@@ -158,25 +169,29 @@ libero-max validate-manifest benchmark/max8000/libero_max_8000.json
 
 ## Reproducing an evaluation
 
-Model weights and upstream repositories are not redistributed here. Each
-launcher receives explicit source and checkpoint paths, records the runtime
-configuration, shards the manifest across GPUs, and supports resumable output.
-For example:
+Model weights and upstream repositories are not redistributed here. A model
+adapter consumes one manifest shard, writes terminal `DONE` or `FAILED`
+markers, and supports `--resume`. The generic scheduler uses every GPU visible
+through `CUDA_VISIBLE_DEVICES` by default and dynamically assigns suite shards
+as workers finish:
 
 ```bash
-python scripts/run_openvla_oft_persistent_benchmark.py \
+python scripts/run_dynamic_benchmark.py \
   benchmark/max8000/libero_max_8000.json \
-  --output-root artifacts/openvla-oft \
-  --gpus 0,1,2,3,4,5,6,7 \
-  --openvla-root /path/to/openvla-oft \
-  --checkpoint /path/to/libero-checkpoint \
-  --resume
+  --runner scripts/run_xvla_persistent_shard.py \
+  --output-root artifacts/xvla \
+  -- \
+  --lerobot-root /path/to/lerobot \
+  --checkpoint /path/to/xvla-libero-checkpoint \
+  --query-interval 30
 ```
 
-Replace the launcher with the model-specific entry point listed above. See the
-[`evaluation guide`](docs/RUNTIME_INTEGRATION.md) for simulator requirements,
-dependency isolation, checkpoint layout, paired replay checks, and aggregation.
-Generated rollouts belong under `artifacts/`, which is ignored by Git.
+Use `--gpus 0,2` to override automatic discovery. A new model can integrate by
+implementing the same shard CLI; the scheduler does not import or special-case
+the policy. See the [`evaluation guide`](docs/RUNTIME_INTEGRATION.md) for the
+adapter contract, simulator requirements, dependency isolation, paired replay
+checks, and aggregation. Generated rollouts belong under `artifacts/`, which
+is ignored by Git.
 
 ## Repository structure
 
@@ -184,7 +199,7 @@ Generated rollouts belong under `artifacts/`, which is ignored by Git.
 LIBERO-MAX/
 ├── benchmark/max8000/   # Frozen 8,000-case release and integrity metadata
 ├── src/libero_max/      # Dynamic interventions, runtime, schemas, aggregation
-├── scripts/             # Dataset builders and five model evaluation adapters
+├── scripts/             # Dataset builders, reference adapters, and GPU scheduler
 ├── assets/              # Benchmark figures and MuJoCo animations
 ├── docs/                # Protocol and runtime documentation
 ├── examples/            # Small manifests and paired-result examples

@@ -4,6 +4,6 @@
   "event_step": 31,
   "replayed_action_sequence_sha256": "0f8167bef74675b891629609bbae2640b20c6b59553e024c756bac38f80f4d86",
   "replayed_event_step": 31,
-  "source_run": "/vepfs/zijian/LIBERO-MAX/artifacts/max8000/paper_final/runs/cosmos_pro_2400",
+  "source_run": "results/max8000/runs/cosmos_pro_2400",
   "stride": 2
 }

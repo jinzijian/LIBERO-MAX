@@ -6,8 +6,8 @@ set -euo pipefail
 # rollout launcher exit nonzero. Only the full-denominator aggregator decides
 # whether a run is complete; infrastructure gaps are repaired separately.
 
-PROJECT_DIR="${PROJECT_DIR:-/vepfs/zijian/LIBERO-MAX}"
-DEPS_DIR="${DEPS_DIR:-/vepfs/zijian/alter-wam-deps}"
+PROJECT_DIR="${PROJECT_DIR:-$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)}"
+DEPS_DIR="${DEPS_DIR:-$PROJECT_DIR/.deps}"
 PYTHON="${PYTHON:-$DEPS_DIR/cosmos-policy/.venv/bin/python}"
 GPUS="${GPUS:-0,1,2,3}"
 FINAL_ROOT="${FINAL_ROOT:-$PROJECT_DIR/artifacts/max8000/paper_final}"
