@@ -7,6 +7,7 @@
 [![Paper](https://img.shields.io/badge/Paper-coming%20soon-6B7280?style=flat-square)](#citation)
 [![Dataset](https://img.shields.io/badge/Dataset-available-3B82F6?style=flat-square)](benchmark/max8000)
 [![Dynamic cases](https://img.shields.io/badge/Dynamic%20cases-8%2C000-14532D?style=flat-square)](#benchmark)
+[![Lite split](https://img.shields.io/badge/Lite-800%20pairs-2563EB?style=flat-square)](benchmark/lite800)
 [![Models](https://img.shields.io/badge/Evaluated%20models-10-C2410C?style=flat-square)](#main-results)
 [![Website](https://img.shields.io/badge/Website-project%20page-14532D?style=flat-square)](https://yunbeizhang.github.io/LIBERO-MAX/)
 [![CI](https://img.shields.io/github/actions/workflow/status/yunbeizhang/LIBERO-MAX/ci.yml?branch=main&label=tests&style=flat-square)](https://github.com/yunbeizhang/LIBERO-MAX/actions/workflows/ci.yml)
@@ -48,6 +49,17 @@ Dynamic episode receives one matched Base control, producing **8,000 pairs and
 16,000 scored rollouts per checkpoint**. The robot begins from the same state
 and executes the same action prefix in both arms. Only the Dynamic arm applies
 one feasible change during execution.
+
+We also release **LIBERO-MAX Lite**, a fixed 800-pair subset for rapid model
+integration, ablation, and early comparison. Lite keeps 100 cases per event and
+the Full track's 70:30 LIBERO-Plus to LIBERO-PRO composition. It requires 1,600
+scored rollouts per checkpoint, one tenth of Full 8000. Full remains the
+primary reporting track.
+
+| Evaluation track | Matched pairs | Scored rollouts | Use |
+| --- | ---: | ---: | --- |
+| **Lite 800** | **800** | **1,600** | Integration, ablation, early comparison |
+| **Full 8000** | **8,000** | **16,000** | Primary benchmark reporting |
 
 | Source benchmark | Dynamic cases | Contribution |
 | --- | ---: | --- |
@@ -157,6 +169,9 @@ pip install -e .
 # Validate the frozen release and its checksums.
 make validate-max8000
 
+# Validate the fixed one tenth scale track.
+make validate-lite800
+
 # Run the repository test suite.
 make test
 ```
@@ -165,6 +180,7 @@ Inspect the complete release through the command line:
 
 ```bash
 libero-max validate-manifest benchmark/max8000/libero_max_8000.json
+libero-max validate-manifest benchmark/lite800/libero_max_lite_800.json
 ```
 
 ## Reproducing an evaluation
@@ -198,6 +214,7 @@ is ignored by Git.
 ```text
 LIBERO-MAX/
 ├── benchmark/max8000/   # Frozen 8,000-case release and integrity metadata
+├── benchmark/lite800/   # Fixed 800-pair rapid-evaluation track
 ├── src/libero_max/      # Dynamic interventions, runtime, schemas, aggregation
 ├── scripts/             # Dataset builders, reference adapters, and GPU scheduler
 ├── assets/              # Benchmark figures and MuJoCo animations
