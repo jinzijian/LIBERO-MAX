@@ -1,0 +1,28 @@
+{
+  "benchmark_id": "libero-max-lite",
+  "benchmark_version": "3.0.0",
+  "case_index_sha256": "2c08b62ce9f98ea046f24ef095d97a57c7a412c4531db3647e80e12eba4dd7a7",
+  "event_counts": {
+    "camera_shift": 50,
+    "distractor_burst": 50,
+    "illumination_switch": 50,
+    "obstacle_insertion": 50,
+    "receptacle_relocation": 50,
+    "sensor_noise_onset": 50,
+    "target_relocation": 50,
+    "visual_theme_switch": 50
+  },
+  "lite_selection_seed": 20260831,
+  "manifest_sha256": "a27250e163aef96f5188b8a93d73f970284720ead0002e4235854f1d6f2e1588",
+  "matched_pairs": 400,
+  "max_candidate_seed": 20260830,
+  "rollouts_per_checkpoint": 800,
+  "selection_method": "outcome-blind stratified half-sample of the frozen 800-case cadence pool, with 35 Plus and 15 PRO cases per event",
+  "source_counts": {
+    "plus": 280,
+    "pro": 120
+  },
+  "source_manifest": "../max8000/libero_max_8000.json",
+  "source_manifest_sha256": "d26c38517b08709645a44b7fcf572f47eca056f7d01f1a7f5555dacf159dd1ed",
+  "status": "released"
+}

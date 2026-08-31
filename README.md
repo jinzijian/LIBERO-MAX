@@ -7,7 +7,7 @@
 [![Paper](https://img.shields.io/badge/Paper-coming%20soon-6B7280?style=flat-square)](#citation)
 [![Dataset](https://img.shields.io/badge/Dataset-available-3B82F6?style=flat-square)](benchmark/max8000)
 [![Dynamic cases](https://img.shields.io/badge/Dynamic%20cases-8%2C000-14532D?style=flat-square)](#benchmark)
-[![Lite split](https://img.shields.io/badge/Lite-800%20pairs-2563EB?style=flat-square)](benchmark/lite800)
+[![Lite split](https://img.shields.io/badge/Track-Lite-2563EB?style=flat-square)](benchmark/lite)
 [![Models](https://img.shields.io/badge/Evaluated%20models-10-C2410C?style=flat-square)](#main-results)
 [![Website](https://img.shields.io/badge/Website-project%20page-14532D?style=flat-square)](https://yunbeizhang.github.io/LIBERO-MAX/)
 [![CI](https://img.shields.io/github/actions/workflow/status/yunbeizhang/LIBERO-MAX/ci.yml?branch=main&label=tests&style=flat-square)](https://github.com/yunbeizhang/LIBERO-MAX/actions/workflows/ci.yml)
@@ -50,16 +50,17 @@ Dynamic episode receives one matched Base control, producing **8,000 pairs and
 and executes the same action prefix in both arms. Only the Dynamic arm applies
 one feasible change during execution.
 
-We also release **LIBERO-MAX Lite**, a fixed 800-pair subset for rapid model
-integration, ablation, and early comparison. Lite keeps 100 cases per event and
-the Full track's 70:30 LIBERO-Plus to LIBERO-PRO composition. It requires 1,600
-scored rollouts per checkpoint, one tenth of Full 8000. Full remains the
-primary reporting track.
+We release two evaluation tracks. **LIBERO-MAX**, shortened to **Max**, is the
+complete benchmark and remains the primary reporting track. **LIBERO-MAX
+Lite**, shortened to **Lite**, is a fixed 400-pair subset for rapid model
+integration, ablation, and early comparison. Lite keeps 50 cases per event and
+the 70:30 LIBERO-Plus to LIBERO-PRO composition of Max. It requires 800 scored
+rollouts per checkpoint, five percent of the Max evaluation cost.
 
 | Evaluation track | Matched pairs | Scored rollouts | Use |
 | --- | ---: | ---: | --- |
-| **Lite 800** | **800** | **1,600** | Integration, ablation, early comparison |
-| **Full 8000** | **8,000** | **16,000** | Primary benchmark reporting |
+| **Max** | **8,000** | **16,000** | Primary benchmark reporting |
+| **Lite** | **400** | **800** | Integration, ablation, early comparison |
 
 | Source benchmark | Dynamic cases | Contribution |
 | --- | ---: | --- |
@@ -81,7 +82,7 @@ The dataset is balanced with 1,000 cases for each event type:
 LIBERO-MAX is an extension layer rather than a fork of one upstream codebase.
 The dynamic event runtime, paired replay protocol, frozen manifests,
 aggregation, and validation in `src/libero_max` were developed for this
-project. Full evaluation loads the upstream benchmarks as external runtime
+project. Max evaluation loads the upstream benchmarks as external runtime
 dependencies:
 
 | Foundation | Contribution | Paper | Code |
@@ -169,8 +170,8 @@ pip install -e .
 # Validate the frozen release and its checksums.
 make validate-max8000
 
-# Validate the fixed one tenth scale track.
-make validate-lite800
+# Validate the fixed lightweight track.
+make validate-lite
 
 # Run the repository test suite.
 make test
@@ -180,7 +181,7 @@ Inspect the complete release through the command line:
 
 ```bash
 libero-max validate-manifest benchmark/max8000/libero_max_8000.json
-libero-max validate-manifest benchmark/lite800/libero_max_lite_800.json
+libero-max validate-manifest benchmark/lite/libero_max_lite.json
 ```
 
 ## Reproducing an evaluation
@@ -214,7 +215,7 @@ is ignored by Git.
 ```text
 LIBERO-MAX/
 ├── benchmark/max8000/   # Frozen 8,000-case release and integrity metadata
-├── benchmark/lite800/   # Fixed 800-pair rapid-evaluation track
+├── benchmark/lite/      # Fixed 400-pair rapid-evaluation track
 ├── src/libero_max/      # Dynamic interventions, runtime, schemas, aggregation
 ├── scripts/             # Dataset builders, reference adapters, and GPU scheduler
 ├── assets/              # Benchmark figures and MuJoCo animations

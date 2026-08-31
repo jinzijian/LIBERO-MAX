@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Build the deterministic LIBERO-MAX Lite 800 release from Full 8000."""
+"""Build the deterministic LIBERO-MAX Lite release from Max."""
 
 import argparse
 import csv
@@ -10,9 +10,12 @@ from collections import Counter
 from pathlib import Path
 
 
-DEFAULT_SEED = 20260830
-PLUS_PER_EVENT = 70
-PRO_PER_EVENT = 30
+MAX_SEED = 20260830
+LITE_SEED = 20260831
+MAX_CANDIDATE_PLUS_PER_EVENT = 70
+MAX_CANDIDATE_PRO_PER_EVENT = 30
+LITE_PLUS_PER_EVENT = 35
+LITE_PRO_PER_EVENT = 15
 
 
 def _sha256(path: Path) -> str:
@@ -27,17 +30,25 @@ def _write_json(path: Path, payload: dict) -> None:
     path.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n")
 
 
-def build_split(source_path: Path, output_dir: Path, seed: int) -> None:
+def build_split(
+    source_path: Path,
+    output_dir: Path,
+    max_seed: int,
+    lite_seed: int,
+) -> None:
     source = json.loads(source_path.read_text())
     cases = source["cases"]
     events = sorted({case["scenario"]["change_type"] for case in cases})
     if len(events) != 8:
-        raise ValueError("expected eight event types in the Full 8000 manifest")
+        raise ValueError("expected eight event types in the Max manifest")
 
-    rng = random.Random(seed)
-    selected = []
+    max_rng = random.Random(max_seed)
+    candidate = []
     for event in events:
-        for track, quota in (("plus", PLUS_PER_EVENT), ("pro", PRO_PER_EVENT)):
+        for track, quota in (
+            ("plus", MAX_CANDIDATE_PLUS_PER_EVENT),
+            ("pro", MAX_CANDIDATE_PRO_PER_EVENT),
+        ):
             pool = sorted(
                 (
                     case
@@ -51,7 +62,25 @@ def build_split(source_path: Path, output_dir: Path, seed: int) -> None:
                 raise ValueError(
                     "insufficient %s cases for %s: %d" % (track, event, len(pool))
                 )
-            selected.extend(rng.sample(pool, quota))
+            candidate.extend(max_rng.sample(pool, quota))
+
+    lite_rng = random.Random(lite_seed)
+    selected = []
+    for event in events:
+        for track, quota in (
+            ("plus", LITE_PLUS_PER_EVENT),
+            ("pro", LITE_PRO_PER_EVENT),
+        ):
+            pool = sorted(
+                (
+                    case
+                    for case in candidate
+                    if case["scenario"]["change_type"] == event
+                    and _source_track(case) == track
+                ),
+                key=lambda case: case["case_id"],
+            )
+            selected.extend(lite_rng.sample(pool, quota))
 
     selected.sort(
         key=lambda case: (
@@ -60,11 +89,11 @@ def build_split(source_path: Path, output_dir: Path, seed: int) -> None:
             case["case_id"],
         )
     )
-    if len(selected) != 800 or len({case["case_id"] for case in selected}) != 800:
-        raise ValueError("Lite split must contain 800 unique case IDs")
+    if len(selected) != 400 or len({case["case_id"] for case in selected}) != 400:
+        raise ValueError("Lite split must contain 400 unique case IDs")
 
     output_dir.mkdir(parents=True, exist_ok=True)
-    manifest_path = output_dir / "libero_max_lite_800.json"
+    manifest_path = output_dir / "libero_max_lite.json"
     case_index_path = output_dir / "case_index.csv"
     summary_path = output_dir / "selection_summary.json"
 
@@ -73,12 +102,12 @@ def build_split(source_path: Path, output_dir: Path, seed: int) -> None:
         {
             "profile": "lite",
             "selection_contract": (
-                "100 cases per event: 70 LIBERO-Plus + 30 LIBERO-PRO"
+                "50 cases per event: 35 LIBERO-Plus + 15 LIBERO-PRO"
             ),
         }
     )
     manifest = {
-        "benchmark_id": "libero-max-lite-800",
+        "benchmark_id": "libero-max-lite",
         "benchmark_version": source["benchmark_version"],
         "protocol": protocol,
         "cases": selected,
@@ -116,14 +145,16 @@ def build_split(source_path: Path, output_dir: Path, seed: int) -> None:
     )
     source_counts = Counter(_source_track(case) for case in selected)
     summary = {
-        "benchmark_id": "libero-max-lite-800",
+        "benchmark_id": "libero-max-lite",
         "benchmark_version": source["benchmark_version"],
         "status": "released",
-        "matched_pairs": 800,
-        "rollouts_per_checkpoint": 1600,
-        "selection_seed": seed,
+        "matched_pairs": 400,
+        "rollouts_per_checkpoint": 800,
+        "max_candidate_seed": max_seed,
+        "lite_selection_seed": lite_seed,
         "selection_method": (
-            "stratified random sample with 70 Plus and 30 PRO cases per event"
+            "outcome-blind stratified half-sample of the frozen 800-case "
+            "cadence pool, with 35 Plus and 15 PRO cases per event"
         ),
         "source_manifest": "../max8000/libero_max_8000.json",
         "source_manifest_sha256": _sha256(source_path),
@@ -150,11 +181,12 @@ def main() -> None:
         default=Path("benchmark/max8000/libero_max_8000.json"),
     )
     parser.add_argument(
-        "--output-dir", type=Path, default=Path("benchmark/lite800")
+        "--output-dir", type=Path, default=Path("benchmark/lite")
     )
-    parser.add_argument("--seed", type=int, default=DEFAULT_SEED)
+    parser.add_argument("--max-seed", type=int, default=MAX_SEED)
+    parser.add_argument("--lite-seed", type=int, default=LITE_SEED)
     args = parser.parse_args()
-    build_split(args.source, args.output_dir, args.seed)
+    build_split(args.source, args.output_dir, args.max_seed, args.lite_seed)
 
 
 if __name__ == "__main__":
