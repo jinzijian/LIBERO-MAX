@@ -1,28 +1,56 @@
 case_id,event,source_track,task_suite,substrate_category,substrate_difficulty
+libero_10-t0009-camera_shift-d0-p195,camera_shift,plus,libero_10,Background Textures,4
+libero_10-t0125-camera_shift-d0-p195,camera_shift,plus,libero_10,Background Textures,5
+libero_10-t0364-camera_shift-d0-p195,camera_shift,plus,libero_10,Robot Initial States,2
 libero_10-t0387-camera_shift-d1-p195,camera_shift,plus,libero_10,Robot Initial States,2
+libero_10-t0421-camera_shift-d1-p195,camera_shift,plus,libero_10,Robot Initial States,3
 libero_10-t0799-camera_shift-d1-p195,camera_shift,plus,libero_10,Camera Viewpoints,3
+libero_10-t0956-camera_shift-d1-p195,camera_shift,plus,libero_10,Camera Viewpoints,4
+libero_10-t1167-camera_shift-d1-p195,camera_shift,plus,libero_10,Language Instructions,4
+libero_10-t1197-camera_shift-d1-p195,camera_shift,plus,libero_10,Language Instructions,4
 libero_10-t1816-camera_shift-d1-p195,camera_shift,plus,libero_10,Sensor Noise,1
 libero_10-t2256-camera_shift-d1-p195,camera_shift,plus,libero_10,Light Conditions,4
+libero_10-t2258-camera_shift-d1-p195,camera_shift,plus,libero_10,Light Conditions,4
+libero_10-t2288-camera_shift-d1-p195,camera_shift,plus,libero_10,Light Conditions,3
+libero_10-t2324-camera_shift-d1-p195,camera_shift,plus,libero_10,Light Conditions,4
 libero_10-t2428-camera_shift-d0-p195,camera_shift,plus,libero_10,Light Conditions,1
+libero_10-t2494-camera_shift-d0-p195,camera_shift,plus,libero_10,Light Conditions,5
 libero_goal-t0081-camera_shift-d0-p195,camera_shift,plus,libero_goal,Background Textures,3
 libero_goal-t0103-camera_shift-d0-p195,camera_shift,plus,libero_goal,Background Textures,2
+libero_goal-t0169-camera_shift-d1-p195,camera_shift,plus,libero_goal,Background Textures,5
+libero_goal-t0209-camera_shift-d1-p195,camera_shift,plus,libero_goal,Background Textures,4
 libero_goal-t0313-camera_shift-d1-p195,camera_shift,plus,libero_goal,Robot Initial States,5
+libero_goal-t0455-camera_shift-d0-p195,camera_shift,plus,libero_goal,Robot Initial States,1
+libero_goal-t0781-camera_shift-d1-p195,camera_shift,plus,libero_goal,Camera Viewpoints,2
 libero_goal-t0783-camera_shift-d0-p195,camera_shift,plus,libero_goal,Camera Viewpoints,3
 libero_goal-t0898-camera_shift-d0-p195,camera_shift,plus,libero_goal,Camera Viewpoints,4
 libero_goal-t1013-camera_shift-d0-p195,camera_shift,plus,libero_goal,Camera Viewpoints,2
 libero_goal-t1054-camera_shift-d1-p195,camera_shift,plus,libero_goal,Camera Viewpoints,3
+libero_goal-t1091-camera_shift-d1-p195,camera_shift,plus,libero_goal,Camera Viewpoints,3
+libero_goal-t1482-camera_shift-d0-p195,camera_shift,plus,libero_goal,Language Instructions,2
+libero_goal-t1499-camera_shift-d1-p195,camera_shift,plus,libero_goal,Language Instructions,5
+libero_goal-t1550-camera_shift-d1-p195,camera_shift,plus,libero_goal,Sensor Noise,1
+libero_goal-t1620-camera_shift-d0-p195,camera_shift,plus,libero_goal,Sensor Noise,3
 libero_goal-t1628-camera_shift-d0-p195,camera_shift,plus,libero_goal,Sensor Noise,5
+libero_goal-t1693-camera_shift-d0-p195,camera_shift,plus,libero_goal,Sensor Noise,5
+libero_goal-t1769-camera_shift-d0-p195,camera_shift,plus,libero_goal,Sensor Noise,1
 libero_goal-t1866-camera_shift-d1-p195,camera_shift,plus,libero_goal,Sensor Noise,1
 libero_goal-t1904-camera_shift-d0-p195,camera_shift,plus,libero_goal,Objects Layout,1
 libero_goal-t1910-camera_shift-d0-p195,camera_shift,plus,libero_goal,Objects Layout,1
+libero_goal-t2142-camera_shift-d0-p195,camera_shift,plus,libero_goal,Objects Layout,2
+libero_goal-t2379-camera_shift-d1-p195,camera_shift,plus,libero_goal,Light Conditions,5
 libero_goal-t2509-camera_shift-d0-p195,camera_shift,plus,libero_goal,Light Conditions,2
+libero_object-t0355-camera_shift-d1-p195,camera_shift,plus,libero_object,Robot Initial States,2
+libero_object-t1640-camera_shift-d1-p195,camera_shift,plus,libero_object,Sensor Noise,4
 libero_spatial-t0019-camera_shift-d1-p195,camera_shift,plus,libero_spatial,Background Textures,1
+libero_spatial-t0041-camera_shift-d1-p195,camera_shift,plus,libero_spatial,Background Textures,2
 libero_spatial-t0211-camera_shift-d1-p195,camera_shift,plus,libero_spatial,Background Textures,1
 libero_spatial-t0270-camera_shift-d1-p195,camera_shift,plus,libero_spatial,Robot Initial States,4
 libero_spatial-t0423-camera_shift-d0-p195,camera_shift,plus,libero_spatial,Robot Initial States,2
 libero_spatial-t0439-camera_shift-d0-p195,camera_shift,plus,libero_spatial,Robot Initial States,4
 libero_spatial-t0654-camera_shift-d0-p195,camera_shift,plus,libero_spatial,Camera Viewpoints,1
 libero_spatial-t0688-camera_shift-d0-p195,camera_shift,plus,libero_spatial,Camera Viewpoints,1
+libero_spatial-t0905-camera_shift-d0-p195,camera_shift,plus,libero_spatial,Camera Viewpoints,4
 libero_spatial-t0926-camera_shift-d0-p195,camera_shift,plus,libero_spatial,Camera Viewpoints,1
 libero_spatial-t0932-camera_shift-d1-p195,camera_shift,plus,libero_spatial,Camera Viewpoints,3
 libero_spatial-t0986-camera_shift-d0-p195,camera_shift,plus,libero_spatial,Language Instructions,2
@@ -31,264 +59,527 @@ libero_spatial-t1159-camera_shift-d1-p195,camera_shift,plus,libero_spatial,Langu
 libero_spatial-t1320-camera_shift-d1-p195,camera_shift,plus,libero_spatial,Language Instructions,1
 libero_spatial-t1456-camera_shift-d1-p195,camera_shift,plus,libero_spatial,Sensor Noise,3
 libero_spatial-t1496-camera_shift-d0-p195,camera_shift,plus,libero_spatial,Sensor Noise,3
+libero_spatial-t1619-camera_shift-d1-p195,camera_shift,plus,libero_spatial,Sensor Noise,2
+libero_spatial-t1693-camera_shift-d1-p195,camera_shift,plus,libero_spatial,Sensor Noise,1
+libero_spatial-t1902-camera_shift-d0-p195,camera_shift,plus,libero_spatial,Objects Layout,2
+libero_spatial-t2055-camera_shift-d0-p195,camera_shift,plus,libero_spatial,Objects Layout,3
+libero_spatial-t2228-camera_shift-d1-p195,camera_shift,plus,libero_spatial,Light Conditions,3
 libero_spatial-t2250-camera_shift-d1-p195,camera_shift,plus,libero_spatial,Light Conditions,2
+libero_spatial-t2259-camera_shift-d0-p195,camera_shift,plus,libero_spatial,Light Conditions,2
 libero_spatial-t2266-camera_shift-d0-p195,camera_shift,plus,libero_spatial,Light Conditions,2
 libero_spatial-t2327-camera_shift-d0-p195,camera_shift,plus,libero_spatial,Light Conditions,4
+libero_spatial-t2368-camera_shift-d0-p195,camera_shift,plus,libero_spatial,Light Conditions,3
 pro-camera-view-angle-10-t07-i06-camera_shift-d0-p195,camera_shift,pro,libero_10,LIBERO-PRO/camera_view_angle,
+pro-camera-view-angle-goal-t08-i01-camera_shift-d0-p195,camera_shift,pro,libero_goal,LIBERO-PRO/camera_view_angle,
+pro-camera-view-angle-object-t00-i04-camera_shift-d0-p195,camera_shift,pro,libero_object,LIBERO-PRO/camera_view_angle,
 pro-camera-view-angle-object-t02-i02-camera_shift-d1-p195,camera_shift,pro,libero_object,LIBERO-PRO/camera_view_angle,
 pro-initial-pose-position-angle-10-t08-i07-camera_shift-d0-p195,camera_shift,pro,libero_10,LIBERO-PRO/initial_pose_position_angle,
+pro-initial-pose-position-angle-goal-t03-i00-camera_shift-d1-p195,camera_shift,pro,libero_goal,LIBERO-PRO/initial_pose_position_angle,
 pro-initial-pose-position-angle-spatial-t04-i03-camera_shift-d1-p195,camera_shift,pro,libero_spatial,LIBERO-PRO/initial_pose_position_angle,
 pro-object-goal-t01-i04-camera_shift-d1-p195,camera_shift,pro,libero_goal,LIBERO-PRO/object,
+pro-object-goal-t06-i00-camera_shift-d1-p195,camera_shift,pro,libero_goal,LIBERO-PRO/object,
 pro-object-object-t00-i00-camera_shift-d1-p195,camera_shift,pro,libero_object,LIBERO-PRO/object,
 pro-object-shape-spatial-t08-i00-camera_shift-d0-p195,camera_shift,pro,libero_spatial,LIBERO-PRO/object_shape,
+pro-object-shape-spatial-t09-i02-camera_shift-d0-p195,camera_shift,pro,libero_spatial,LIBERO-PRO/object_shape,
 pro-object-texture-10-t04-i03-camera_shift-d0-p195,camera_shift,pro,libero_10,LIBERO-PRO/object_texture,
+pro-object-texture-10-t05-i02-camera_shift-d0-p195,camera_shift,pro,libero_10,LIBERO-PRO/object_texture,
 pro-object-texture-spatial-t00-i05-camera_shift-d1-p195,camera_shift,pro,libero_spatial,LIBERO-PRO/object_texture,
+pro-object-texture-spatial-t04-i00-camera_shift-d0-p195,camera_shift,pro,libero_spatial,LIBERO-PRO/object_texture,
+pro-position-goal-t09-i07-camera_shift-d1-p195,camera_shift,pro,libero_goal,LIBERO-PRO/position,
+pro-position-spatial-t02-i02-camera_shift-d0-p195,camera_shift,pro,libero_spatial,LIBERO-PRO/position,
 pro-semantic-goal-t00-i02-camera_shift-d0-p195,camera_shift,pro,libero_goal,LIBERO-PRO/semantic,
 pro-semantic-goal-t04-i01-camera_shift-d1-p195,camera_shift,pro,libero_goal,LIBERO-PRO/semantic,
 pro-semantic-spatial-t04-i08-camera_shift-d0-p195,camera_shift,pro,libero_spatial,LIBERO-PRO/semantic,
+pro-view-occlusion-10-t02-i02-camera_shift-d0-p195,camera_shift,pro,libero_10,LIBERO-PRO/view_occlusion,
+pro-view-occlusion-object-t08-i07-camera_shift-d0-p195,camera_shift,pro,libero_object,LIBERO-PRO/view_occlusion,
+pro-visual-noise-glare-10-t00-i05-camera_shift-d0-p195,camera_shift,pro,libero_10,LIBERO-PRO/visual_noise_glare,
+pro-visual-noise-glare-goal-t00-i03-camera_shift-d1-p195,camera_shift,pro,libero_goal,LIBERO-PRO/visual_noise_glare,
+pro-visual-noise-glare-object-t03-i09-camera_shift-d0-p195,camera_shift,pro,libero_object,LIBERO-PRO/visual_noise_glare,
 pro-visual-noise-glare-object-t05-i03-camera_shift-d0-p195,camera_shift,pro,libero_object,LIBERO-PRO/visual_noise_glare,
 pro-visual-noise-glare-object-t06-i07-camera_shift-d1-p195,camera_shift,pro,libero_object,LIBERO-PRO/visual_noise_glare,
 pro-visual-noise-glare-spatial-t01-i00-camera_shift-d1-p195,camera_shift,pro,libero_spatial,LIBERO-PRO/visual_noise_glare,
+pro-visual-noise-glare-spatial-t06-i07-camera_shift-d1-p195,camera_shift,pro,libero_spatial,LIBERO-PRO/visual_noise_glare,
+libero_10-t0147-distractor_burst-d1-p195,distractor_burst,plus,libero_10,Background Textures,4
 libero_10-t0302-distractor_burst-d1-p195,distractor_burst,plus,libero_10,Robot Initial States,5
+libero_10-t0690-distractor_burst-d1-p195,distractor_burst,plus,libero_10,Camera Viewpoints,3
+libero_10-t1103-distractor_burst-d0-p195,distractor_burst,plus,libero_10,Language Instructions,5
+libero_10-t1114-distractor_burst-d1-p195,distractor_burst,plus,libero_10,Language Instructions,2
 libero_10-t1130-distractor_burst-d0-p195,distractor_burst,plus,libero_10,Language Instructions,3
+libero_10-t1133-distractor_burst-d1-p195,distractor_burst,plus,libero_10,Language Instructions,5
 libero_10-t1149-distractor_burst-d1-p195,distractor_burst,plus,libero_10,Language Instructions,5
 libero_10-t1165-distractor_burst-d1-p195,distractor_burst,plus,libero_10,Language Instructions,5
 libero_10-t1492-distractor_burst-d0-p195,distractor_burst,plus,libero_10,Sensor Noise,5
+libero_10-t2412-distractor_burst-d1-p195,distractor_burst,plus,libero_10,Light Conditions,4
 libero_object-t0063-distractor_burst-d1-p195,distractor_burst,plus,libero_object,Background Textures,3
+libero_object-t0090-distractor_burst-d1-p195,distractor_burst,plus,libero_object,Background Textures,2
+libero_object-t0112-distractor_burst-d1-p195,distractor_burst,plus,libero_object,Background Textures,1
 libero_object-t0270-distractor_burst-d1-p195,distractor_burst,plus,libero_object,Robot Initial States,4
 libero_object-t0280-distractor_burst-d1-p195,distractor_burst,plus,libero_object,Robot Initial States,5
+libero_object-t0389-distractor_burst-d1-p195,distractor_burst,plus,libero_object,Robot Initial States,5
 libero_object-t0400-distractor_burst-d0-p195,distractor_burst,plus,libero_object,Robot Initial States,5
+libero_object-t0467-distractor_burst-d0-p195,distractor_burst,plus,libero_object,Robot Initial States,5
+libero_object-t0486-distractor_burst-d0-p195,distractor_burst,plus,libero_object,Robot Initial States,1
 libero_object-t0493-distractor_burst-d0-p195,distractor_burst,plus,libero_object,Robot Initial States,4
 libero_object-t0561-distractor_burst-d1-p195,distractor_burst,plus,libero_object,Robot Initial States,5
 libero_object-t0715-distractor_burst-d1-p195,distractor_burst,plus,libero_object,Camera Viewpoints,3
+libero_object-t0827-distractor_burst-d0-p195,distractor_burst,plus,libero_object,Camera Viewpoints,5
+libero_object-t0877-distractor_burst-d1-p195,distractor_burst,plus,libero_object,Camera Viewpoints,5
 libero_object-t0886-distractor_burst-d0-p195,distractor_burst,plus,libero_object,Camera Viewpoints,4
 libero_object-t0898-distractor_burst-d1-p195,distractor_burst,plus,libero_object,Camera Viewpoints,5
+libero_object-t0919-distractor_burst-d0-p195,distractor_burst,plus,libero_object,Camera Viewpoints,5
 libero_object-t0928-distractor_burst-d0-p195,distractor_burst,plus,libero_object,Camera Viewpoints,5
+libero_object-t0940-distractor_burst-d0-p195,distractor_burst,plus,libero_object,Camera Viewpoints,5
+libero_object-t0946-distractor_burst-d0-p195,distractor_burst,plus,libero_object,Camera Viewpoints,5
+libero_object-t1047-distractor_burst-d0-p195,distractor_burst,plus,libero_object,Language Instructions,5
 libero_object-t1056-distractor_burst-d0-p195,distractor_burst,plus,libero_object,Language Instructions,5
+libero_object-t1123-distractor_burst-d1-p195,distractor_burst,plus,libero_object,Language Instructions,1
+libero_object-t1209-distractor_burst-d0-p195,distractor_burst,plus,libero_object,Language Instructions,4
+libero_object-t1214-distractor_burst-d1-p195,distractor_burst,plus,libero_object,Language Instructions,1
+libero_object-t1303-distractor_burst-d0-p195,distractor_burst,plus,libero_object,Language Instructions,1
+libero_object-t1318-distractor_burst-d1-p195,distractor_burst,plus,libero_object,Language Instructions,5
 libero_object-t1381-distractor_burst-d1-p195,distractor_burst,plus,libero_object,Language Instructions,5
 libero_object-t1386-distractor_burst-d0-p195,distractor_burst,plus,libero_object,Language Instructions,5
+libero_object-t1399-distractor_burst-d1-p195,distractor_burst,plus,libero_object,Sensor Noise,2
 libero_object-t1408-distractor_burst-d1-p195,distractor_burst,plus,libero_object,Sensor Noise,5
+libero_object-t1436-distractor_burst-d0-p195,distractor_burst,plus,libero_object,Sensor Noise,4
 libero_object-t1600-distractor_burst-d1-p195,distractor_burst,plus,libero_object,Sensor Noise,2
+libero_object-t1615-distractor_burst-d1-p195,distractor_burst,plus,libero_object,Sensor Noise,3
+libero_object-t1665-distractor_burst-d1-p195,distractor_burst,plus,libero_object,Sensor Noise,5
+libero_object-t1676-distractor_burst-d0-p195,distractor_burst,plus,libero_object,Sensor Noise,3
 libero_object-t1679-distractor_burst-d0-p195,distractor_burst,plus,libero_object,Sensor Noise,1
 libero_object-t1711-distractor_burst-d1-p195,distractor_burst,plus,libero_object,Sensor Noise,5
 libero_object-t1713-distractor_burst-d1-p195,distractor_burst,plus,libero_object,Sensor Noise,1
 libero_object-t1723-distractor_burst-d0-p195,distractor_burst,plus,libero_object,Sensor Noise,2
 libero_object-t1792-distractor_burst-d1-p195,distractor_burst,plus,libero_object,Sensor Noise,5
 libero_object-t1894-distractor_burst-d0-p195,distractor_burst,plus,libero_object,Objects Layout,5
+libero_object-t1895-distractor_burst-d0-p195,distractor_burst,plus,libero_object,Objects Layout,5
 libero_object-t1941-distractor_burst-d1-p195,distractor_burst,plus,libero_object,Objects Layout,5
+libero_object-t1978-distractor_burst-d1-p195,distractor_burst,plus,libero_object,Objects Layout,5
 libero_object-t2051-distractor_burst-d1-p195,distractor_burst,plus,libero_object,Objects Layout,3
 libero_object-t2054-distractor_burst-d0-p195,distractor_burst,plus,libero_object,Objects Layout,3
+libero_object-t2118-distractor_burst-d1-p195,distractor_burst,plus,libero_object,Objects Layout,5
 libero_object-t2224-distractor_burst-d0-p195,distractor_burst,plus,libero_object,Light Conditions,5
+libero_object-t2228-distractor_burst-d1-p195,distractor_burst,plus,libero_object,Light Conditions,5
 libero_object-t2232-distractor_burst-d0-p195,distractor_burst,plus,libero_object,Light Conditions,5
 libero_object-t2236-distractor_burst-d0-p195,distractor_burst,plus,libero_object,Light Conditions,5
+libero_object-t2240-distractor_burst-d0-p195,distractor_burst,plus,libero_object,Light Conditions,5
 libero_object-t2264-distractor_burst-d0-p195,distractor_burst,plus,libero_object,Light Conditions,3
+libero_object-t2303-distractor_burst-d0-p195,distractor_burst,plus,libero_object,Light Conditions,3
 libero_object-t2336-distractor_burst-d1-p195,distractor_burst,plus,libero_object,Light Conditions,5
+libero_object-t2352-distractor_burst-d1-p195,distractor_burst,plus,libero_object,Light Conditions,5
 libero_object-t2379-distractor_burst-d0-p195,distractor_burst,plus,libero_object,Light Conditions,4
+libero_spatial-t1998-distractor_burst-d0-p195,distractor_burst,plus,libero_spatial,Objects Layout,4
+pro-camera-view-angle-10-t01-i06-distractor_burst-d0-p195,distractor_burst,pro,libero_10,LIBERO-PRO/camera_view_angle,
 pro-camera-view-angle-object-t07-i00-distractor_burst-d1-p195,distractor_burst,pro,libero_object,LIBERO-PRO/camera_view_angle,
 pro-camera-view-angle-object-t09-i09-distractor_burst-d0-p195,distractor_burst,pro,libero_object,LIBERO-PRO/camera_view_angle,
 pro-initial-pose-position-angle-10-t00-i05-distractor_burst-d1-p195,distractor_burst,pro,libero_10,LIBERO-PRO/initial_pose_position_angle,
+pro-initial-pose-position-angle-object-t06-i02-distractor_burst-d1-p195,distractor_burst,pro,libero_object,LIBERO-PRO/initial_pose_position_angle,
 pro-object-object-t06-i07-distractor_burst-d1-p195,distractor_burst,pro,libero_object,LIBERO-PRO/object,
+pro-object-object-t08-i02-distractor_burst-d0-p195,distractor_burst,pro,libero_object,LIBERO-PRO/object,
+pro-object-shape-object-t01-i03-distractor_burst-d1-p195,distractor_burst,pro,libero_object,LIBERO-PRO/object_shape,
+pro-object-shape-object-t02-i02-distractor_burst-d0-p195,distractor_burst,pro,libero_object,LIBERO-PRO/object_shape,
 pro-object-shape-object-t02-i09-distractor_burst-d1-p195,distractor_burst,pro,libero_object,LIBERO-PRO/object_shape,
 pro-object-shape-object-t03-i00-distractor_burst-d1-p195,distractor_burst,pro,libero_object,LIBERO-PRO/object_shape,
 pro-object-shape-object-t04-i09-distractor_burst-d0-p195,distractor_burst,pro,libero_object,LIBERO-PRO/object_shape,
+pro-object-shape-object-t05-i01-distractor_burst-d0-p195,distractor_burst,pro,libero_object,LIBERO-PRO/object_shape,
 pro-object-shape-object-t06-i08-distractor_burst-d1-p195,distractor_burst,pro,libero_object,LIBERO-PRO/object_shape,
 pro-object-texture-object-t04-i09-distractor_burst-d0-p195,distractor_burst,pro,libero_object,LIBERO-PRO/object_texture,
+pro-object-texture-object-t05-i03-distractor_burst-d1-p195,distractor_burst,pro,libero_object,LIBERO-PRO/object_texture,
 pro-object-texture-object-t05-i05-distractor_burst-d1-p195,distractor_burst,pro,libero_object,LIBERO-PRO/object_texture,
 pro-object-texture-object-t06-i01-distractor_burst-d1-p195,distractor_burst,pro,libero_object,LIBERO-PRO/object_texture,
 pro-position-object-t01-i07-distractor_burst-d1-p195,distractor_burst,pro,libero_object,LIBERO-PRO/position,
+pro-position-object-t04-i03-distractor_burst-d0-p195,distractor_burst,pro,libero_object,LIBERO-PRO/position,
+pro-position-object-t05-i06-distractor_burst-d0-p195,distractor_burst,pro,libero_object,LIBERO-PRO/position,
 pro-semantic-object-t00-i01-distractor_burst-d0-p195,distractor_burst,pro,libero_object,LIBERO-PRO/semantic,
 pro-semantic-object-t01-i00-distractor_burst-d0-p195,distractor_burst,pro,libero_object,LIBERO-PRO/semantic,
+pro-semantic-object-t03-i03-distractor_burst-d1-p195,distractor_burst,pro,libero_object,LIBERO-PRO/semantic,
+pro-semantic-object-t06-i04-distractor_burst-d0-p195,distractor_burst,pro,libero_object,LIBERO-PRO/semantic,
+pro-semantic-object-t08-i09-distractor_burst-d0-p195,distractor_burst,pro,libero_object,LIBERO-PRO/semantic,
+pro-task-10-t01-i00-distractor_burst-d1-p195,distractor_burst,pro,libero_10,LIBERO-PRO/task,
+pro-task-object-t09-i05-distractor_burst-d0-p195,distractor_burst,pro,libero_object,LIBERO-PRO/task,
+pro-view-occlusion-object-t09-i00-distractor_burst-d1-p195,distractor_burst,pro,libero_object,LIBERO-PRO/view_occlusion,
 pro-view-occlusion-object-t09-i01-distractor_burst-d1-p195,distractor_burst,pro,libero_object,LIBERO-PRO/view_occlusion,
+libero_10-t0136-illumination_switch-d1-p195,illumination_switch,plus,libero_10,Background Textures,5
 libero_10-t0207-illumination_switch-d0-p195,illumination_switch,plus,libero_10,Background Textures,2
 libero_10-t0328-illumination_switch-d0-p195,illumination_switch,plus,libero_10,Robot Initial States,3
 libero_10-t0532-illumination_switch-d0-p195,illumination_switch,plus,libero_10,Robot Initial States,1
 libero_10-t1554-illumination_switch-d1-p195,illumination_switch,plus,libero_10,Sensor Noise,3
 libero_10-t1670-illumination_switch-d0-p195,illumination_switch,plus,libero_10,Sensor Noise,2
+libero_10-t2170-illumination_switch-d1-p195,illumination_switch,plus,libero_10,Objects Layout,1
 libero_10-t2242-illumination_switch-d1-p195,illumination_switch,plus,libero_10,Objects Layout,2
+libero_10-t2245-illumination_switch-d1-p195,illumination_switch,plus,libero_10,Light Conditions,4
+libero_10-t2300-illumination_switch-d1-p195,illumination_switch,plus,libero_10,Light Conditions,3
+libero_10-t2375-illumination_switch-d0-p195,illumination_switch,plus,libero_10,Light Conditions,5
+libero_goal-t0019-illumination_switch-d0-p195,illumination_switch,plus,libero_goal,Background Textures,2
 libero_goal-t0071-illumination_switch-d0-p195,illumination_switch,plus,libero_goal,Background Textures,4
+libero_goal-t0084-illumination_switch-d0-p195,illumination_switch,plus,libero_goal,Background Textures,2
 libero_goal-t0164-illumination_switch-d1-p195,illumination_switch,plus,libero_goal,Background Textures,3
+libero_goal-t0181-illumination_switch-d0-p195,illumination_switch,plus,libero_goal,Background Textures,5
 libero_goal-t0241-illumination_switch-d1-p195,illumination_switch,plus,libero_goal,Background Textures,5
+libero_goal-t0257-illumination_switch-d1-p195,illumination_switch,plus,libero_goal,Background Textures,3
+libero_goal-t0451-illumination_switch-d1-p195,illumination_switch,plus,libero_goal,Robot Initial States,4
 libero_goal-t0486-illumination_switch-d0-p195,illumination_switch,plus,libero_goal,Robot Initial States,3
+libero_goal-t0496-illumination_switch-d0-p195,illumination_switch,plus,libero_goal,Robot Initial States,1
 libero_goal-t0544-illumination_switch-d1-p195,illumination_switch,plus,libero_goal,Robot Initial States,3
+libero_goal-t0594-illumination_switch-d1-p195,illumination_switch,plus,libero_goal,Robot Initial States,2
 libero_goal-t0600-illumination_switch-d0-p195,illumination_switch,plus,libero_goal,Robot Initial States,5
+libero_goal-t0956-illumination_switch-d0-p195,illumination_switch,plus,libero_goal,Camera Viewpoints,4
+libero_goal-t0974-illumination_switch-d0-p195,illumination_switch,plus,libero_goal,Camera Viewpoints,4
 libero_goal-t1020-illumination_switch-d0-p195,illumination_switch,plus,libero_goal,Camera Viewpoints,1
+libero_goal-t1155-illumination_switch-d1-p195,illumination_switch,plus,libero_goal,Language Instructions,3
+libero_goal-t1157-illumination_switch-d1-p195,illumination_switch,plus,libero_goal,Language Instructions,1
 libero_goal-t1421-illumination_switch-d0-p195,illumination_switch,plus,libero_goal,Language Instructions,3
 libero_goal-t1540-illumination_switch-d0-p195,illumination_switch,plus,libero_goal,Sensor Noise,1
 libero_goal-t1574-illumination_switch-d1-p195,illumination_switch,plus,libero_goal,Sensor Noise,2
 libero_goal-t1660-illumination_switch-d1-p195,illumination_switch,plus,libero_goal,Sensor Noise,5
 libero_goal-t1731-illumination_switch-d0-p195,illumination_switch,plus,libero_goal,Sensor Noise,2
 libero_goal-t1786-illumination_switch-d0-p195,illumination_switch,plus,libero_goal,Sensor Noise,1
+libero_goal-t1796-illumination_switch-d0-p195,illumination_switch,plus,libero_goal,Sensor Noise,3
 libero_goal-t1803-illumination_switch-d0-p195,illumination_switch,plus,libero_goal,Sensor Noise,3
+libero_goal-t1806-illumination_switch-d1-p195,illumination_switch,plus,libero_goal,Sensor Noise,1
 libero_goal-t1865-illumination_switch-d1-p195,illumination_switch,plus,libero_goal,Sensor Noise,1
+libero_goal-t2010-illumination_switch-d1-p195,illumination_switch,plus,libero_goal,Objects Layout,4
+libero_goal-t2017-illumination_switch-d0-p195,illumination_switch,plus,libero_goal,Objects Layout,5
+libero_goal-t2073-illumination_switch-d1-p195,illumination_switch,plus,libero_goal,Objects Layout,2
+libero_goal-t2128-illumination_switch-d0-p195,illumination_switch,plus,libero_goal,Objects Layout,3
+libero_goal-t2196-illumination_switch-d1-p195,illumination_switch,plus,libero_goal,Objects Layout,1
+libero_goal-t2341-illumination_switch-d1-p195,illumination_switch,plus,libero_goal,Light Conditions,1
+libero_goal-t2424-illumination_switch-d1-p195,illumination_switch,plus,libero_goal,Light Conditions,2
+libero_goal-t2433-illumination_switch-d0-p195,illumination_switch,plus,libero_goal,Light Conditions,2
+libero_object-t0183-illumination_switch-d1-p195,illumination_switch,plus,libero_object,Background Textures,2
 libero_object-t1063-illumination_switch-d0-p195,illumination_switch,plus,libero_object,Language Instructions,2
+libero_object-t1430-illumination_switch-d0-p195,illumination_switch,plus,libero_object,Sensor Noise,3
 libero_object-t1851-illumination_switch-d0-p195,illumination_switch,plus,libero_object,Objects Layout,4
 libero_object-t2189-illumination_switch-d1-p195,illumination_switch,plus,libero_object,Objects Layout,2
 libero_object-t2218-illumination_switch-d1-p195,illumination_switch,plus,libero_object,Objects Layout,3
+libero_object-t2359-illumination_switch-d1-p195,illumination_switch,plus,libero_object,Light Conditions,4
+libero_spatial-t0102-illumination_switch-d0-p195,illumination_switch,plus,libero_spatial,Background Textures,2
+libero_spatial-t0473-illumination_switch-d1-p195,illumination_switch,plus,libero_spatial,Robot Initial States,2
+libero_spatial-t0641-illumination_switch-d0-p195,illumination_switch,plus,libero_spatial,Camera Viewpoints,5
 libero_spatial-t0728-illumination_switch-d0-p195,illumination_switch,plus,libero_spatial,Camera Viewpoints,2
+libero_spatial-t0743-illumination_switch-d0-p195,illumination_switch,plus,libero_spatial,Camera Viewpoints,2
 libero_spatial-t0840-illumination_switch-d0-p195,illumination_switch,plus,libero_spatial,Camera Viewpoints,3
 libero_spatial-t0897-illumination_switch-d1-p195,illumination_switch,plus,libero_spatial,Camera Viewpoints,3
 libero_spatial-t0899-illumination_switch-d1-p195,illumination_switch,plus,libero_spatial,Camera Viewpoints,1
 libero_spatial-t1150-illumination_switch-d0-p195,illumination_switch,plus,libero_spatial,Language Instructions,3
 libero_spatial-t1279-illumination_switch-d0-p195,illumination_switch,plus,libero_spatial,Language Instructions,2
+libero_spatial-t1349-illumination_switch-d1-p195,illumination_switch,plus,libero_spatial,Language Instructions,3
 libero_spatial-t1629-illumination_switch-d1-p195,illumination_switch,plus,libero_spatial,Sensor Noise,3
 libero_spatial-t1689-illumination_switch-d0-p195,illumination_switch,plus,libero_spatial,Sensor Noise,3
 libero_spatial-t2044-illumination_switch-d0-p195,illumination_switch,plus,libero_spatial,Objects Layout,4
 libero_spatial-t2186-illumination_switch-d1-p195,illumination_switch,plus,libero_spatial,Light Conditions,3
+libero_spatial-t2321-illumination_switch-d0-p195,illumination_switch,plus,libero_spatial,Light Conditions,2
+pro-camera-view-angle-goal-t03-i04-illumination_switch-d1-p195,illumination_switch,pro,libero_goal,LIBERO-PRO/camera_view_angle,
+pro-initial-pose-position-angle-10-t00-i03-illumination_switch-d1-p195,illumination_switch,pro,libero_10,LIBERO-PRO/initial_pose_position_angle,
 pro-initial-pose-position-angle-10-t03-i01-illumination_switch-d1-p195,illumination_switch,pro,libero_10,LIBERO-PRO/initial_pose_position_angle,
+pro-initial-pose-position-angle-goal-t04-i04-illumination_switch-d1-p195,illumination_switch,pro,libero_goal,LIBERO-PRO/initial_pose_position_angle,
 pro-initial-pose-position-angle-goal-t05-i00-illumination_switch-d0-p195,illumination_switch,pro,libero_goal,LIBERO-PRO/initial_pose_position_angle,
+pro-object-shape-goal-t01-i08-illumination_switch-d0-p195,illumination_switch,pro,libero_goal,LIBERO-PRO/object_shape,
 pro-object-shape-goal-t02-i02-illumination_switch-d0-p195,illumination_switch,pro,libero_goal,LIBERO-PRO/object_shape,
+pro-object-shape-object-t08-i04-illumination_switch-d1-p195,illumination_switch,pro,libero_object,LIBERO-PRO/object_shape,
+pro-object-shape-spatial-t03-i00-illumination_switch-d0-p195,illumination_switch,pro,libero_spatial,LIBERO-PRO/object_shape,
 pro-object-spatial-t09-i01-illumination_switch-d0-p195,illumination_switch,pro,libero_spatial,LIBERO-PRO/object,
 pro-object-texture-goal-t02-i06-illumination_switch-d0-p195,illumination_switch,pro,libero_goal,LIBERO-PRO/object_texture,
+pro-object-texture-goal-t07-i01-illumination_switch-d0-p195,illumination_switch,pro,libero_goal,LIBERO-PRO/object_texture,
+pro-object-texture-object-t02-i00-illumination_switch-d0-p195,illumination_switch,pro,libero_object,LIBERO-PRO/object_texture,
 pro-object-texture-spatial-t01-i08-illumination_switch-d1-p195,illumination_switch,pro,libero_spatial,LIBERO-PRO/object_texture,
+pro-position-10-t01-i09-illumination_switch-d1-p195,illumination_switch,pro,libero_10,LIBERO-PRO/position,
 pro-position-10-t05-i06-illumination_switch-d0-p195,illumination_switch,pro,libero_10,LIBERO-PRO/position,
+pro-position-object-t09-i09-illumination_switch-d0-p195,illumination_switch,pro,libero_object,LIBERO-PRO/position,
 pro-semantic-object-t00-i05-illumination_switch-d0-p195,illumination_switch,pro,libero_object,LIBERO-PRO/semantic,
 pro-semantic-object-t03-i03-illumination_switch-d0-p195,illumination_switch,pro,libero_object,LIBERO-PRO/semantic,
+pro-semantic-object-t05-i09-illumination_switch-d0-p195,illumination_switch,pro,libero_object,LIBERO-PRO/semantic,
 pro-task-goal-t02-i06-illumination_switch-d1-p195,illumination_switch,pro,libero_goal,LIBERO-PRO/task,
+pro-task-spatial-t02-i02-illumination_switch-d0-p195,illumination_switch,pro,libero_spatial,LIBERO-PRO/task,
 pro-view-occlusion-goal-t04-i08-illumination_switch-d1-p195,illumination_switch,pro,libero_goal,LIBERO-PRO/view_occlusion,
+pro-view-occlusion-object-t02-i01-illumination_switch-d1-p195,illumination_switch,pro,libero_object,LIBERO-PRO/view_occlusion,
 pro-view-occlusion-object-t03-i09-illumination_switch-d0-p195,illumination_switch,pro,libero_object,LIBERO-PRO/view_occlusion,
+pro-view-occlusion-spatial-t05-i04-illumination_switch-d1-p195,illumination_switch,pro,libero_spatial,LIBERO-PRO/view_occlusion,
 pro-visual-noise-glare-object-t04-i01-illumination_switch-d1-p195,illumination_switch,pro,libero_object,LIBERO-PRO/visual_noise_glare,
+pro-visual-noise-glare-object-t06-i03-illumination_switch-d0-p195,illumination_switch,pro,libero_object,LIBERO-PRO/visual_noise_glare,
 pro-visual-noise-glare-object-t07-i00-illumination_switch-d0-p195,illumination_switch,pro,libero_object,LIBERO-PRO/visual_noise_glare,
 pro-visual-noise-glare-object-t08-i08-illumination_switch-d0-p195,illumination_switch,pro,libero_object,LIBERO-PRO/visual_noise_glare,
 libero_10-t0088-obstacle_insertion-d1-p195,obstacle_insertion,plus,libero_10,Background Textures,5
 libero_10-t0103-obstacle_insertion-d0-p195,obstacle_insertion,plus,libero_10,Background Textures,5
+libero_10-t0284-obstacle_insertion-d0-p195,obstacle_insertion,plus,libero_10,Background Textures,3
 libero_10-t0497-obstacle_insertion-d1-p195,obstacle_insertion,plus,libero_10,Robot Initial States,2
+libero_10-t0515-obstacle_insertion-d0-p195,obstacle_insertion,plus,libero_10,Robot Initial States,2
 libero_10-t0516-obstacle_insertion-d1-p195,obstacle_insertion,plus,libero_10,Robot Initial States,4
+libero_10-t0642-obstacle_insertion-d1-p195,obstacle_insertion,plus,libero_10,Robot Initial States,1
+libero_10-t0649-obstacle_insertion-d1-p195,obstacle_insertion,plus,libero_10,Robot Initial States,2
+libero_10-t0671-obstacle_insertion-d0-p195,obstacle_insertion,plus,libero_10,Robot Initial States,5
 libero_10-t0673-obstacle_insertion-d0-p195,obstacle_insertion,plus,libero_10,Robot Initial States,5
 libero_10-t0679-obstacle_insertion-d1-p195,obstacle_insertion,plus,libero_10,Robot Initial States,4
+libero_10-t0876-obstacle_insertion-d1-p195,obstacle_insertion,plus,libero_10,Camera Viewpoints,5
+libero_10-t0889-obstacle_insertion-d0-p195,obstacle_insertion,plus,libero_10,Camera Viewpoints,5
+libero_10-t0891-obstacle_insertion-d1-p195,obstacle_insertion,plus,libero_10,Camera Viewpoints,5
 libero_10-t1086-obstacle_insertion-d0-p195,obstacle_insertion,plus,libero_10,Camera Viewpoints,4
+libero_10-t1310-obstacle_insertion-d1-p195,obstacle_insertion,plus,libero_10,Language Instructions,1
+libero_10-t1720-obstacle_insertion-d0-p195,obstacle_insertion,plus,libero_10,Sensor Noise,5
 libero_10-t1727-obstacle_insertion-d0-p195,obstacle_insertion,plus,libero_10,Sensor Noise,1
 libero_10-t1754-obstacle_insertion-d1-p195,obstacle_insertion,plus,libero_10,Sensor Noise,4
 libero_10-t1896-obstacle_insertion-d1-p195,obstacle_insertion,plus,libero_10,Sensor Noise,5
+libero_10-t1898-obstacle_insertion-d0-p195,obstacle_insertion,plus,libero_10,Sensor Noise,5
+libero_10-t1931-obstacle_insertion-d1-p195,obstacle_insertion,plus,libero_10,Sensor Noise,5
+libero_10-t1997-obstacle_insertion-d1-p195,obstacle_insertion,plus,libero_10,Objects Layout,1
 libero_10-t2215-obstacle_insertion-d0-p195,obstacle_insertion,plus,libero_10,Objects Layout,3
 libero_10-t2512-obstacle_insertion-d0-p195,obstacle_insertion,plus,libero_10,Light Conditions,2
 libero_goal-t1951-obstacle_insertion-d0-p195,obstacle_insertion,plus,libero_goal,Objects Layout,1
+libero_object-t0087-obstacle_insertion-d1-p195,obstacle_insertion,plus,libero_object,Background Textures,3
+libero_object-t0136-obstacle_insertion-d1-p195,obstacle_insertion,plus,libero_object,Background Textures,2
 libero_object-t0214-obstacle_insertion-d0-p195,obstacle_insertion,plus,libero_object,Background Textures,2
+libero_object-t0253-obstacle_insertion-d0-p195,obstacle_insertion,plus,libero_object,Robot Initial States,1
 libero_object-t0337-obstacle_insertion-d1-p195,obstacle_insertion,plus,libero_object,Robot Initial States,4
+libero_object-t0344-obstacle_insertion-d1-p195,obstacle_insertion,plus,libero_object,Robot Initial States,5
+libero_object-t0444-obstacle_insertion-d1-p195,obstacle_insertion,plus,libero_object,Robot Initial States,5
 libero_object-t0505-obstacle_insertion-d1-p195,obstacle_insertion,plus,libero_object,Robot Initial States,3
+libero_object-t0537-obstacle_insertion-d1-p195,obstacle_insertion,plus,libero_object,Robot Initial States,1
+libero_object-t0538-obstacle_insertion-d1-p195,obstacle_insertion,plus,libero_object,Robot Initial States,3
 libero_object-t0579-obstacle_insertion-d0-p195,obstacle_insertion,plus,libero_object,Robot Initial States,3
 libero_object-t0694-obstacle_insertion-d0-p195,obstacle_insertion,plus,libero_object,Camera Viewpoints,3
 libero_object-t0732-obstacle_insertion-d1-p195,obstacle_insertion,plus,libero_object,Camera Viewpoints,3
+libero_object-t0819-obstacle_insertion-d0-p195,obstacle_insertion,plus,libero_object,Camera Viewpoints,5
+libero_object-t0906-obstacle_insertion-d1-p195,obstacle_insertion,plus,libero_object,Camera Viewpoints,5
+libero_object-t0957-obstacle_insertion-d0-p195,obstacle_insertion,plus,libero_object,Camera Viewpoints,5
+libero_object-t0968-obstacle_insertion-d1-p195,obstacle_insertion,plus,libero_object,Camera Viewpoints,5
+libero_object-t1040-obstacle_insertion-d0-p195,obstacle_insertion,plus,libero_object,Camera Viewpoints,1
+libero_object-t1104-obstacle_insertion-d1-p195,obstacle_insertion,plus,libero_object,Language Instructions,1
+libero_object-t1120-obstacle_insertion-d1-p195,obstacle_insertion,plus,libero_object,Language Instructions,3
 libero_object-t1179-obstacle_insertion-d1-p195,obstacle_insertion,plus,libero_object,Language Instructions,1
 libero_object-t1186-obstacle_insertion-d0-p195,obstacle_insertion,plus,libero_object,Language Instructions,3
 libero_object-t1269-obstacle_insertion-d1-p195,obstacle_insertion,plus,libero_object,Language Instructions,5
+libero_object-t1270-obstacle_insertion-d1-p195,obstacle_insertion,plus,libero_object,Language Instructions,4
 libero_object-t1485-obstacle_insertion-d1-p195,obstacle_insertion,plus,libero_object,Sensor Noise,2
 libero_object-t1597-obstacle_insertion-d0-p195,obstacle_insertion,plus,libero_object,Sensor Noise,4
 libero_object-t1604-obstacle_insertion-d0-p195,obstacle_insertion,plus,libero_object,Sensor Noise,5
 libero_object-t1749-obstacle_insertion-d1-p195,obstacle_insertion,plus,libero_object,Sensor Noise,5
 libero_object-t1790-obstacle_insertion-d0-p195,obstacle_insertion,plus,libero_object,Sensor Noise,5
+libero_object-t1926-obstacle_insertion-d1-p195,obstacle_insertion,plus,libero_object,Objects Layout,1
 libero_object-t1933-obstacle_insertion-d0-p195,obstacle_insertion,plus,libero_object,Objects Layout,5
 libero_object-t2035-obstacle_insertion-d0-p195,obstacle_insertion,plus,libero_object,Objects Layout,5
+libero_object-t2073-obstacle_insertion-d0-p195,obstacle_insertion,plus,libero_object,Objects Layout,5
 libero_object-t2159-obstacle_insertion-d1-p195,obstacle_insertion,plus,libero_object,Objects Layout,5
+libero_object-t2320-obstacle_insertion-d1-p195,obstacle_insertion,plus,libero_object,Light Conditions,5
 libero_object-t2325-obstacle_insertion-d1-p195,obstacle_insertion,plus,libero_object,Light Conditions,3
+libero_object-t2343-obstacle_insertion-d0-p195,obstacle_insertion,plus,libero_object,Light Conditions,4
+libero_object-t2412-obstacle_insertion-d1-p195,obstacle_insertion,plus,libero_object,Light Conditions,3
 libero_object-t2415-obstacle_insertion-d1-p195,obstacle_insertion,plus,libero_object,Light Conditions,4
 libero_object-t2444-obstacle_insertion-d0-p195,obstacle_insertion,plus,libero_object,Light Conditions,4
+libero_object-t2475-obstacle_insertion-d0-p195,obstacle_insertion,plus,libero_object,Light Conditions,3
 libero_object-t2483-obstacle_insertion-d1-p195,obstacle_insertion,plus,libero_object,Light Conditions,4
 libero_spatial-t0763-obstacle_insertion-d0-p195,obstacle_insertion,plus,libero_spatial,Camera Viewpoints,3
+libero_spatial-t2141-obstacle_insertion-d0-p195,obstacle_insertion,plus,libero_spatial,Light Conditions,3
 pro-camera-view-angle-goal-t04-i07-obstacle_insertion-d0-p195,obstacle_insertion,pro,libero_goal,LIBERO-PRO/camera_view_angle,
 pro-camera-view-angle-spatial-t04-i03-obstacle_insertion-d1-p195,obstacle_insertion,pro,libero_spatial,LIBERO-PRO/camera_view_angle,
+pro-initial-pose-position-angle-10-t03-i09-obstacle_insertion-d0-p195,obstacle_insertion,pro,libero_10,LIBERO-PRO/initial_pose_position_angle,
 pro-initial-pose-position-angle-goal-t02-i06-obstacle_insertion-d0-p195,obstacle_insertion,pro,libero_goal,LIBERO-PRO/initial_pose_position_angle,
 pro-initial-pose-position-angle-goal-t02-i06-obstacle_insertion-d1-p195,obstacle_insertion,pro,libero_goal,LIBERO-PRO/initial_pose_position_angle,
+pro-object-goal-t09-i05-obstacle_insertion-d0-p195,obstacle_insertion,pro,libero_goal,LIBERO-PRO/object,
+pro-object-shape-10-t09-i06-obstacle_insertion-d1-p195,obstacle_insertion,pro,libero_10,LIBERO-PRO/object_shape,
+pro-object-shape-goal-t06-i05-obstacle_insertion-d1-p195,obstacle_insertion,pro,libero_goal,LIBERO-PRO/object_shape,
 pro-object-shape-goal-t09-i05-obstacle_insertion-d0-p195,obstacle_insertion,pro,libero_goal,LIBERO-PRO/object_shape,
+pro-object-shape-spatial-t00-i03-obstacle_insertion-d1-p195,obstacle_insertion,pro,libero_spatial,LIBERO-PRO/object_shape,
+pro-object-shape-spatial-t04-i04-obstacle_insertion-d1-p195,obstacle_insertion,pro,libero_spatial,LIBERO-PRO/object_shape,
+pro-object-texture-10-t09-i09-obstacle_insertion-d1-p195,obstacle_insertion,pro,libero_10,LIBERO-PRO/object_texture,
 pro-object-texture-spatial-t00-i06-obstacle_insertion-d1-p195,obstacle_insertion,pro,libero_spatial,LIBERO-PRO/object_texture,
+pro-position-10-t05-i05-obstacle_insertion-d1-p195,obstacle_insertion,pro,libero_10,LIBERO-PRO/position,
+pro-semantic-10-t04-i05-obstacle_insertion-d1-p195,obstacle_insertion,pro,libero_10,LIBERO-PRO/semantic,
 pro-semantic-10-t07-i05-obstacle_insertion-d1-p195,obstacle_insertion,pro,libero_10,LIBERO-PRO/semantic,
 pro-semantic-10-t09-i01-obstacle_insertion-d1-p195,obstacle_insertion,pro,libero_10,LIBERO-PRO/semantic,
+pro-semantic-10-t09-i06-obstacle_insertion-d0-p195,obstacle_insertion,pro,libero_10,LIBERO-PRO/semantic,
 pro-semantic-10-t09-i09-obstacle_insertion-d1-p195,obstacle_insertion,pro,libero_10,LIBERO-PRO/semantic,
 pro-semantic-goal-t04-i02-obstacle_insertion-d0-p195,obstacle_insertion,pro,libero_goal,LIBERO-PRO/semantic,
 pro-task-10-t03-i00-obstacle_insertion-d1-p195,obstacle_insertion,pro,libero_10,LIBERO-PRO/task,
+pro-task-10-t09-i03-obstacle_insertion-d1-p195,obstacle_insertion,pro,libero_10,LIBERO-PRO/task,
+pro-view-occlusion-10-t03-i05-obstacle_insertion-d1-p195,obstacle_insertion,pro,libero_10,LIBERO-PRO/view_occlusion,
 pro-view-occlusion-10-t04-i01-obstacle_insertion-d1-p195,obstacle_insertion,pro,libero_10,LIBERO-PRO/view_occlusion,
 pro-view-occlusion-10-t05-i05-obstacle_insertion-d0-p195,obstacle_insertion,pro,libero_10,LIBERO-PRO/view_occlusion,
+pro-view-occlusion-10-t09-i00-obstacle_insertion-d1-p195,obstacle_insertion,pro,libero_10,LIBERO-PRO/view_occlusion,
 pro-visual-noise-glare-10-t03-i03-obstacle_insertion-d0-p195,obstacle_insertion,pro,libero_10,LIBERO-PRO/visual_noise_glare,
+pro-visual-noise-glare-goal-t01-i09-obstacle_insertion-d0-p195,obstacle_insertion,pro,libero_goal,LIBERO-PRO/visual_noise_glare,
+pro-visual-noise-glare-goal-t02-i02-obstacle_insertion-d0-p195,obstacle_insertion,pro,libero_goal,LIBERO-PRO/visual_noise_glare,
 pro-visual-noise-glare-spatial-t00-i09-obstacle_insertion-d1-p195,obstacle_insertion,pro,libero_spatial,LIBERO-PRO/visual_noise_glare,
+libero_10-t0197-receptacle_relocation-d0-p195,receptacle_relocation,plus,libero_10,Background Textures,3
+libero_10-t0258-receptacle_relocation-d0-p195,receptacle_relocation,plus,libero_10,Background Textures,5
+libero_10-t0291-receptacle_relocation-d1-p195,receptacle_relocation,plus,libero_10,Robot Initial States,1
+libero_10-t0479-receptacle_relocation-d0-p195,receptacle_relocation,plus,libero_10,Robot Initial States,4
 libero_10-t0560-receptacle_relocation-d0-p195,receptacle_relocation,plus,libero_10,Robot Initial States,4
 libero_10-t0594-receptacle_relocation-d1-p195,receptacle_relocation,plus,libero_10,Robot Initial States,5
+libero_10-t1687-receptacle_relocation-d0-p195,receptacle_relocation,plus,libero_10,Sensor Noise,5
 libero_10-t1788-receptacle_relocation-d1-p195,receptacle_relocation,plus,libero_10,Sensor Noise,5
 libero_10-t1810-receptacle_relocation-d0-p195,receptacle_relocation,plus,libero_10,Sensor Noise,4
 libero_10-t2105-receptacle_relocation-d0-p195,receptacle_relocation,plus,libero_10,Objects Layout,1
+libero_goal-t0155-receptacle_relocation-d0-p195,receptacle_relocation,plus,libero_goal,Background Textures,5
+libero_goal-t0171-receptacle_relocation-d1-p195,receptacle_relocation,plus,libero_goal,Background Textures,4
 libero_goal-t0546-receptacle_relocation-d0-p195,receptacle_relocation,plus,libero_goal,Robot Initial States,3
+libero_goal-t0553-receptacle_relocation-d0-p195,receptacle_relocation,plus,libero_goal,Robot Initial States,4
 libero_goal-t0648-receptacle_relocation-d0-p195,receptacle_relocation,plus,libero_goal,Robot Initial States,5
 libero_goal-t1816-receptacle_relocation-d0-p195,receptacle_relocation,plus,libero_goal,Sensor Noise,2
+libero_goal-t1839-receptacle_relocation-d1-p195,receptacle_relocation,plus,libero_goal,Sensor Noise,3
 libero_object-t0010-receptacle_relocation-d0-p195,receptacle_relocation,plus,libero_object,Background Textures,3
 libero_object-t0191-receptacle_relocation-d1-p195,receptacle_relocation,plus,libero_object,Background Textures,2
+libero_object-t0304-receptacle_relocation-d0-p195,receptacle_relocation,plus,libero_object,Robot Initial States,2
 libero_object-t0597-receptacle_relocation-d0-p195,receptacle_relocation,plus,libero_object,Robot Initial States,3
+libero_object-t0760-receptacle_relocation-d0-p195,receptacle_relocation,plus,libero_object,Camera Viewpoints,3
 libero_object-t0904-receptacle_relocation-d1-p195,receptacle_relocation,plus,libero_object,Camera Viewpoints,4
+libero_object-t1106-receptacle_relocation-d0-p195,receptacle_relocation,plus,libero_object,Language Instructions,1
 libero_object-t1140-receptacle_relocation-d0-p195,receptacle_relocation,plus,libero_object,Language Instructions,3
+libero_object-t1211-receptacle_relocation-d0-p195,receptacle_relocation,plus,libero_object,Language Instructions,1
+libero_object-t1545-receptacle_relocation-d1-p195,receptacle_relocation,plus,libero_object,Sensor Noise,4
 libero_object-t1799-receptacle_relocation-d1-p195,receptacle_relocation,plus,libero_object,Sensor Noise,3
+libero_object-t2028-receptacle_relocation-d0-p195,receptacle_relocation,plus,libero_object,Objects Layout,5
 libero_object-t2188-receptacle_relocation-d1-p195,receptacle_relocation,plus,libero_object,Objects Layout,2
+libero_object-t2260-receptacle_relocation-d0-p195,receptacle_relocation,plus,libero_object,Light Conditions,3
+libero_object-t2279-receptacle_relocation-d0-p195,receptacle_relocation,plus,libero_object,Light Conditions,4
+libero_object-t2286-receptacle_relocation-d1-p195,receptacle_relocation,plus,libero_object,Light Conditions,4
 libero_object-t2313-receptacle_relocation-d0-p195,receptacle_relocation,plus,libero_object,Light Conditions,5
+libero_object-t2454-receptacle_relocation-d1-p195,receptacle_relocation,plus,libero_object,Light Conditions,4
 libero_object-t2500-receptacle_relocation-d0-p195,receptacle_relocation,plus,libero_object,Light Conditions,5
+libero_spatial-t0059-receptacle_relocation-d0-p195,receptacle_relocation,plus,libero_spatial,Background Textures,4
+libero_spatial-t0073-receptacle_relocation-d0-p195,receptacle_relocation,plus,libero_spatial,Background Textures,3
 libero_spatial-t0175-receptacle_relocation-d1-p195,receptacle_relocation,plus,libero_spatial,Background Textures,2
+libero_spatial-t0204-receptacle_relocation-d1-p195,receptacle_relocation,plus,libero_spatial,Background Textures,4
 libero_spatial-t0217-receptacle_relocation-d1-p195,receptacle_relocation,plus,libero_spatial,Background Textures,3
+libero_spatial-t0261-receptacle_relocation-d0-p195,receptacle_relocation,plus,libero_spatial,Robot Initial States,1
+libero_spatial-t0325-receptacle_relocation-d1-p195,receptacle_relocation,plus,libero_spatial,Robot Initial States,5
 libero_spatial-t0435-receptacle_relocation-d1-p195,receptacle_relocation,plus,libero_spatial,Robot Initial States,3
 libero_spatial-t0455-receptacle_relocation-d0-p195,receptacle_relocation,plus,libero_spatial,Robot Initial States,5
+libero_spatial-t0492-receptacle_relocation-d1-p195,receptacle_relocation,plus,libero_spatial,Robot Initial States,4
 libero_spatial-t0572-receptacle_relocation-d0-p195,receptacle_relocation,plus,libero_spatial,Robot Initial States,1
+libero_spatial-t0679-receptacle_relocation-d1-p195,receptacle_relocation,plus,libero_spatial,Camera Viewpoints,2
+libero_spatial-t0866-receptacle_relocation-d1-p195,receptacle_relocation,plus,libero_spatial,Camera Viewpoints,2
+libero_spatial-t0873-receptacle_relocation-d1-p195,receptacle_relocation,plus,libero_spatial,Camera Viewpoints,4
 libero_spatial-t0904-receptacle_relocation-d0-p195,receptacle_relocation,plus,libero_spatial,Camera Viewpoints,4
 libero_spatial-t0953-receptacle_relocation-d1-p195,receptacle_relocation,plus,libero_spatial,Camera Viewpoints,4
 libero_spatial-t0988-receptacle_relocation-d0-p195,receptacle_relocation,plus,libero_spatial,Language Instructions,1
 libero_spatial-t1021-receptacle_relocation-d1-p195,receptacle_relocation,plus,libero_spatial,Language Instructions,3
+libero_spatial-t1043-receptacle_relocation-d1-p195,receptacle_relocation,plus,libero_spatial,Language Instructions,4
 libero_spatial-t1200-receptacle_relocation-d0-p195,receptacle_relocation,plus,libero_spatial,Language Instructions,3
+libero_spatial-t1202-receptacle_relocation-d0-p195,receptacle_relocation,plus,libero_spatial,Language Instructions,4
 libero_spatial-t1392-receptacle_relocation-d1-p195,receptacle_relocation,plus,libero_spatial,Sensor Noise,2
+libero_spatial-t1489-receptacle_relocation-d0-p195,receptacle_relocation,plus,libero_spatial,Sensor Noise,1
 libero_spatial-t1557-receptacle_relocation-d1-p195,receptacle_relocation,plus,libero_spatial,Sensor Noise,3
 libero_spatial-t1752-receptacle_relocation-d1-p195,receptacle_relocation,plus,libero_spatial,Objects Layout,3
+libero_spatial-t1800-receptacle_relocation-d0-p195,receptacle_relocation,plus,libero_spatial,Objects Layout,4
 libero_spatial-t1803-receptacle_relocation-d1-p195,receptacle_relocation,plus,libero_spatial,Objects Layout,4
 libero_spatial-t1867-receptacle_relocation-d0-p195,receptacle_relocation,plus,libero_spatial,Objects Layout,5
+libero_spatial-t1892-receptacle_relocation-d0-p195,receptacle_relocation,plus,libero_spatial,Objects Layout,4
+libero_spatial-t2027-receptacle_relocation-d0-p195,receptacle_relocation,plus,libero_spatial,Objects Layout,4
 libero_spatial-t2165-receptacle_relocation-d1-p195,receptacle_relocation,plus,libero_spatial,Light Conditions,3
 libero_spatial-t2330-receptacle_relocation-d0-p195,receptacle_relocation,plus,libero_spatial,Light Conditions,4
 libero_spatial-t2342-receptacle_relocation-d1-p195,receptacle_relocation,plus,libero_spatial,Light Conditions,2
+libero_spatial-t2394-receptacle_relocation-d1-p195,receptacle_relocation,plus,libero_spatial,Light Conditions,3
+pro-camera-view-angle-goal-t08-i04-receptacle_relocation-d0-p195,receptacle_relocation,pro,libero_goal,LIBERO-PRO/camera_view_angle,
 pro-initial-pose-position-angle-object-t05-i01-receptacle_relocation-d1-p195,receptacle_relocation,pro,libero_object,LIBERO-PRO/initial_pose_position_angle,
+pro-initial-pose-position-angle-spatial-t04-i04-receptacle_relocation-d1-p195,receptacle_relocation,pro,libero_spatial,LIBERO-PRO/initial_pose_position_angle,
 pro-object-10-t07-i04-receptacle_relocation-d0-p195,receptacle_relocation,pro,libero_10,LIBERO-PRO/object,
 pro-object-object-t01-i02-receptacle_relocation-d1-p195,receptacle_relocation,pro,libero_object,LIBERO-PRO/object,
+pro-object-shape-spatial-t04-i04-receptacle_relocation-d0-p195,receptacle_relocation,pro,libero_spatial,LIBERO-PRO/object_shape,
+pro-object-spatial-t04-i07-receptacle_relocation-d0-p195,receptacle_relocation,pro,libero_spatial,LIBERO-PRO/object,
 pro-object-texture-spatial-t08-i03-receptacle_relocation-d0-p195,receptacle_relocation,pro,libero_spatial,LIBERO-PRO/object_texture,
+pro-position-object-t02-i02-receptacle_relocation-d0-p195,receptacle_relocation,pro,libero_object,LIBERO-PRO/position,
+pro-position-spatial-t03-i02-receptacle_relocation-d1-p195,receptacle_relocation,pro,libero_spatial,LIBERO-PRO/position,
 pro-semantic-10-t01-i07-receptacle_relocation-d1-p195,receptacle_relocation,pro,libero_10,LIBERO-PRO/semantic,
 pro-semantic-object-t00-i07-receptacle_relocation-d0-p195,receptacle_relocation,pro,libero_object,LIBERO-PRO/semantic,
 pro-semantic-object-t04-i08-receptacle_relocation-d1-p195,receptacle_relocation,pro,libero_object,LIBERO-PRO/semantic,
+pro-semantic-spatial-t03-i07-receptacle_relocation-d1-p195,receptacle_relocation,pro,libero_spatial,LIBERO-PRO/semantic,
+pro-semantic-spatial-t08-i08-receptacle_relocation-d0-p195,receptacle_relocation,pro,libero_spatial,LIBERO-PRO/semantic,
 pro-task-10-t06-i01-receptacle_relocation-d1-p195,receptacle_relocation,pro,libero_10,LIBERO-PRO/task,
+pro-task-goal-t08-i02-receptacle_relocation-d1-p195,receptacle_relocation,pro,libero_goal,LIBERO-PRO/task,
+pro-task-object-t03-i06-receptacle_relocation-d0-p195,receptacle_relocation,pro,libero_object,LIBERO-PRO/task,
 pro-task-object-t05-i01-receptacle_relocation-d1-p195,receptacle_relocation,pro,libero_object,LIBERO-PRO/task,
 pro-task-spatial-t01-i02-receptacle_relocation-d1-p195,receptacle_relocation,pro,libero_spatial,LIBERO-PRO/task,
 pro-task-spatial-t03-i00-receptacle_relocation-d1-p195,receptacle_relocation,pro,libero_spatial,LIBERO-PRO/task,
+pro-task-spatial-t04-i08-receptacle_relocation-d0-p195,receptacle_relocation,pro,libero_spatial,LIBERO-PRO/task,
+pro-view-occlusion-object-t03-i00-receptacle_relocation-d1-p195,receptacle_relocation,pro,libero_object,LIBERO-PRO/view_occlusion,
 pro-view-occlusion-object-t05-i09-receptacle_relocation-d0-p195,receptacle_relocation,pro,libero_object,LIBERO-PRO/view_occlusion,
+pro-view-occlusion-object-t08-i06-receptacle_relocation-d1-p195,receptacle_relocation,pro,libero_object,LIBERO-PRO/view_occlusion,
+pro-view-occlusion-spatial-t03-i03-receptacle_relocation-d1-p195,receptacle_relocation,pro,libero_spatial,LIBERO-PRO/view_occlusion,
 pro-visual-noise-glare-10-t07-i08-receptacle_relocation-d1-p195,receptacle_relocation,pro,libero_10,LIBERO-PRO/visual_noise_glare,
 pro-visual-noise-glare-goal-t08-i04-receptacle_relocation-d1-p195,receptacle_relocation,pro,libero_goal,LIBERO-PRO/visual_noise_glare,
+pro-visual-noise-glare-object-t03-i06-receptacle_relocation-d0-p195,receptacle_relocation,pro,libero_object,LIBERO-PRO/visual_noise_glare,
 pro-visual-noise-glare-spatial-t06-i06-receptacle_relocation-d0-p195,receptacle_relocation,pro,libero_spatial,LIBERO-PRO/visual_noise_glare,
 libero_10-t0016-sensor_noise_onset-d1-p195,sensor_noise_onset,plus,libero_10,Background Textures,4
 libero_10-t0133-sensor_noise_onset-d1-p195,sensor_noise_onset,plus,libero_10,Background Textures,5
 libero_10-t0173-sensor_noise_onset-d1-p195,sensor_noise_onset,plus,libero_10,Background Textures,3
+libero_10-t0306-sensor_noise_onset-d0-p195,sensor_noise_onset,plus,libero_10,Robot Initial States,2
 libero_10-t0333-sensor_noise_onset-d1-p195,sensor_noise_onset,plus,libero_10,Robot Initial States,1
+libero_10-t0374-sensor_noise_onset-d1-p195,sensor_noise_onset,plus,libero_10,Robot Initial States,3
 libero_10-t0861-sensor_noise_onset-d1-p195,sensor_noise_onset,plus,libero_10,Camera Viewpoints,5
 libero_10-t0894-sensor_noise_onset-d0-p195,sensor_noise_onset,plus,libero_10,Camera Viewpoints,3
 libero_10-t0993-sensor_noise_onset-d1-p195,sensor_noise_onset,plus,libero_10,Camera Viewpoints,4
+libero_10-t1164-sensor_noise_onset-d1-p195,sensor_noise_onset,plus,libero_10,Language Instructions,5
 libero_10-t1268-sensor_noise_onset-d1-p195,sensor_noise_onset,plus,libero_10,Language Instructions,2
+libero_10-t1273-sensor_noise_onset-d0-p195,sensor_noise_onset,plus,libero_10,Language Instructions,2
+libero_10-t1278-sensor_noise_onset-d0-p195,sensor_noise_onset,plus,libero_10,Language Instructions,3
 libero_10-t1375-sensor_noise_onset-d0-p195,sensor_noise_onset,plus,libero_10,Language Instructions,1
+libero_10-t1503-sensor_noise_onset-d0-p195,sensor_noise_onset,plus,libero_10,Sensor Noise,2
 libero_10-t1546-sensor_noise_onset-d0-p195,sensor_noise_onset,plus,libero_10,Sensor Noise,1
 libero_10-t1662-sensor_noise_onset-d0-p195,sensor_noise_onset,plus,libero_10,Sensor Noise,1
 libero_10-t1845-sensor_noise_onset-d0-p195,sensor_noise_onset,plus,libero_10,Sensor Noise,5
+libero_10-t2072-sensor_noise_onset-d0-p195,sensor_noise_onset,plus,libero_10,Objects Layout,3
+libero_10-t2183-sensor_noise_onset-d0-p195,sensor_noise_onset,plus,libero_10,Objects Layout,2
 libero_10-t2226-sensor_noise_onset-d1-p195,sensor_noise_onset,plus,libero_10,Objects Layout,1
+libero_10-t2252-sensor_noise_onset-d0-p195,sensor_noise_onset,plus,libero_10,Light Conditions,4
 libero_10-t2318-sensor_noise_onset-d1-p195,sensor_noise_onset,plus,libero_10,Light Conditions,4
 libero_10-t2388-sensor_noise_onset-d1-p195,sensor_noise_onset,plus,libero_10,Light Conditions,5
+libero_10-t2415-sensor_noise_onset-d0-p195,sensor_noise_onset,plus,libero_10,Light Conditions,1
 libero_goal-t0151-sensor_noise_onset-d0-p195,sensor_noise_onset,plus,libero_goal,Background Textures,4
 libero_goal-t0185-sensor_noise_onset-d1-p195,sensor_noise_onset,plus,libero_goal,Background Textures,2
 libero_goal-t0407-sensor_noise_onset-d1-p195,sensor_noise_onset,plus,libero_goal,Robot Initial States,2
 libero_goal-t0477-sensor_noise_onset-d1-p195,sensor_noise_onset,plus,libero_goal,Robot Initial States,1
+libero_goal-t0884-sensor_noise_onset-d1-p195,sensor_noise_onset,plus,libero_goal,Camera Viewpoints,2
 libero_goal-t1041-sensor_noise_onset-d0-p195,sensor_noise_onset,plus,libero_goal,Camera Viewpoints,3
+libero_goal-t1272-sensor_noise_onset-d1-p195,sensor_noise_onset,plus,libero_goal,Language Instructions,2
+libero_goal-t1396-sensor_noise_onset-d0-p195,sensor_noise_onset,plus,libero_goal,Language Instructions,1
 libero_goal-t1434-sensor_noise_onset-d0-p195,sensor_noise_onset,plus,libero_goal,Language Instructions,1
+libero_goal-t1711-sensor_noise_onset-d0-p195,sensor_noise_onset,plus,libero_goal,Sensor Noise,1
+libero_goal-t1837-sensor_noise_onset-d1-p195,sensor_noise_onset,plus,libero_goal,Sensor Noise,2
+libero_goal-t1844-sensor_noise_onset-d0-p195,sensor_noise_onset,plus,libero_goal,Sensor Noise,2
+libero_goal-t1903-sensor_noise_onset-d1-p195,sensor_noise_onset,plus,libero_goal,Objects Layout,2
+libero_goal-t2292-sensor_noise_onset-d1-p195,sensor_noise_onset,plus,libero_goal,Objects Layout,1
 libero_goal-t2497-sensor_noise_onset-d1-p195,sensor_noise_onset,plus,libero_goal,Light Conditions,1
+libero_goal-t2533-sensor_noise_onset-d0-p195,sensor_noise_onset,plus,libero_goal,Light Conditions,3
+libero_object-t0327-sensor_noise_onset-d0-p195,sensor_noise_onset,plus,libero_object,Robot Initial States,3
 libero_object-t0551-sensor_noise_onset-d0-p195,sensor_noise_onset,plus,libero_object,Robot Initial States,5
 libero_object-t0653-sensor_noise_onset-d1-p195,sensor_noise_onset,plus,libero_object,Camera Viewpoints,1
+libero_object-t0945-sensor_noise_onset-d1-p195,sensor_noise_onset,plus,libero_object,Camera Viewpoints,2
+libero_object-t1173-sensor_noise_onset-d0-p195,sensor_noise_onset,plus,libero_object,Language Instructions,4
+libero_object-t2262-sensor_noise_onset-d0-p195,sensor_noise_onset,plus,libero_object,Light Conditions,3
 libero_object-t2285-sensor_noise_onset-d0-p195,sensor_noise_onset,plus,libero_object,Light Conditions,3
+libero_object-t2329-sensor_noise_onset-d0-p195,sensor_noise_onset,plus,libero_object,Light Conditions,5
+libero_spatial-t0076-sensor_noise_onset-d0-p195,sensor_noise_onset,plus,libero_spatial,Background Textures,2
 libero_spatial-t0124-sensor_noise_onset-d0-p195,sensor_noise_onset,plus,libero_spatial,Background Textures,3
 libero_spatial-t0363-sensor_noise_onset-d1-p195,sensor_noise_onset,plus,libero_spatial,Robot Initial States,1
 libero_spatial-t0365-sensor_noise_onset-d1-p195,sensor_noise_onset,plus,libero_spatial,Robot Initial States,1
 libero_spatial-t0610-sensor_noise_onset-d1-p195,sensor_noise_onset,plus,libero_spatial,Camera Viewpoints,1
+libero_spatial-t0672-sensor_noise_onset-d0-p195,sensor_noise_onset,plus,libero_spatial,Camera Viewpoints,1
+libero_spatial-t0704-sensor_noise_onset-d0-p195,sensor_noise_onset,plus,libero_spatial,Camera Viewpoints,1
+libero_spatial-t0783-sensor_noise_onset-d0-p195,sensor_noise_onset,plus,libero_spatial,Camera Viewpoints,3
+libero_spatial-t1266-sensor_noise_onset-d1-p195,sensor_noise_onset,plus,libero_spatial,Language Instructions,2
+libero_spatial-t1577-sensor_noise_onset-d0-p195,sensor_noise_onset,plus,libero_spatial,Sensor Noise,2
 libero_spatial-t1639-sensor_noise_onset-d0-p195,sensor_noise_onset,plus,libero_spatial,Sensor Noise,1
+libero_spatial-t1696-sensor_noise_onset-d1-p195,sensor_noise_onset,plus,libero_spatial,Sensor Noise,3
+libero_spatial-t2009-sensor_noise_onset-d1-p195,sensor_noise_onset,plus,libero_spatial,Objects Layout,4
 libero_spatial-t2145-sensor_noise_onset-d0-p195,sensor_noise_onset,plus,libero_spatial,Light Conditions,3
 libero_spatial-t2240-sensor_noise_onset-d0-p195,sensor_noise_onset,plus,libero_spatial,Light Conditions,3
+libero_spatial-t2281-sensor_noise_onset-d1-p195,sensor_noise_onset,plus,libero_spatial,Light Conditions,2
 libero_spatial-t2296-sensor_noise_onset-d0-p195,sensor_noise_onset,plus,libero_spatial,Light Conditions,1
 libero_spatial-t2320-sensor_noise_onset-d1-p195,sensor_noise_onset,plus,libero_spatial,Light Conditions,2
+libero_spatial-t2347-sensor_noise_onset-d1-p195,sensor_noise_onset,plus,libero_spatial,Light Conditions,3
 libero_spatial-t2352-sensor_noise_onset-d0-p195,sensor_noise_onset,plus,libero_spatial,Light Conditions,1
+libero_spatial-t2376-sensor_noise_onset-d0-p195,sensor_noise_onset,plus,libero_spatial,Light Conditions,2
 pro-camera-view-angle-goal-t03-i09-sensor_noise_onset-d1-p195,sensor_noise_onset,pro,libero_goal,LIBERO-PRO/camera_view_angle,
+pro-initial-pose-position-angle-goal-t01-i04-sensor_noise_onset-d1-p195,sensor_noise_onset,pro,libero_goal,LIBERO-PRO/initial_pose_position_angle,
 pro-initial-pose-position-angle-goal-t02-i05-sensor_noise_onset-d1-p195,sensor_noise_onset,pro,libero_goal,LIBERO-PRO/initial_pose_position_angle,
+pro-initial-pose-position-angle-goal-t08-i01-sensor_noise_onset-d0-p195,sensor_noise_onset,pro,libero_goal,LIBERO-PRO/initial_pose_position_angle,
 pro-initial-pose-position-angle-object-t04-i06-sensor_noise_onset-d1-p195,sensor_noise_onset,pro,libero_object,LIBERO-PRO/initial_pose_position_angle,
+pro-initial-pose-position-angle-object-t06-i03-sensor_noise_onset-d1-p195,sensor_noise_onset,pro,libero_object,LIBERO-PRO/initial_pose_position_angle,
+pro-initial-pose-position-angle-spatial-t06-i06-sensor_noise_onset-d1-p195,sensor_noise_onset,pro,libero_spatial,LIBERO-PRO/initial_pose_position_angle,
 pro-object-goal-t08-i01-sensor_noise_onset-d0-p195,sensor_noise_onset,pro,libero_goal,LIBERO-PRO/object,
+pro-object-shape-10-t07-i09-sensor_noise_onset-d0-p195,sensor_noise_onset,pro,libero_10,LIBERO-PRO/object_shape,
 pro-object-shape-goal-t08-i00-sensor_noise_onset-d0-p195,sensor_noise_onset,pro,libero_goal,LIBERO-PRO/object_shape,
+pro-object-spatial-t02-i08-sensor_noise_onset-d1-p195,sensor_noise_onset,pro,libero_spatial,LIBERO-PRO/object,
 pro-object-texture-10-t04-i01-sensor_noise_onset-d1-p195,sensor_noise_onset,pro,libero_10,LIBERO-PRO/object_texture,
 pro-object-texture-goal-t08-i06-sensor_noise_onset-d1-p195,sensor_noise_onset,pro,libero_goal,LIBERO-PRO/object_texture,
 pro-object-texture-object-t03-i01-sensor_noise_onset-d1-p195,sensor_noise_onset,pro,libero_object,LIBERO-PRO/object_texture,
@@ -297,105 +588,214 @@ pro-object-texture-object-t09-i00-sensor_noise_onset-d0-p195,sensor_noise_onset,
 pro-position-10-t06-i09-sensor_noise_onset-d0-p195,sensor_noise_onset,pro,libero_10,LIBERO-PRO/position,
 pro-position-10-t07-i00-sensor_noise_onset-d1-p195,sensor_noise_onset,pro,libero_10,LIBERO-PRO/position,
 pro-position-spatial-t03-i00-sensor_noise_onset-d1-p195,sensor_noise_onset,pro,libero_spatial,LIBERO-PRO/position,
+pro-semantic-10-t01-i02-sensor_noise_onset-d0-p195,sensor_noise_onset,pro,libero_10,LIBERO-PRO/semantic,
+pro-semantic-goal-t08-i06-sensor_noise_onset-d1-p195,sensor_noise_onset,pro,libero_goal,LIBERO-PRO/semantic,
+pro-semantic-goal-t09-i00-sensor_noise_onset-d0-p195,sensor_noise_onset,pro,libero_goal,LIBERO-PRO/semantic,
+pro-semantic-object-t06-i00-sensor_noise_onset-d0-p195,sensor_noise_onset,pro,libero_object,LIBERO-PRO/semantic,
+pro-semantic-spatial-t01-i05-sensor_noise_onset-d0-p195,sensor_noise_onset,pro,libero_spatial,LIBERO-PRO/semantic,
+pro-task-10-t01-i01-sensor_noise_onset-d0-p195,sensor_noise_onset,pro,libero_10,LIBERO-PRO/task,
+pro-task-10-t07-i07-sensor_noise_onset-d0-p195,sensor_noise_onset,pro,libero_10,LIBERO-PRO/task,
+pro-task-object-t00-i04-sensor_noise_onset-d0-p195,sensor_noise_onset,pro,libero_object,LIBERO-PRO/task,
 pro-task-spatial-t05-i01-sensor_noise_onset-d1-p195,sensor_noise_onset,pro,libero_spatial,LIBERO-PRO/task,
 pro-task-spatial-t09-i00-sensor_noise_onset-d1-p195,sensor_noise_onset,pro,libero_spatial,LIBERO-PRO/task,
+pro-view-occlusion-goal-t03-i04-sensor_noise_onset-d0-p195,sensor_noise_onset,pro,libero_goal,LIBERO-PRO/view_occlusion,
 libero_10-t0235-target_relocation-d1-p195,target_relocation,plus,libero_10,Background Textures,5
 libero_10-t0783-target_relocation-d1-p195,target_relocation,plus,libero_10,Camera Viewpoints,4
+libero_10-t0931-target_relocation-d1-p195,target_relocation,plus,libero_10,Camera Viewpoints,3
 libero_10-t0955-target_relocation-d1-p195,target_relocation,plus,libero_10,Camera Viewpoints,5
+libero_10-t0988-target_relocation-d1-p195,target_relocation,plus,libero_10,Camera Viewpoints,4
+libero_10-t1292-target_relocation-d0-p195,target_relocation,plus,libero_10,Language Instructions,1
+libero_10-t1339-target_relocation-d0-p195,target_relocation,plus,libero_10,Language Instructions,4
 libero_10-t1351-target_relocation-d0-p195,target_relocation,plus,libero_10,Language Instructions,3
+libero_10-t1434-target_relocation-d1-p195,target_relocation,plus,libero_10,Language Instructions,5
 libero_10-t1449-target_relocation-d0-p195,target_relocation,plus,libero_10,Language Instructions,4
 libero_10-t1454-target_relocation-d0-p195,target_relocation,plus,libero_10,Language Instructions,3
+libero_10-t1599-target_relocation-d0-p195,target_relocation,plus,libero_10,Sensor Noise,2
+libero_10-t1907-target_relocation-d1-p195,target_relocation,plus,libero_10,Sensor Noise,2
 libero_10-t1919-target_relocation-d0-p195,target_relocation,plus,libero_10,Sensor Noise,4
+libero_10-t2122-target_relocation-d0-p195,target_relocation,plus,libero_10,Objects Layout,3
 libero_10-t2314-target_relocation-d1-p195,target_relocation,plus,libero_10,Light Conditions,4
 libero_10-t2333-target_relocation-d1-p195,target_relocation,plus,libero_10,Light Conditions,2
+libero_goal-t0030-target_relocation-d0-p195,target_relocation,plus,libero_goal,Background Textures,4
 libero_goal-t0200-target_relocation-d0-p195,target_relocation,plus,libero_goal,Background Textures,4
 libero_goal-t0206-target_relocation-d1-p195,target_relocation,plus,libero_goal,Background Textures,5
+libero_goal-t0330-target_relocation-d0-p195,target_relocation,plus,libero_goal,Robot Initial States,3
 libero_goal-t0771-target_relocation-d1-p195,target_relocation,plus,libero_goal,Camera Viewpoints,4
+libero_goal-t0892-target_relocation-d0-p195,target_relocation,plus,libero_goal,Camera Viewpoints,1
+libero_goal-t0942-target_relocation-d0-p195,target_relocation,plus,libero_goal,Camera Viewpoints,4
 libero_goal-t1031-target_relocation-d0-p195,target_relocation,plus,libero_goal,Camera Viewpoints,4
 libero_goal-t1264-target_relocation-d0-p195,target_relocation,plus,libero_goal,Language Instructions,4
+libero_goal-t1307-target_relocation-d1-p195,target_relocation,plus,libero_goal,Language Instructions,5
+libero_goal-t1466-target_relocation-d1-p195,target_relocation,plus,libero_goal,Language Instructions,3
+libero_goal-t1467-target_relocation-d1-p195,target_relocation,plus,libero_goal,Language Instructions,5
 libero_goal-t1674-target_relocation-d0-p195,target_relocation,plus,libero_goal,Sensor Noise,4
 libero_goal-t1675-target_relocation-d0-p195,target_relocation,plus,libero_goal,Sensor Noise,5
 libero_goal-t1713-target_relocation-d1-p195,target_relocation,plus,libero_goal,Sensor Noise,3
+libero_goal-t1779-target_relocation-d0-p195,target_relocation,plus,libero_goal,Sensor Noise,3
+libero_goal-t1885-target_relocation-d1-p195,target_relocation,plus,libero_goal,Sensor Noise,5
 libero_goal-t1962-target_relocation-d1-p195,target_relocation,plus,libero_goal,Objects Layout,4
 libero_goal-t2051-target_relocation-d0-p195,target_relocation,plus,libero_goal,Objects Layout,4
+libero_goal-t2126-target_relocation-d1-p195,target_relocation,plus,libero_goal,Objects Layout,5
+libero_goal-t2158-target_relocation-d0-p195,target_relocation,plus,libero_goal,Objects Layout,4
 libero_goal-t2246-target_relocation-d0-p195,target_relocation,plus,libero_goal,Objects Layout,3
+libero_goal-t2394-target_relocation-d1-p195,target_relocation,plus,libero_goal,Light Conditions,4
 libero_goal-t2524-target_relocation-d1-p195,target_relocation,plus,libero_goal,Light Conditions,3
 libero_object-t0077-target_relocation-d1-p195,target_relocation,plus,libero_object,Background Textures,4
 libero_object-t0114-target_relocation-d0-p195,target_relocation,plus,libero_object,Background Textures,2
+libero_object-t0399-target_relocation-d0-p195,target_relocation,plus,libero_object,Robot Initial States,3
+libero_object-t0535-target_relocation-d1-p195,target_relocation,plus,libero_object,Robot Initial States,4
+libero_object-t0852-target_relocation-d1-p195,target_relocation,plus,libero_object,Camera Viewpoints,3
 libero_object-t0884-target_relocation-d0-p195,target_relocation,plus,libero_object,Camera Viewpoints,4
 libero_object-t0951-target_relocation-d1-p195,target_relocation,plus,libero_object,Camera Viewpoints,5
+libero_object-t1064-target_relocation-d0-p195,target_relocation,plus,libero_object,Language Instructions,2
 libero_object-t1306-target_relocation-d0-p195,target_relocation,plus,libero_object,Language Instructions,3
 libero_object-t1804-target_relocation-d0-p195,target_relocation,plus,libero_object,Sensor Noise,1
+libero_object-t1808-target_relocation-d0-p195,target_relocation,plus,libero_object,Sensor Noise,5
 libero_object-t1858-target_relocation-d1-p195,target_relocation,plus,libero_object,Objects Layout,5
 libero_object-t2141-target_relocation-d1-p195,target_relocation,plus,libero_object,Objects Layout,1
+libero_object-t2366-target_relocation-d0-p195,target_relocation,plus,libero_object,Light Conditions,4
 libero_object-t2433-target_relocation-d0-p195,target_relocation,plus,libero_object,Light Conditions,4
 libero_object-t2465-target_relocation-d0-p195,target_relocation,plus,libero_object,Light Conditions,3
+libero_object-t2481-target_relocation-d1-p195,target_relocation,plus,libero_object,Light Conditions,2
+libero_object-t2489-target_relocation-d1-p195,target_relocation,plus,libero_object,Light Conditions,4
+libero_spatial-t0276-target_relocation-d1-p195,target_relocation,plus,libero_spatial,Robot Initial States,1
 libero_spatial-t0344-target_relocation-d0-p195,target_relocation,plus,libero_spatial,Robot Initial States,5
+libero_spatial-t0460-target_relocation-d0-p195,target_relocation,plus,libero_spatial,Robot Initial States,1
 libero_spatial-t0463-target_relocation-d0-p195,target_relocation,plus,libero_spatial,Robot Initial States,2
+libero_spatial-t0639-target_relocation-d1-p195,target_relocation,plus,libero_spatial,Camera Viewpoints,4
 libero_spatial-t0830-target_relocation-d0-p195,target_relocation,plus,libero_spatial,Camera Viewpoints,2
+libero_spatial-t0870-target_relocation-d0-p195,target_relocation,plus,libero_spatial,Camera Viewpoints,3
+libero_spatial-t1057-target_relocation-d1-p195,target_relocation,plus,libero_spatial,Language Instructions,4
+libero_spatial-t1074-target_relocation-d0-p195,target_relocation,plus,libero_spatial,Language Instructions,4
 libero_spatial-t1763-target_relocation-d1-p195,target_relocation,plus,libero_spatial,Objects Layout,5
+libero_spatial-t2269-target_relocation-d1-p195,target_relocation,plus,libero_spatial,Light Conditions,1
 pro-camera-view-angle-10-t04-i06-target_relocation-d0-p195,target_relocation,pro,libero_10,LIBERO-PRO/camera_view_angle,
 pro-initial-pose-position-angle-10-t06-i09-target_relocation-d1-p195,target_relocation,pro,libero_10,LIBERO-PRO/initial_pose_position_angle,
 pro-initial-pose-position-angle-goal-t06-i09-target_relocation-d1-p195,target_relocation,pro,libero_goal,LIBERO-PRO/initial_pose_position_angle,
+pro-initial-pose-position-angle-object-t05-i04-target_relocation-d0-p195,target_relocation,pro,libero_object,LIBERO-PRO/initial_pose_position_angle,
+pro-object-10-t08-i02-target_relocation-d0-p195,target_relocation,pro,libero_10,LIBERO-PRO/object,
 pro-object-object-t09-i09-target_relocation-d0-p195,target_relocation,pro,libero_object,LIBERO-PRO/object,
+pro-object-shape-goal-t04-i02-target_relocation-d0-p195,target_relocation,pro,libero_goal,LIBERO-PRO/object_shape,
 pro-object-shape-object-t08-i06-target_relocation-d0-p195,target_relocation,pro,libero_object,LIBERO-PRO/object_shape,
+pro-object-texture-10-t03-i01-target_relocation-d0-p195,target_relocation,pro,libero_10,LIBERO-PRO/object_texture,
+pro-object-texture-spatial-t02-i05-target_relocation-d0-p195,target_relocation,pro,libero_spatial,LIBERO-PRO/object_texture,
+pro-position-10-t01-i07-target_relocation-d1-p195,target_relocation,pro,libero_10,LIBERO-PRO/position,
 pro-position-goal-t06-i02-target_relocation-d1-p195,target_relocation,pro,libero_goal,LIBERO-PRO/position,
+pro-position-object-t00-i04-target_relocation-d0-p195,target_relocation,pro,libero_object,LIBERO-PRO/position,
 pro-position-object-t02-i03-target_relocation-d0-p195,target_relocation,pro,libero_object,LIBERO-PRO/position,
+pro-position-object-t06-i02-target_relocation-d1-p195,target_relocation,pro,libero_object,LIBERO-PRO/position,
 pro-semantic-10-t02-i09-target_relocation-d1-p195,target_relocation,pro,libero_10,LIBERO-PRO/semantic,
+pro-semantic-10-t05-i00-target_relocation-d1-p195,target_relocation,pro,libero_10,LIBERO-PRO/semantic,
+pro-semantic-object-t08-i09-target_relocation-d1-p195,target_relocation,pro,libero_object,LIBERO-PRO/semantic,
 pro-semantic-spatial-t01-i00-target_relocation-d0-p195,target_relocation,pro,libero_spatial,LIBERO-PRO/semantic,
 pro-task-object-t06-i05-target_relocation-d0-p195,target_relocation,pro,libero_object,LIBERO-PRO/task,
 pro-task-spatial-t08-i06-target_relocation-d1-p195,target_relocation,pro,libero_spatial,LIBERO-PRO/task,
 pro-view-occlusion-goal-t04-i07-target_relocation-d1-p195,target_relocation,pro,libero_goal,LIBERO-PRO/view_occlusion,
 pro-view-occlusion-object-t02-i04-target_relocation-d1-p195,target_relocation,pro,libero_object,LIBERO-PRO/view_occlusion,
+pro-visual-noise-glare-goal-t01-i04-target_relocation-d1-p195,target_relocation,pro,libero_goal,LIBERO-PRO/visual_noise_glare,
+pro-visual-noise-glare-goal-t03-i09-target_relocation-d0-p195,target_relocation,pro,libero_goal,LIBERO-PRO/visual_noise_glare,
 pro-visual-noise-glare-object-t01-i04-target_relocation-d0-p195,target_relocation,pro,libero_object,LIBERO-PRO/visual_noise_glare,
+pro-visual-noise-glare-object-t04-i01-target_relocation-d1-p195,target_relocation,pro,libero_object,LIBERO-PRO/visual_noise_glare,
+pro-visual-noise-glare-object-t08-i00-target_relocation-d0-p195,target_relocation,pro,libero_object,LIBERO-PRO/visual_noise_glare,
 pro-visual-noise-glare-spatial-t00-i04-target_relocation-d0-p195,target_relocation,pro,libero_spatial,LIBERO-PRO/visual_noise_glare,
+pro-visual-noise-glare-spatial-t08-i07-target_relocation-d1-p195,target_relocation,pro,libero_spatial,LIBERO-PRO/visual_noise_glare,
 libero_10-t0164-visual_theme_switch-d0-p195,visual_theme_switch,plus,libero_10,Background Textures,1
+libero_10-t0246-visual_theme_switch-d0-p195,visual_theme_switch,plus,libero_10,Background Textures,5
 libero_10-t0338-visual_theme_switch-d0-p195,visual_theme_switch,plus,libero_10,Robot Initial States,1
+libero_10-t0572-visual_theme_switch-d1-p195,visual_theme_switch,plus,libero_10,Robot Initial States,3
+libero_10-t0575-visual_theme_switch-d0-p195,visual_theme_switch,plus,libero_10,Robot Initial States,3
 libero_10-t0656-visual_theme_switch-d0-p195,visual_theme_switch,plus,libero_10,Robot Initial States,1
+libero_10-t0952-visual_theme_switch-d1-p195,visual_theme_switch,plus,libero_10,Camera Viewpoints,5
+libero_10-t0973-visual_theme_switch-d1-p195,visual_theme_switch,plus,libero_10,Camera Viewpoints,3
+libero_10-t1087-visual_theme_switch-d0-p195,visual_theme_switch,plus,libero_10,Camera Viewpoints,4
 libero_10-t1250-visual_theme_switch-d0-p195,visual_theme_switch,plus,libero_10,Language Instructions,5
+libero_10-t1407-visual_theme_switch-d0-p195,visual_theme_switch,plus,libero_10,Language Instructions,2
+libero_10-t1489-visual_theme_switch-d1-p195,visual_theme_switch,plus,libero_10,Sensor Noise,5
+libero_10-t1552-visual_theme_switch-d1-p195,visual_theme_switch,plus,libero_10,Sensor Noise,1
 libero_10-t1744-visual_theme_switch-d0-p195,visual_theme_switch,plus,libero_10,Sensor Noise,5
 libero_10-t1765-visual_theme_switch-d0-p195,visual_theme_switch,plus,libero_10,Sensor Noise,3
 libero_10-t2038-visual_theme_switch-d0-p195,visual_theme_switch,plus,libero_10,Objects Layout,1
+libero_10-t2066-visual_theme_switch-d1-p195,visual_theme_switch,plus,libero_10,Objects Layout,3
+libero_10-t2292-visual_theme_switch-d1-p195,visual_theme_switch,plus,libero_10,Light Conditions,3
 libero_10-t2301-visual_theme_switch-d0-p195,visual_theme_switch,plus,libero_10,Light Conditions,4
 libero_goal-t0005-visual_theme_switch-d1-p195,visual_theme_switch,plus,libero_goal,Background Textures,4
+libero_goal-t0158-visual_theme_switch-d0-p195,visual_theme_switch,plus,libero_goal,Background Textures,4
 libero_goal-t0191-visual_theme_switch-d1-p195,visual_theme_switch,plus,libero_goal,Background Textures,2
 libero_goal-t0222-visual_theme_switch-d1-p195,visual_theme_switch,plus,libero_goal,Background Textures,5
 libero_goal-t0255-visual_theme_switch-d1-p195,visual_theme_switch,plus,libero_goal,Background Textures,4
+libero_goal-t0527-visual_theme_switch-d1-p195,visual_theme_switch,plus,libero_goal,Robot Initial States,2
+libero_goal-t0645-visual_theme_switch-d0-p195,visual_theme_switch,plus,libero_goal,Robot Initial States,3
 libero_goal-t0694-visual_theme_switch-d0-p195,visual_theme_switch,plus,libero_goal,Camera Viewpoints,2
 libero_goal-t1002-visual_theme_switch-d1-p195,visual_theme_switch,plus,libero_goal,Camera Viewpoints,2
+libero_goal-t1005-visual_theme_switch-d0-p195,visual_theme_switch,plus,libero_goal,Camera Viewpoints,2
 libero_goal-t1138-visual_theme_switch-d1-p195,visual_theme_switch,plus,libero_goal,Language Instructions,5
+libero_goal-t1201-visual_theme_switch-d0-p195,visual_theme_switch,plus,libero_goal,Language Instructions,5
+libero_goal-t1458-visual_theme_switch-d0-p195,visual_theme_switch,plus,libero_goal,Language Instructions,1
 libero_goal-t1529-visual_theme_switch-d1-p195,visual_theme_switch,plus,libero_goal,Sensor Noise,1
 libero_goal-t1734-visual_theme_switch-d0-p195,visual_theme_switch,plus,libero_goal,Sensor Noise,3
+libero_goal-t2006-visual_theme_switch-d1-p195,visual_theme_switch,plus,libero_goal,Objects Layout,5
 libero_goal-t2248-visual_theme_switch-d0-p195,visual_theme_switch,plus,libero_goal,Objects Layout,2
+libero_goal-t2348-visual_theme_switch-d0-p195,visual_theme_switch,plus,libero_goal,Light Conditions,1
+libero_goal-t2434-visual_theme_switch-d1-p195,visual_theme_switch,plus,libero_goal,Light Conditions,1
 libero_object-t0135-visual_theme_switch-d0-p195,visual_theme_switch,plus,libero_object,Background Textures,1
 libero_object-t0197-visual_theme_switch-d1-p195,visual_theme_switch,plus,libero_object,Background Textures,2
+libero_object-t0301-visual_theme_switch-d1-p195,visual_theme_switch,plus,libero_object,Robot Initial States,3
+libero_object-t0568-visual_theme_switch-d1-p195,visual_theme_switch,plus,libero_object,Robot Initial States,2
 libero_object-t0726-visual_theme_switch-d1-p195,visual_theme_switch,plus,libero_object,Camera Viewpoints,2
 libero_object-t0774-visual_theme_switch-d0-p195,visual_theme_switch,plus,libero_object,Camera Viewpoints,3
 libero_object-t1583-visual_theme_switch-d0-p195,visual_theme_switch,plus,libero_object,Sensor Noise,4
 libero_object-t1754-visual_theme_switch-d1-p195,visual_theme_switch,plus,libero_object,Sensor Noise,1
 libero_object-t1824-visual_theme_switch-d0-p195,visual_theme_switch,plus,libero_object,Objects Layout,3
 libero_object-t2186-visual_theme_switch-d0-p195,visual_theme_switch,plus,libero_object,Objects Layout,3
+libero_object-t2330-visual_theme_switch-d1-p195,visual_theme_switch,plus,libero_object,Light Conditions,5
 libero_spatial-t0056-visual_theme_switch-d0-p195,visual_theme_switch,plus,libero_spatial,Background Textures,3
+libero_spatial-t0145-visual_theme_switch-d0-p195,visual_theme_switch,plus,libero_spatial,Background Textures,1
 libero_spatial-t0263-visual_theme_switch-d0-p195,visual_theme_switch,plus,libero_spatial,Robot Initial States,1
 libero_spatial-t0705-visual_theme_switch-d0-p195,visual_theme_switch,plus,libero_spatial,Camera Viewpoints,1
+libero_spatial-t0719-visual_theme_switch-d0-p195,visual_theme_switch,plus,libero_spatial,Camera Viewpoints,2
+libero_spatial-t0812-visual_theme_switch-d0-p195,visual_theme_switch,plus,libero_spatial,Camera Viewpoints,3
+libero_spatial-t1007-visual_theme_switch-d1-p195,visual_theme_switch,plus,libero_spatial,Language Instructions,3
+libero_spatial-t1010-visual_theme_switch-d0-p195,visual_theme_switch,plus,libero_spatial,Language Instructions,3
 libero_spatial-t1222-visual_theme_switch-d1-p195,visual_theme_switch,plus,libero_spatial,Language Instructions,1
+libero_spatial-t1295-visual_theme_switch-d0-p195,visual_theme_switch,plus,libero_spatial,Language Instructions,1
+libero_spatial-t1398-visual_theme_switch-d0-p195,visual_theme_switch,plus,libero_spatial,Sensor Noise,2
 libero_spatial-t1528-visual_theme_switch-d0-p195,visual_theme_switch,plus,libero_spatial,Sensor Noise,2
+libero_spatial-t1624-visual_theme_switch-d1-p195,visual_theme_switch,plus,libero_spatial,Sensor Noise,3
+libero_spatial-t1666-visual_theme_switch-d1-p195,visual_theme_switch,plus,libero_spatial,Sensor Noise,2
+libero_spatial-t1700-visual_theme_switch-d1-p195,visual_theme_switch,plus,libero_spatial,Sensor Noise,3
+libero_spatial-t1991-visual_theme_switch-d0-p195,visual_theme_switch,plus,libero_spatial,Objects Layout,2
 libero_spatial-t2032-visual_theme_switch-d1-p195,visual_theme_switch,plus,libero_spatial,Objects Layout,4
 libero_spatial-t2125-visual_theme_switch-d1-p195,visual_theme_switch,plus,libero_spatial,Light Conditions,3
+libero_spatial-t2207-visual_theme_switch-d0-p195,visual_theme_switch,plus,libero_spatial,Light Conditions,3
 libero_spatial-t2323-visual_theme_switch-d1-p195,visual_theme_switch,plus,libero_spatial,Light Conditions,4
 libero_spatial-t2396-visual_theme_switch-d0-p195,visual_theme_switch,plus,libero_spatial,Light Conditions,3
+pro-camera-view-angle-goal-t01-i03-visual_theme_switch-d0-p195,visual_theme_switch,pro,libero_goal,LIBERO-PRO/camera_view_angle,
+pro-camera-view-angle-goal-t03-i09-visual_theme_switch-d0-p195,visual_theme_switch,pro,libero_goal,LIBERO-PRO/camera_view_angle,
+pro-camera-view-angle-object-t05-i01-visual_theme_switch-d0-p195,visual_theme_switch,pro,libero_object,LIBERO-PRO/camera_view_angle,
 pro-camera-view-angle-object-t09-i08-visual_theme_switch-d0-p195,visual_theme_switch,pro,libero_object,LIBERO-PRO/camera_view_angle,
+pro-camera-view-angle-spatial-t01-i08-visual_theme_switch-d1-p195,visual_theme_switch,pro,libero_spatial,LIBERO-PRO/camera_view_angle,
 pro-camera-view-angle-spatial-t04-i08-visual_theme_switch-d0-p195,visual_theme_switch,pro,libero_spatial,LIBERO-PRO/camera_view_angle,
+pro-initial-pose-position-angle-10-t07-i02-visual_theme_switch-d1-p195,visual_theme_switch,pro,libero_10,LIBERO-PRO/initial_pose_position_angle,
+pro-initial-pose-position-angle-goal-t01-i03-visual_theme_switch-d0-p195,visual_theme_switch,pro,libero_goal,LIBERO-PRO/initial_pose_position_angle,
+pro-object-goal-t00-i05-visual_theme_switch-d1-p195,visual_theme_switch,pro,libero_goal,LIBERO-PRO/object,
+pro-object-object-t07-i06-visual_theme_switch-d0-p195,visual_theme_switch,pro,libero_object,LIBERO-PRO/object,
 pro-object-shape-goal-t06-i08-visual_theme_switch-d0-p195,visual_theme_switch,pro,libero_goal,LIBERO-PRO/object_shape,
+pro-object-spatial-t07-i00-visual_theme_switch-d1-p195,visual_theme_switch,pro,libero_spatial,LIBERO-PRO/object,
 pro-object-texture-object-t02-i02-visual_theme_switch-d1-p195,visual_theme_switch,pro,libero_object,LIBERO-PRO/object_texture,
 pro-object-texture-spatial-t04-i08-visual_theme_switch-d1-p195,visual_theme_switch,pro,libero_spatial,LIBERO-PRO/object_texture,
 pro-position-10-t02-i04-visual_theme_switch-d0-p195,visual_theme_switch,pro,libero_10,LIBERO-PRO/position,
 pro-position-10-t03-i02-visual_theme_switch-d0-p195,visual_theme_switch,pro,libero_10,LIBERO-PRO/position,
 pro-position-goal-t05-i07-visual_theme_switch-d1-p195,visual_theme_switch,pro,libero_goal,LIBERO-PRO/position,
 pro-position-object-t00-i00-visual_theme_switch-d0-p195,visual_theme_switch,pro,libero_object,LIBERO-PRO/position,
+pro-semantic-object-t02-i07-visual_theme_switch-d0-p195,visual_theme_switch,pro,libero_object,LIBERO-PRO/semantic,
+pro-semantic-object-t05-i06-visual_theme_switch-d1-p195,visual_theme_switch,pro,libero_object,LIBERO-PRO/semantic,
+pro-semantic-object-t08-i03-visual_theme_switch-d0-p195,visual_theme_switch,pro,libero_object,LIBERO-PRO/semantic,
+pro-semantic-spatial-t00-i00-visual_theme_switch-d1-p195,visual_theme_switch,pro,libero_spatial,LIBERO-PRO/semantic,
 pro-task-10-t02-i09-visual_theme_switch-d1-p195,visual_theme_switch,pro,libero_10,LIBERO-PRO/task,
+pro-task-object-t00-i02-visual_theme_switch-d0-p195,visual_theme_switch,pro,libero_object,LIBERO-PRO/task,
 pro-task-object-t01-i02-visual_theme_switch-d0-p195,visual_theme_switch,pro,libero_object,LIBERO-PRO/task,
 pro-task-spatial-t01-i01-visual_theme_switch-d1-p195,visual_theme_switch,pro,libero_spatial,LIBERO-PRO/task,
+pro-task-spatial-t02-i06-visual_theme_switch-d1-p195,visual_theme_switch,pro,libero_spatial,LIBERO-PRO/task,
 pro-visual-noise-glare-10-t00-i06-visual_theme_switch-d0-p195,visual_theme_switch,pro,libero_10,LIBERO-PRO/visual_noise_glare,
 pro-visual-noise-glare-object-t07-i06-visual_theme_switch-d0-p195,visual_theme_switch,pro,libero_object,LIBERO-PRO/visual_noise_glare,
 pro-visual-noise-glare-object-t09-i07-visual_theme_switch-d1-p195,visual_theme_switch,pro,libero_object,LIBERO-PRO/visual_noise_glare,

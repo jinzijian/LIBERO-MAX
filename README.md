@@ -32,10 +32,11 @@ prefix before the change.
 
 ## News
 
-- **2026-08-31:** Released **LIBERO-MAX Lite**, a fixed 400-pair subset that
-  uses 5% of the Max rollout budget, together with audited Max--Lite results
-  for nine checkpoints; the complete Max comparison now covers thirteen
-  checkpoints.
+- **2026-08-31:** Released **LIBERO-MAX Lite**, a fixed 800-pair subset that
+  uses 10% of the Max rollout budget, together with audited Max--Lite results
+  for nine checkpoints.
+- **2026-08-30:** Expanded the complete 8,000-pair comparison from five to
+  **thirteen VLA, VLA + WM, and WAM checkpoints**.
 - **2026-08-20:** Expanded the complete 8,000-pair evaluation to **ten**
   VLA/WAM checkpoints and released a model-agnostic dynamic GPU scheduler.
 - **2026-08-15:** Released the **LIBERO-MAX dataset** and complete 8,000-pair
@@ -56,15 +57,15 @@ one feasible change during execution.
 
 We release two evaluation tracks. **LIBERO-MAX**, shortened to **Max**, is the
 complete benchmark and remains the primary reporting track. **LIBERO-MAX
-Lite**, shortened to **Lite**, is a fixed 400-pair subset for rapid model
-integration, ablation, and early comparison. Lite keeps 50 cases per event and
-the 70:30 LIBERO-Plus to LIBERO-PRO composition of Max. It requires 800 scored
-rollouts per checkpoint, five percent of the Max evaluation cost.
+Lite**, shortened to **Lite**, is a fixed 800-pair subset for rapid model
+integration, ablation, and early comparison. Lite keeps 100 cases per event and
+the 70:30 LIBERO-Plus to LIBERO-PRO composition of Max. It requires 1,600 scored
+rollouts per checkpoint, ten percent of the Max evaluation cost.
 
 | Evaluation track | Matched pairs | Scored rollouts | Use |
 | --- | ---: | ---: | --- |
 | **Max** | **8,000** | **16,000** | Primary benchmark reporting |
-| **Lite** | **400** | **800** | Integration, ablation, early comparison |
+| **Lite** | **800** | **1,600** | Integration, ablation, early comparison |
 
 | Source benchmark | Dynamic cases | Contribution |
 | --- | ---: | --- |
@@ -151,23 +152,23 @@ compact source data for the table and plots is available in
 ### Lite validation
 
 Lite uses the same frozen case IDs and the same native checkpoint settings as
-Max. Only the evaluation set changes: each Lite checkpoint scores 400 matched
-pairs, or 800 rollouts. Across the nine checkpoints with audited Lite records,
+Max. Only the evaluation set changes: each Lite checkpoint scores 800 matched
+pairs, or 1,600 rollouts. Across the nine checkpoints with audited Lite records,
 Lite preserves the Dynamic-success ordering observed on Max. The largest
 absolute Max--Lite deviation over Base success, Dynamic success, and the paired
-gap is 4.1 percentage points.
+gap is 2.4 percentage points.
 
 | Model | Max Base | Lite Base | Max Dynamic | Lite Dynamic | Max gap | Lite gap |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: |
-| π0.5 | 79.7 | 79.5 | 65.7 | 64.8 | −13.9 | −14.8 |
-| OpenVLA-OFT | 64.3 | 65.3 | 43.2 | 47.3 | −21.1 | −18.0 |
-| X-VLA | 62.6 | 61.3 | 37.7 | 39.3 | −24.9 | −22.0 |
-| MolmoAct2 | 80.3 | 81.0 | 66.9 | 68.0 | −13.4 | −13.0 |
-| GR00T N1.7 | 69.3 | 68.5 | 50.0 | 51.5 | −19.3 | −17.0 |
-| VLA-JEPA | 73.5 | 73.3 | 54.3 | 53.0 | −19.2 | −20.3 |
-| Cosmos-Policy | 77.4 | 76.3 | 59.3 | 59.8 | −18.2 | −16.5 |
-| Fast-WAM | 42.0 | 41.0 | 24.0 | 22.5 | −18.0 | −18.5 |
-| Light-WAM | 54.8 | 56.5 | 37.3 | 39.3 | −17.5 | −17.3 |
+| π0.5 | 79.7 | 79.3 | 65.7 | 65.1 | −13.9 | −14.1 |
+| OpenVLA-OFT | 64.3 | 64.3 | 43.2 | 45.0 | −21.1 | −19.3 |
+| X-VLA | 62.6 | 62.0 | 37.7 | 39.4 | −24.9 | −22.6 |
+| MolmoAct2 | 80.3 | 79.5 | 66.9 | 68.5 | −13.4 | −11.0 |
+| GR00T N1.7 | 69.3 | 69.3 | 50.0 | 51.4 | −19.3 | −17.9 |
+| VLA-JEPA | 73.5 | 72.5 | 54.3 | 53.4 | −19.2 | −19.1 |
+| Cosmos-Policy | 77.4 | 76.1 | 59.3 | 58.6 | −18.2 | −17.5 |
+| Fast-WAM | 42.0 | 41.4 | 24.0 | 24.0 | −18.0 | −17.4 |
+| Light-WAM | 54.8 | 55.3 | 37.3 | 38.5 | −17.5 | −16.8 |
 
 <p align="center">
   <img src="assets/figures/max_lite_validation.png" width="95%" alt="Max and Lite Base and Dynamic success rates across nine audited checkpoints">
@@ -230,7 +231,7 @@ through `CUDA_VISIBLE_DEVICES` by default and dynamically assigns suite shards
 as workers finish.
 
 Start with Lite when integrating a checkpoint. The following example evaluates
-X-VLA on all 400 Lite pairs:
+X-VLA on all 800 Lite pairs:
 
 ```bash
 python scripts/run_dynamic_benchmark.py \
@@ -259,7 +260,7 @@ python scripts/run_dynamic_benchmark.py \
 ```
 
 Use `--gpus 0,2` to override automatic discovery. A valid Lite evaluation must
-finish all 400 case IDs in both the Base and Dynamic arms; failed or missing
+finish all 800 case IDs in both the Base and Dynamic arms; failed or missing
 cases remain in the full denominator rather than being dropped. A new model can
 integrate by implementing the same shard CLI; the scheduler does not import or
 special-case the policy. See the [`Lite guide`](benchmark/lite/README.md) and
@@ -273,7 +274,7 @@ Git.
 ```text
 LIBERO-MAX/
 ├── benchmark/max8000/   # Frozen 8,000-case release and integrity metadata
-├── benchmark/lite/      # Fixed 400-pair rapid-evaluation track
+├── benchmark/lite/      # Fixed 800-pair rapid-evaluation track
 ├── src/libero_max/      # Dynamic interventions, runtime, schemas, aggregation
 ├── scripts/             # Dataset builders, reference adapters, and GPU scheduler
 ├── assets/              # Benchmark figures and MuJoCo animations

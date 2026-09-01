@@ -24,17 +24,17 @@ class LiteReleaseTest(unittest.TestCase):
         self.assertEqual(validate_manifest(lite), [])
         self.assertEqual(lite["benchmark_id"], "libero-max-lite")
         self.assertEqual(lite["protocol"]["profile"], "lite")
-        self.assertEqual(len(lite["cases"]), 400)
+        self.assertEqual(len(lite["cases"]), 800)
         max_ids = {case["case_id"] for case in max_manifest["cases"]}
         lite_ids = {case["case_id"] for case in lite["cases"]}
-        self.assertEqual(len(lite_ids), 400)
+        self.assertEqual(len(lite_ids), 800)
         self.assertTrue(lite_ids.issubset(max_ids))
 
         event_counts = Counter(
             case["scenario"]["change_type"] for case in lite["cases"]
         )
         self.assertEqual(len(event_counts), 8)
-        self.assertEqual(set(event_counts.values()), {50})
+        self.assertEqual(set(event_counts.values()), {100})
         event_source_counts = Counter(
             (
                 case["scenario"]["change_type"],
@@ -43,13 +43,13 @@ class LiteReleaseTest(unittest.TestCase):
             for case in lite["cases"]
         )
         for event in event_counts:
-            self.assertEqual(event_source_counts[(event, "plus")], 35)
-            self.assertEqual(event_source_counts[(event, "pro")], 15)
+            self.assertEqual(event_source_counts[(event, "plus")], 70)
+            self.assertEqual(event_source_counts[(event, "pro")], 30)
 
-        self.assertEqual(summary["max_candidate_seed"], 20260830)
-        self.assertEqual(summary["lite_selection_seed"], 20260831)
-        self.assertEqual(summary["matched_pairs"], 400)
-        self.assertEqual(summary["source_counts"], {"plus": 280, "pro": 120})
+        self.assertEqual(summary["selection_seed"], 20260830)
+        self.assertEqual(summary["matched_pairs"], 800)
+        self.assertEqual(summary["rollouts_per_checkpoint"], 1600)
+        self.assertEqual(summary["source_counts"], {"plus": 560, "pro": 240})
 
     def test_case_index_matches_manifest(self):
         lite = json.loads((LITE / "libero_max_lite.json").read_text())

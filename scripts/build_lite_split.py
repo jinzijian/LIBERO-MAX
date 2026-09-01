@@ -10,12 +10,9 @@ from collections import Counter
 from pathlib import Path
 
 
-MAX_SEED = 20260830
-LITE_SEED = 20260831
-MAX_CANDIDATE_PLUS_PER_EVENT = 70
-MAX_CANDIDATE_PRO_PER_EVENT = 30
-LITE_PLUS_PER_EVENT = 35
-LITE_PRO_PER_EVENT = 15
+SELECTION_SEED = 20260830
+LITE_PLUS_PER_EVENT = 70
+LITE_PRO_PER_EVENT = 30
 
 
 def _sha256(path: Path) -> str:
@@ -33,8 +30,7 @@ def _write_json(path: Path, payload: dict) -> None:
 def build_split(
     source_path: Path,
     output_dir: Path,
-    max_seed: int,
-    lite_seed: int,
+    selection_seed: int,
 ) -> None:
     source = json.loads(source_path.read_text())
     cases = source["cases"]
@@ -42,12 +38,12 @@ def build_split(
     if len(events) != 8:
         raise ValueError("expected eight event types in the Max manifest")
 
-    max_rng = random.Random(max_seed)
-    candidate = []
+    selection_rng = random.Random(selection_seed)
+    selected = []
     for event in events:
         for track, quota in (
-            ("plus", MAX_CANDIDATE_PLUS_PER_EVENT),
-            ("pro", MAX_CANDIDATE_PRO_PER_EVENT),
+            ("plus", LITE_PLUS_PER_EVENT),
+            ("pro", LITE_PRO_PER_EVENT),
         ):
             pool = sorted(
                 (
@@ -62,25 +58,7 @@ def build_split(
                 raise ValueError(
                     "insufficient %s cases for %s: %d" % (track, event, len(pool))
                 )
-            candidate.extend(max_rng.sample(pool, quota))
-
-    lite_rng = random.Random(lite_seed)
-    selected = []
-    for event in events:
-        for track, quota in (
-            ("plus", LITE_PLUS_PER_EVENT),
-            ("pro", LITE_PRO_PER_EVENT),
-        ):
-            pool = sorted(
-                (
-                    case
-                    for case in candidate
-                    if case["scenario"]["change_type"] == event
-                    and _source_track(case) == track
-                ),
-                key=lambda case: case["case_id"],
-            )
-            selected.extend(lite_rng.sample(pool, quota))
+            selected.extend(selection_rng.sample(pool, quota))
 
     selected.sort(
         key=lambda case: (
@@ -89,8 +67,8 @@ def build_split(
             case["case_id"],
         )
     )
-    if len(selected) != 400 or len({case["case_id"] for case in selected}) != 400:
-        raise ValueError("Lite split must contain 400 unique case IDs")
+    if len(selected) != 800 or len({case["case_id"] for case in selected}) != 800:
+        raise ValueError("Lite split must contain 800 unique case IDs")
 
     output_dir.mkdir(parents=True, exist_ok=True)
     manifest_path = output_dir / "libero_max_lite.json"
@@ -102,7 +80,7 @@ def build_split(
         {
             "profile": "lite",
             "selection_contract": (
-                "50 cases per event: 35 LIBERO-Plus + 15 LIBERO-PRO"
+                "100 cases per event: 70 LIBERO-Plus + 30 LIBERO-PRO"
             ),
         }
     )
@@ -148,13 +126,12 @@ def build_split(
         "benchmark_id": "libero-max-lite",
         "benchmark_version": source["benchmark_version"],
         "status": "released",
-        "matched_pairs": 400,
-        "rollouts_per_checkpoint": 800,
-        "max_candidate_seed": max_seed,
-        "lite_selection_seed": lite_seed,
+        "matched_pairs": 800,
+        "rollouts_per_checkpoint": 1600,
+        "selection_seed": selection_seed,
         "selection_method": (
-            "outcome-blind stratified half-sample of the frozen 800-case "
-            "cadence pool, with 35 Plus and 15 PRO cases per event"
+            "outcome-blind stratified sample with 70 Plus and 30 PRO cases "
+            "per event; the same fixed pool is used for cadence analysis"
         ),
         "source_manifest": "../max8000/libero_max_8000.json",
         "source_manifest_sha256": _sha256(source_path),
@@ -183,10 +160,11 @@ def main() -> None:
     parser.add_argument(
         "--output-dir", type=Path, default=Path("benchmark/lite")
     )
-    parser.add_argument("--max-seed", type=int, default=MAX_SEED)
-    parser.add_argument("--lite-seed", type=int, default=LITE_SEED)
+    parser.add_argument(
+        "--selection-seed", type=int, default=SELECTION_SEED
+    )
     args = parser.parse_args()
-    build_split(args.source, args.output_dir, args.max_seed, args.lite_seed)
+    build_split(args.source, args.output_dir, args.selection_seed)
 
 
 if __name__ == "__main__":

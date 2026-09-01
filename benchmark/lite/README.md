@@ -1,21 +1,21 @@
 # LIBERO-MAX Lite
 
-LIBERO-MAX Lite is the fixed 400-pair evaluation track for rapid policy
+LIBERO-MAX Lite is the fixed 800-pair evaluation track for rapid policy
 integration, ablation, and early comparison. It is a strict subset of the
 released LIBERO-MAX track. We shorten the two track names to Lite and Max in
 tables and figures.
 
-The split contains 50 cases from each of the eight online event types. Every
-event contains 35 LIBERO-Plus cases and 15 LIBERO-PRO cases, preserving the
-70:30 source composition of Max. Lite is an outcome-blind half-sample of the
-frozen 800-case cadence pool. The candidate pool uses seed `20260830` and the
-Lite selection uses seed `20260831`. The same case IDs apply to every
-checkpoint and every query cadence.
+The split contains 100 cases from each of the eight online event types. Every
+event contains 70 LIBERO-Plus cases and 30 LIBERO-PRO cases, preserving the
+70:30 source composition of Max. A persistent pseudorandom generator with seed
+`20260830` selects the outcome-blind subset before any policy result is
+inspected. These are also the fixed case IDs used by the cadence analysis. The
+same case IDs apply to every checkpoint and every query cadence.
 
 | Track | Matched pairs | Scored rollouts per checkpoint | Intended use |
 | --- | ---: | ---: | --- |
 | Max | 8,000 | 16,000 | Primary benchmark reporting |
-| Lite | 400 | 800 | Integration, debugging, ablation, early comparison |
+| Lite | 800 | 1,600 | Integration, debugging, ablation, early comparison |
 
 The manifest records the benchmark default query interval for schema
 compatibility. Model evaluations should apply the same released native query
@@ -54,9 +54,9 @@ python scripts/run_dynamic_benchmark.py \
 
 The scheduler discovers all GPUs visible through `CUDA_VISIBLE_DEVICES`,
 assigns suite shards dynamically, and retries incomplete shards with `--resume`.
-Pass `--gpus 0,2` to use an explicit subset. A complete Lite run contains 400
-terminal pair records and scores 800 rollouts: one Base and one Dynamic rollout
-for every released case ID. Failed or missing cases stay in the 400-pair
+Pass `--gpus 0,2` to use an explicit subset. A complete Lite run contains 800
+terminal pair records and scores 1,600 rollouts: one Base and one Dynamic rollout
+for every released case ID. Failed or missing cases stay in the 800-pair
 denominator.
 
 After validating an integration on Lite, evaluate Max by replacing the manifest

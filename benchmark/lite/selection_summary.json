@@ -1,26 +1,25 @@
 {
   "benchmark_id": "libero-max-lite",
   "benchmark_version": "3.0.0",
-  "case_index_sha256": "2c08b62ce9f98ea046f24ef095d97a57c7a412c4531db3647e80e12eba4dd7a7",
+  "case_index_sha256": "dbd17240caef7091a902aed817383239d324ad83237bea5806dd08f221da5ad2",
   "event_counts": {
-    "camera_shift": 50,
-    "distractor_burst": 50,
-    "illumination_switch": 50,
-    "obstacle_insertion": 50,
-    "receptacle_relocation": 50,
-    "sensor_noise_onset": 50,
-    "target_relocation": 50,
-    "visual_theme_switch": 50
+    "camera_shift": 100,
+    "distractor_burst": 100,
+    "illumination_switch": 100,
+    "obstacle_insertion": 100,
+    "receptacle_relocation": 100,
+    "sensor_noise_onset": 100,
+    "target_relocation": 100,
+    "visual_theme_switch": 100
   },
-  "lite_selection_seed": 20260831,
-  "manifest_sha256": "a27250e163aef96f5188b8a93d73f970284720ead0002e4235854f1d6f2e1588",
-  "matched_pairs": 400,
-  "max_candidate_seed": 20260830,
-  "rollouts_per_checkpoint": 800,
-  "selection_method": "outcome-blind stratified half-sample of the frozen 800-case cadence pool, with 35 Plus and 15 PRO cases per event",
+  "manifest_sha256": "0f2b7fc879e91f1ab85156f005adbb708c68966c631603f179f8153f4f2e22f7",
+  "matched_pairs": 800,
+  "rollouts_per_checkpoint": 1600,
+  "selection_method": "outcome-blind stratified sample with 70 Plus and 30 PRO cases per event; the same fixed pool is used for cadence analysis",
+  "selection_seed": 20260830,
   "source_counts": {
-    "plus": 280,
-    "pro": 120
+    "plus": 560,
+    "pro": 240
   },
   "source_manifest": "../max8000/libero_max_8000.json",
   "source_manifest_sha256": "d26c38517b08709645a44b7fcf572f47eca056f7d01f1a7f5555dacf159dd1ed",
