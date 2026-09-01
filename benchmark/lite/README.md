@@ -33,5 +33,35 @@ Rebuild it deterministically from Max:
 python scripts/build_lite_split.py
 ```
 
+## Evaluate a checkpoint on Lite
+
+Use the same checkpoint and native serving configuration that would be used on
+Max. Lite changes case membership only; it does not change the action horizon,
+query interval, decoding steps, or model seed. From the repository root, the
+generic scheduler can run any compatible shard adapter on every visible GPU.
+For example:
+
+```bash
+python scripts/run_dynamic_benchmark.py \
+  benchmark/lite/libero_max_lite.json \
+  --runner scripts/run_xvla_persistent_shard.py \
+  --output-root artifacts/xvla-lite \
+  -- \
+  --lerobot-root /path/to/lerobot \
+  --checkpoint /path/to/xvla-libero-checkpoint \
+  --query-interval 30
+```
+
+The scheduler discovers all GPUs visible through `CUDA_VISIBLE_DEVICES`,
+assigns suite shards dynamically, and retries incomplete shards with `--resume`.
+Pass `--gpus 0,2` to use an explicit subset. A complete Lite run contains 400
+terminal pair records and scores 800 rollouts: one Base and one Dynamic rollout
+for every released case ID. Failed or missing cases stay in the 400-pair
+denominator.
+
+After validating an integration on Lite, evaluate Max by replacing the manifest
+with `benchmark/max8000/libero_max_8000.json` and using a separate output root.
+Do not change the checkpoint or serving configuration between tracks.
+
 `case_index.csv` makes the released membership easy to audit.
 `selection_summary.json` records the seed, quotas, and source digest.

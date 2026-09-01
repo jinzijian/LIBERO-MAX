@@ -8,7 +8,7 @@
 [![Dataset](https://img.shields.io/badge/Dataset-available-3B82F6?style=flat-square)](benchmark/max8000)
 [![Dynamic cases](https://img.shields.io/badge/Dynamic%20cases-8%2C000-14532D?style=flat-square)](#benchmark)
 [![Lite split](https://img.shields.io/badge/Track-Lite-2563EB?style=flat-square)](benchmark/lite)
-[![Models](https://img.shields.io/badge/Evaluated%20models-10-C2410C?style=flat-square)](#main-results)
+[![Models](https://img.shields.io/badge/Evaluated%20models-13-C2410C?style=flat-square)](#main-results)
 [![Website](https://img.shields.io/badge/Website-project%20page-14532D?style=flat-square)](https://yunbeizhang.github.io/LIBERO-MAX/)
 [![CI](https://img.shields.io/github/actions/workflow/status/yunbeizhang/LIBERO-MAX/ci.yml?branch=main&label=tests&style=flat-square)](https://github.com/yunbeizhang/LIBERO-MAX/actions/workflows/ci.yml)
 
@@ -32,6 +32,10 @@ prefix before the change.
 
 ## News
 
+- **2026-08-31:** Released **LIBERO-MAX Lite**, a fixed 400-pair subset that
+  uses 5% of the Max rollout budget, together with audited Max--Lite results
+  for nine checkpoints; the complete Max comparison now covers thirteen
+  checkpoints.
 - **2026-08-20:** Expanded the complete 8,000-pair evaluation to **ten**
   VLA/WAM checkpoints and released a model-agnostic dynamic GPU scheduler.
 - **2026-08-15:** Released the **LIBERO-MAX dataset** and complete 8,000-pair
@@ -120,18 +124,21 @@ event trigger remains an end-to-end failure.
 | VLA | OpenVLA-OFT | 64.3 | 43.1 | −21.1 |
 | VLA | X-VLA | 62.6 | 37.7 | −24.9 |
 | VLA | Xiaomi-Robotics-0 | 70.3 | 52.0 | −18.3 |
-| VLA | MolmoAct2 | **80.3** | **66.9** | **−13.4** |
+| VLA | MolmoAct2 | **80.3** | **66.9** | −13.4 |
+| VLA | SmolVLA | 26.1 | 15.0 | −11.0 |
+| VLA | GR00T N1.7 | 69.3 | 50.0 | −19.3 |
 | VLA + WM | VLA-JEPA | 73.5 | 54.3 | −19.2 |
 | WAM | Cosmos-Policy | 77.4 | 59.3 | −18.2 |
 | WAM | Fast-WAM | 42.0 | 24.0 | −18.0 |
 | WAM | HiMem-WAM | 73.0 | 57.7 | −15.3 |
 | WAM | Light-WAM | 54.8 | 37.3 | −17.5 |
+| WAM | DiT4DiT | 65.1 | 39.4 | −25.7 |
 
 <p align="center">
-  <img src="assets/figures/main_results.png" width="95%" alt="Base and Dynamic success rates across ten robot policies">
+  <img src="assets/figures/main_results.png" width="95%" alt="Base and Dynamic success rates across thirteen robot policies">
 </p>
 
-All ten policies lose **13.4 to 24.9 success-rate points** when the world
+All thirteen policies lose **11.0 to 25.7 success-rate points** when the world
 changes during execution. No family dominates across all events. Relocation,
 camera shift, and sensor corruption expose the largest shared weaknesses. The
 compact source data for the table and plots is available in
@@ -140,6 +147,36 @@ compact source data for the table and plots is available in
 <p align="center">
   <img src="assets/figures/change_type_breakdown.png" width="100%" alt="Success-rate loss by model and online change type">
 </p>
+
+### Lite validation
+
+Lite uses the same frozen case IDs and the same native checkpoint settings as
+Max. Only the evaluation set changes: each Lite checkpoint scores 400 matched
+pairs, or 800 rollouts. Across the nine checkpoints with audited Lite records,
+Lite preserves the Dynamic-success ordering observed on Max. The largest
+absolute Max--Lite deviation over Base success, Dynamic success, and the paired
+gap is 4.1 percentage points.
+
+| Model | Max Base | Lite Base | Max Dynamic | Lite Dynamic | Max gap | Lite gap |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| π0.5 | 79.7 | 79.5 | 65.7 | 64.8 | −13.9 | −14.8 |
+| OpenVLA-OFT | 64.3 | 65.3 | 43.2 | 47.3 | −21.1 | −18.0 |
+| X-VLA | 62.6 | 61.3 | 37.7 | 39.3 | −24.9 | −22.0 |
+| MolmoAct2 | 80.3 | 81.0 | 66.9 | 68.0 | −13.4 | −13.0 |
+| GR00T N1.7 | 69.3 | 68.5 | 50.0 | 51.5 | −19.3 | −17.0 |
+| VLA-JEPA | 73.5 | 73.3 | 54.3 | 53.0 | −19.2 | −20.3 |
+| Cosmos-Policy | 77.4 | 76.3 | 59.3 | 59.8 | −18.2 | −16.5 |
+| Fast-WAM | 42.0 | 41.0 | 24.0 | 22.5 | −18.0 | −18.5 |
+| Light-WAM | 54.8 | 56.5 | 37.3 | 39.3 | −17.5 | −17.3 |
+
+<p align="center">
+  <img src="assets/figures/max_lite_validation.png" width="95%" alt="Max and Lite Base and Dynamic success rates across nine audited checkpoints">
+</p>
+
+The exact values are available in
+[`assets/figures/max_lite_validation.csv`](assets/figures/max_lite_validation.csv).
+Max remains the primary reporting track; Lite is intended for integration,
+debugging, ablation, and early comparison.
 
 The repository focuses on the benchmark contract rather than redistributing
 model implementations or weights. These reference adapters demonstrate the
@@ -190,7 +227,25 @@ Model weights and upstream repositories are not redistributed here. A model
 adapter consumes one manifest shard, writes terminal `DONE` or `FAILED`
 markers, and supports `--resume`. The generic scheduler uses every GPU visible
 through `CUDA_VISIBLE_DEVICES` by default and dynamically assigns suite shards
-as workers finish:
+as workers finish.
+
+Start with Lite when integrating a checkpoint. The following example evaluates
+X-VLA on all 400 Lite pairs:
+
+```bash
+python scripts/run_dynamic_benchmark.py \
+  benchmark/lite/libero_max_lite.json \
+  --runner scripts/run_xvla_persistent_shard.py \
+  --output-root artifacts/xvla-lite \
+  -- \
+  --lerobot-root /path/to/lerobot \
+  --checkpoint /path/to/xvla-libero-checkpoint \
+  --query-interval 30
+```
+
+Keep the model checkpoint, action horizon, query interval, and all other
+serving settings identical when moving from Lite to Max. To run the complete
+track, change the manifest and output directory:
 
 ```bash
 python scripts/run_dynamic_benchmark.py \
@@ -203,12 +258,15 @@ python scripts/run_dynamic_benchmark.py \
   --query-interval 30
 ```
 
-Use `--gpus 0,2` to override automatic discovery. A new model can integrate by
-implementing the same shard CLI; the scheduler does not import or special-case
-the policy. See the [`evaluation guide`](docs/RUNTIME_INTEGRATION.md) for the
-adapter contract, simulator requirements, dependency isolation, paired replay
-checks, and aggregation. Generated rollouts belong under `artifacts/`, which
-is ignored by Git.
+Use `--gpus 0,2` to override automatic discovery. A valid Lite evaluation must
+finish all 400 case IDs in both the Base and Dynamic arms; failed or missing
+cases remain in the full denominator rather than being dropped. A new model can
+integrate by implementing the same shard CLI; the scheduler does not import or
+special-case the policy. See the [`Lite guide`](benchmark/lite/README.md) and
+the [`evaluation guide`](docs/RUNTIME_INTEGRATION.md) for the adapter contract,
+simulator requirements, dependency isolation, paired replay checks, and
+aggregation. Generated rollouts belong under `artifacts/`, which is ignored by
+Git.
 
 ## Repository structure
 

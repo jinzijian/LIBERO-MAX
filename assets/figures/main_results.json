@@ -7,10 +7,13 @@
     {"family": "VLA", "model": "X-VLA", "base_sr": 62.6, "dynamic_sr": 37.7, "gap_pp": -24.9},
     {"family": "VLA", "model": "Xiaomi-Robotics-0", "base_sr": 70.3, "dynamic_sr": 52.0, "gap_pp": -18.3},
     {"family": "VLA", "model": "MolmoAct2", "base_sr": 80.3, "dynamic_sr": 66.9, "gap_pp": -13.4},
+    {"family": "VLA", "model": "SmolVLA", "base_sr": 26.1, "dynamic_sr": 15.0, "gap_pp": -11.0},
+    {"family": "VLA", "model": "GR00T N1.7", "base_sr": 69.3, "dynamic_sr": 50.0, "gap_pp": -19.3},
     {"family": "VLA + WM", "model": "VLA-JEPA", "base_sr": 73.5, "dynamic_sr": 54.3, "gap_pp": -19.2},
     {"family": "WAM", "model": "Cosmos-Policy", "base_sr": 77.4, "dynamic_sr": 59.3, "gap_pp": -18.2},
     {"family": "WAM", "model": "Fast-WAM", "base_sr": 42.0, "dynamic_sr": 24.0, "gap_pp": -18.0},
     {"family": "WAM", "model": "HiMem-WAM", "base_sr": 73.0, "dynamic_sr": 57.7, "gap_pp": -15.3},
-    {"family": "WAM", "model": "Light-WAM", "base_sr": 54.8, "dynamic_sr": 37.3, "gap_pp": -17.5}
+    {"family": "WAM", "model": "Light-WAM", "base_sr": 54.8, "dynamic_sr": 37.3, "gap_pp": -17.5},
+    {"family": "WAM", "model": "DiT4DiT", "base_sr": 65.1, "dynamic_sr": 39.4, "gap_pp": -25.7}
   ]
 }
