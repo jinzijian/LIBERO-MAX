@@ -34,7 +34,7 @@ prefix before the change.
 
 - **2026-08-31:** Released **LIBERO-MAX Lite**, a fixed 800-pair subset that
   uses 10% of the Max rollout budget, together with audited Max--Lite results
-  for nine checkpoints.
+  for twelve checkpoints.
 - **2026-08-30:** Expanded the complete 8,000-pair comparison from five to
   **thirteen VLA, VLA + WM, and WAM checkpoints**.
 - **2026-08-20:** Expanded the complete 8,000-pair evaluation to **ten**
@@ -153,25 +153,29 @@ compact source data for the table and plots is available in
 
 Lite uses the same frozen case IDs and the same native checkpoint settings as
 Max. Only the evaluation set changes: each Lite checkpoint scores 800 matched
-pairs, or 1,600 rollouts. Across the nine checkpoints with audited Lite records,
-Lite preserves the Dynamic-success ordering observed on Max. The largest
-absolute Max--Lite deviation over Base success, Dynamic success, and the paired
-gap is 2.4 percentage points.
+pairs, or 1,600 rollouts. Across the twelve checkpoints with audited Lite
+records, the largest absolute Max--Lite deviation over Base success, Dynamic
+success, and the paired gap is 2.4 percentage points. The Dynamic ordering has
+one adjacent swap: Xiaomi-Robotics-0 and VLA-JEPA are separated by 0.1 points
+on Lite.
 
 | Model | Max Base | Lite Base | Max Dynamic | Lite Dynamic | Max gap | Lite gap |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: |
 | π0.5 | 79.7 | 79.3 | 65.7 | 65.1 | −13.9 | −14.1 |
 | OpenVLA-OFT | 64.3 | 64.3 | 43.2 | 45.0 | −21.1 | −19.3 |
 | X-VLA | 62.6 | 62.0 | 37.7 | 39.4 | −24.9 | −22.6 |
+| Xiaomi-Robotics-0 | 70.3 | 70.6 | 52.0 | 53.5 | −18.3 | −17.1 |
 | MolmoAct2 | 80.3 | 79.5 | 66.9 | 68.5 | −13.4 | −11.0 |
+| SmolVLA | 26.1 | 25.6 | 15.0 | 15.3 | −11.0 | −10.4 |
 | GR00T N1.7 | 69.3 | 69.3 | 50.0 | 51.4 | −19.3 | −17.9 |
 | VLA-JEPA | 73.5 | 72.5 | 54.3 | 53.4 | −19.2 | −19.1 |
 | Cosmos-Policy | 77.4 | 76.1 | 59.3 | 58.6 | −18.2 | −17.5 |
 | Fast-WAM | 42.0 | 41.4 | 24.0 | 24.0 | −18.0 | −17.4 |
+| HiMem-WAM | 73.0 | 72.5 | 57.7 | 58.0 | −15.3 | −14.5 |
 | Light-WAM | 54.8 | 55.3 | 37.3 | 38.5 | −17.5 | −16.8 |
 
 <p align="center">
-  <img src="assets/figures/max_lite_validation.png" width="95%" alt="Max and Lite Base and Dynamic success rates across nine audited checkpoints">
+  <img src="assets/figures/max_lite_validation.png" width="95%" alt="Max and Lite Base and Dynamic success rates across twelve audited checkpoints">
 </p>
 
 The exact values are available in
