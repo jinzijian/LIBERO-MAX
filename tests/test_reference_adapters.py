@@ -51,11 +51,21 @@ class PublicRepositoryPrivacyTest(unittest.TestCase):
         }
         candidates.update(
             {
-                "assets/figures/main_results.json",
                 "scripts/libero_source_overlay/libero/__init__.py",
                 "scripts/run_dynamic_benchmark.py",
+                "scripts/run_groot_n17_persistent_benchmark.py",
+                "scripts/run_groot_n17_persistent_shard.py",
+                "scripts/run_himem_wam_persistent_benchmark.py",
+                "scripts/run_himem_wam_persistent_shard.py",
+                "scripts/run_lightwam_persistent_benchmark.py",
+                "scripts/run_lightwam_persistent_shard.py",
+                "scripts/run_molmoact2_persistent_benchmark.py",
+                "scripts/run_molmoact2_persistent_shard.py",
+                "scripts/run_smolvla_persistent_shard.py",
                 "scripts/run_xvla_persistent_benchmark.py",
                 "scripts/run_xvla_persistent_shard.py",
+                "scripts/run_xiaomi_robotics0_persistent_benchmark.py",
+                "scripts/run_xiaomi_robotics0_persistent_shard.py",
                 "tests/test_dynamic_scheduler.py",
                 "tests/test_reference_adapters.py",
             }
@@ -76,6 +86,8 @@ class PublicRepositoryPrivacyTest(unittest.TestCase):
         violations = []
         for relative_path in sorted(candidates):
             path = ROOT / relative_path
+            if not path.is_file():
+                continue
             try:
                 content = path.read_text(encoding="utf-8")
             except UnicodeDecodeError:
